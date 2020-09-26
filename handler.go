@@ -1,0 +1,211 @@
+package flygo
+
+import (
+	"regexp"
+	"strings"
+)
+
+const (
+	methodAll     = "*"
+	methodGet     = "GET"
+	methodPost    = "POST"
+	methodPut     = "PUT"
+	methodDelete  = "DELETE"
+	methodPatch   = "PATCH"
+	methodOptions = "OPTIONS"
+	methodHead    = "HEAD"
+)
+
+//Define pattern handler route struct
+type patternHandlerRoute struct {
+	regex   string
+	pattern string
+	method  string
+	handler *Handler
+	fields  []*Field
+}
+
+//Define variable route struct
+type variableHandlerRoute struct {
+	regex      string
+	pattern    string
+	method     string
+	handler    *Handler
+	parameters []string
+	fields     []*Field
+}
+
+//Define handler
+type Handler func(*Context)
+
+//match handler
+func (c *Context) matchHandler() ([]*Field, Handler) {
+	var handler Handler
+	fields, handler := c.matchPatternHandler()
+	if handler != nil {
+		return fields, handler
+	}
+
+	fields, handler = c.matchVariableHandler()
+	if handler != nil {
+		return fields, handler
+	}
+
+	return nil, nil
+}
+
+//match pattern handler
+func (c *Context) matchPatternHandler() ([]*Field, Handler) {
+	var phrs []patternHandlerRoute
+	for regex, routes := range app.patternRoutes {
+		if c.matchPath(regex) {
+			for _, route := range routes {
+				phrs = append(phrs, route)
+			}
+		}
+	}
+
+	if phrs == nil || len(phrs) <= 0 {
+		return nil, nil
+	}
+
+	var phr *patternHandlerRoute
+	for _, r := range phrs {
+
+		if r.method == methodAll ||
+			c.RequestMethod == methodOptions ||
+			c.RequestMethod == methodHead ||
+			r.method == c.RequestMethod {
+			phr = &r
+			break
+		}
+	}
+
+	if phr == nil {
+		var ms []string
+		for _, r := range phrs {
+			ms = append(ms, r.method)
+		}
+		app.LogInfo("Request is not supported {config: [%s], request: [%s]}", strings.Join(ms, ","), c.RequestMethod)
+		return nil, app.requestNotSupportedHandler
+	}
+
+	if c.RequestMethod == methodOptions || c.RequestMethod == methodHead {
+		return nil, app.preflightedHandler
+	}
+
+	return phr.fields, *phr.handler
+}
+
+//match variable handler
+func (c *Context) matchVariableHandler() ([]*Field, Handler) {
+	//  path : /index/123/name
+	//  pattern : /index/{id}/name
+	//  regex : /index/.+/name
+	var vhrs []variableHandlerRoute
+	for regex, routes := range app.variableRoutes {
+		for _, route := range routes {
+			if c.matchPath(regex) {
+				vhrs = append(vhrs, route)
+			}
+		}
+	}
+
+	if vhrs == nil || len(vhrs) <= 0 {
+		return nil, nil
+	}
+
+	var vhr *variableHandlerRoute
+	for _, r := range vhrs {
+		if r.method == methodAll ||
+			c.RequestMethod == methodOptions ||
+			c.RequestMethod == methodHead ||
+			r.method == c.RequestMethod {
+			vhr = &r
+			break
+		}
+	}
+
+	if vhr == nil {
+		return nil, nil
+	}
+
+	if vhr == nil {
+		var ms []string
+		for _, r := range vhrs {
+			ms = append(ms, r.method)
+		}
+		app.LogInfo("Request is not supported {config: [%s], request: [%s]}", strings.Join(ms, ","), c.RequestMethod)
+		return nil, app.requestNotSupportedHandler
+	}
+
+	if c.RequestMethod == methodOptions || c.RequestMethod == methodHead {
+		return nil, app.preflightedHandler
+	}
+
+	//Setting parameters
+	matches := c.contextMatches(vhr.regex)
+	if nil != matches && len(matches)-1 == len(vhr.parameters) {
+		for i, p := range matches {
+			pn := vhr.parameters[i]
+			c.Parameters[pn] = []string{p}
+		}
+	}
+
+	return vhr.fields, *vhr.handler
+}
+
+//Invoke handler
+func (c *Context) invokeHandler() {
+	//If the response is done, direct return
+	if c.Response.done {
+		return
+	}
+	//match handler
+	fields, handler := c.matchHandler()
+	if handler == nil {
+		app.defaultHandler(c)
+		return
+	}
+
+	if fields != nil {
+		err := presetAndValidate(fields, c)
+		if err != nil {
+			c.Text(err.Error())
+			c.Response.SetDone(true)
+			return
+		}
+	}
+
+	handler(c)
+}
+
+//Config default handler
+func (a *App) DefaultHandler(handler Handler) *App {
+	a.defaultHandler = handler
+	return a
+}
+
+//Config request not supported handler
+func (a *App) RequestNotSupportedHandler(handler Handler) *App {
+	a.requestNotSupportedHandler = handler
+	return a
+}
+
+//Config preflighted handler
+func (a *App) PreflightedHandler(handler Handler) *App {
+	a.preflightedHandler = handler
+	return a
+}
+
+//trim quotas
+func trim(pattern string) string {
+	//trim quotas
+	reg := regexp.MustCompile(`[^/*{}a-zA-Z0-9]`)
+	pattern = reg.ReplaceAllString(pattern, "")
+	//trim double `*`
+	for strings.Contains(pattern, "**") {
+		pattern = strings.ReplaceAll(pattern, "**", "*")
+	}
+	return pattern
+}
