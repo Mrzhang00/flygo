@@ -47,12 +47,17 @@ func (d *dispatcher) initContext(writer http.ResponseWriter, request *http.Reque
 }
 
 //ServeHTTP main entry point
-func (d *dispatcher) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+func (d *dispatcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
+	done := make(chan bool, 1)
+	go invoke(d, w, r, done)
+	<-done
+}
 
+func invoke(d *dispatcher, w http.ResponseWriter, r *http.Request, done chan<- bool) {
 	//init c
-	d.initContext(writer, request)
+	d.initContext(w, r)
 
 	defer func() {
 		//set default headers
@@ -73,6 +78,7 @@ func (d *dispatcher) ServeHTTP(writer http.ResponseWriter, request *http.Request
 	invokedStatic := d.c.invokeStatic()
 
 	if invokedStatic {
+		done <- true
 		return
 	}
 
@@ -90,6 +96,8 @@ func (d *dispatcher) ServeHTTP(writer http.ResponseWriter, request *http.Request
 
 	//match and invoke after filter
 	d.c.invokeAfterFilter()
+
+	done <- true
 }
 
 //write Response
