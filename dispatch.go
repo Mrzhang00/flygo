@@ -51,22 +51,22 @@ func (d *dispatcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 	done := make(chan bool, 1)
-	go invoke(d, w, r, done)
+	go d.invoke(w, r, done)
 	<-done
 }
 
-func invoke(d *dispatcher, w http.ResponseWriter, r *http.Request, done chan<- bool) {
+func (d *dispatcher) writeDone() {
+	//set default headers
+	d.c.setDefaultHeaders()
+	//set content type
+	d.c.setContextType()
+	//start write
+	d.write()
+}
+
+func (d *dispatcher) invoke(w http.ResponseWriter, r *http.Request, done chan<- bool) {
 	//init c
 	d.initContext(w, r)
-
-	defer func() {
-		//set default headers
-		d.c.setDefaultHeaders()
-		//set content type
-		d.c.setContextType()
-		//start write
-		d.write()
-	}()
 
 	//parse request uri
 	d.c.parseRequestURI()
@@ -78,6 +78,7 @@ func invoke(d *dispatcher, w http.ResponseWriter, r *http.Request, done chan<- b
 	invokedStatic := d.c.invokeStatic()
 
 	if invokedStatic {
+		d.writeDone()
 		done <- true
 		return
 	}
@@ -97,6 +98,7 @@ func invoke(d *dispatcher, w http.ResponseWriter, r *http.Request, done chan<- b
 	//match and invoke after filter
 	d.c.invokeAfterFilter()
 
+	d.writeDone()
 	done <- true
 }
 
