@@ -1,0 +1,45 @@
+flygo:
+  server:
+    host: localhost
+    port: 80
+    webRoot: ''
+    contextPath: ''
+  banner:
+    enable: true
+    type: default
+    text: ''
+    file: ''
+  static:
+    enable: false
+    pattern: static
+    prefix: static
+    cache: false
+    favicon:
+      enable: false
+    mimes:
+      - css: text/css;charset=utf-8
+      - json: application/json;charset=utf-8
+      - jpg: image/jpg
+      - png: image/png
+      - gif: image/gif
+      - ico: image/x-icon
+  view:
+    enable: false
+    prefix: templates
+    suffix: html
+    cache: false
+  template:
+    enable: false
+    delims:
+      left: '{{'
+      right: '}}'
+  session:
+    enable: false
+  validate:
+    err:
+      code: 1
+  log:
+    type: stdout
+    file:
+      out: out.log
+      err: err.log
