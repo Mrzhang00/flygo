@@ -41,7 +41,7 @@ func (c *Context) AddHeader(name, value string) *Context {
 
 //Set view funcMap
 func (c *Context) SetViewFuncMap(funcMap template.FuncMap) *Context {
-	if app.GetTemplateEnable() {
+	if app.Config.Flygo.Template.Enable {
 		c.funcMap = funcMap
 	}
 	return c
@@ -55,7 +55,7 @@ func (c *Context) AddViewFuncMap(name string, fn interface{}) *Context {
 	if reflect.TypeOf(fn).Kind() != reflect.Func {
 		return c
 	}
-	if app.GetTemplateEnable() {
+	if app.Config.Flygo.Template.Enable {
 		c.funcMap[name] = fn
 	}
 	return c
@@ -68,84 +68,105 @@ func (c *Context) View(name string) {
 
 //Response view to client with data
 func (c *Context) ViewWithData(name string, data map[string]interface{}) {
-	if !app.GetViewEnable() {
+	if !app.Config.Flygo.View.Enable {
 		return
 	}
 	viewData, err := parseView(name)
 	if err != nil {
-		app.log.fatal(err.Error())
+		app.Error(err.Error())
 		return
 	}
 
-	if app.GetTemplateEnable() {
+	if app.Config.Flygo.Template.Enable {
 		tt := template.New("template")
-		if app.GetTemplateFuncs() != nil {
-			for k, fc := range app.GetTemplateFuncs() {
+		if app.TemplateFuncs != nil {
+			for k, fc := range app.TemplateFuncs {
 				c.funcMap[k] = fc
 			}
 		}
 		if len(c.funcMap) > 0 {
 			tt.Funcs(c.funcMap)
 		}
-		if app.GetTemplateDelimLeft() != "" && app.GetTemplateDelimRight() != "" {
-			tt.Delims(app.GetTemplateDelimLeft(), app.GetTemplateDelimRight())
+		left := app.Config.Flygo.Template.Delims.Left
+		right := app.Config.Flygo.Template.Delims.Right
+		if left != "" && right != "" {
+			tt.Delims(left, right)
 		}
 		templ := template.Must(tt.Parse(viewData))
 		if err != nil {
-			app.log.fatal(err.Error())
+			app.Error(err.Error())
 			return
 		}
 		if data == nil {
 			data = make(map[string]interface{})
 		}
-		if app.GetSessionEnable() && app.sessionProvider != nil {
+		if app.Config.Flygo.Session.Enable && app.SessionProvider != nil {
 			data["session"] = c.Session.GetAll()
 		}
-		data["application"] = app.GetAllCaches()
+		data["application"] = app.Caches
 		c.setDefaultHeaders()
 		err = templ.Execute(c.ResponseWriter, data)
 		if err != nil {
-			app.log.fatal(err.Error())
+			app.Error(err.Error())
 			return
 		}
 	} else {
-		c.render([]byte(viewData), contentTypeHtml)
+		c.Render([]byte(viewData), contentTypeHtml)
 	}
 }
 
 //Response text to client
 func (c *Context) Text(text string) {
-	c.render([]byte(text), contentTypeText)
+	c.Render([]byte(text), contentTypeText)
 }
 
 //Response json to client
 func (c *Context) JSON(data interface{}) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		app.LogFatal(err.Error())
-		panic(err.Error())
+		app.Error(err.Error())
 		return
 	}
-	c.render(jsonData, contentTypeJson)
+	c.Render(jsonData, contentTypeJson)
 }
 
 //Response image to client
 func (c *Context) Image(buffer []byte) {
-	c.render(buffer, contentTypeImage)
+	c.Render(buffer, contentTypeImage)
 }
 
-//Response binary to client
-func (c *Context) Binary(buffer []byte) {
-	c.render(buffer, contentTypeBinary)
+//Response jpg image to client
+func (c *Context) JPG(buffer []byte) {
+	c.Render(buffer, contentTypeJpg)
 }
 
-//Response binary to client with ContentType
-func (c *Context) BinaryWith(buffer []byte, contentType string) {
-	c.render(buffer, contentType)
+//Response jpeg image to client
+func (c *Context) JPEG(buffer []byte) {
+	c.Render(buffer, contentTypeJpg)
+}
+
+//Response png image to client
+func (c *Context) PNG(buffer []byte) {
+	c.Render(buffer, contentTypePng)
+}
+
+//Response gif image to client
+func (c *Context) GIF(buffer []byte) {
+	c.Render(buffer, contentTypeGif)
+}
+
+//Response css to client
+func (c *Context) CSS(buffer []byte) {
+	c.Render(buffer, contentTypeCSS)
+}
+
+//Response css to client
+func (c *Context) JS(buffer []byte) {
+	c.Render(buffer, contentTypeJS)
 }
 
 //Base Response
-func (c *Context) render(buffer []byte, contentType string) {
+func (c *Context) Render(buffer []byte, contentType string) {
 	if !c.Response.done {
 		c.Response.data = buffer
 		c.Response.contentType = contentType

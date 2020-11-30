@@ -46,7 +46,7 @@ func TestPatchRoute(t *testing.T) {
 
 func TestFix(t *testing.T) {
 	h := func(c *Context) {}
-	app := NewApp().SetContextPath("/go")
+	app := NewApp()
 	app.Get("/shop/account", h)
 	app.Post("/shop/account", h)
 	app.Delete("/shop/account", h)

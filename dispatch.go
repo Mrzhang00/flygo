@@ -37,7 +37,7 @@ func (d *dispatcher) initContext(writer http.ResponseWriter, request *http.Reque
 		funcMap:       make(map[string]interface{}),
 	}
 
-	if app.sessionEnable && app.sessionProvider != nil {
+	if app.Config.Flygo.Session.Enable && app.SessionProvider != nil {
 		d.c.initSession()
 	}
 

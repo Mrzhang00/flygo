@@ -5,17 +5,17 @@ import (
 )
 
 //Get request parameter
-func (c *Context) GetParameter(name string) string {
-	return c.GetParameterWithDefault(name, "")
+func (c *Context) Param(name string) string {
+	return c.ParamWith(name, "")
 }
 
 //Get request parameters
-func (c *Context) GetParameters(name string) []string {
-	return c.GetParametersWithDefault(name, nil)
+func (c *Context) Params(name string) []string {
+	return c.ParamsWith(name, nil)
 }
 
 //Get request parameter with default
-func (c *Context) GetParameterWithDefault(name, defaultValue string) string {
+func (c *Context) ParamWith(name, defaultValue string) string {
 	vals := c.Parameters[name]
 	if vals != nil {
 		if len(vals) == 0 || (len(vals) > 0 && vals[0] == "") {
@@ -28,7 +28,7 @@ func (c *Context) GetParameterWithDefault(name, defaultValue string) string {
 }
 
 //Get request parameters with default
-func (c *Context) GetParametersWithDefault(name string, defaultValue []string) []string {
+func (c *Context) ParamsWith(name string, defaultValue []string) []string {
 	vals := c.Parameters[name]
 	if vals != nil {
 		return vals

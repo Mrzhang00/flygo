@@ -12,7 +12,7 @@ func TestPresetDefaultVal(t *testing.T) {
 	idField := NewField("id").DefaultVal("1000")
 
 	app.Get("/", func(c *Context) {
-		c.Text("id = " + c.GetParameter("id"))
+		c.Text("id = " + c.Param("id"))
 	}, idField)
 
 	app.Run()
@@ -24,7 +24,7 @@ func TestPresetSplit(t *testing.T) {
 
 	idField := NewField("id").Split(true).DefaultVal("1,2,3,4,5,6")
 	app.Get("/", func(c *Context) {
-		ids := c.GetParameters("id")
+		ids := c.Params("id")
 		c.Text("id = " + strings.Join(ids, " - "))
 	}, idField)
 
@@ -37,7 +37,7 @@ func TestPresetConcat(t *testing.T) {
 
 	idField := NewField("id").Concat(true).DefaultVal("1000")
 	app.Get("/", func(c *Context) {
-		c.Text("id = " + c.GetParameter("id"))
+		c.Text("id = " + c.Param("id"))
 	}, idField)
 
 	app.Run()

@@ -7,7 +7,7 @@ func TestBeforeInteceptor(t *testing.T) {
 	app := NewApp()
 
 	app.BeforeInterceptor("/before/*", func(c *Context) {
-		if c.GetParameter("id") == "" {
+		if c.Param("id") == "" {
 			c.Text("before interceptor")
 		}
 	})

@@ -43,8 +43,9 @@ func (a *App) route(method, pattern string, handler Handler, fields ...*Field) *
 	//pattern route : /index/path1 or /index/*.go
 	dynamicRoute := isVariableRoute(pattern)
 
+	contextPath := app.Config.Flygo.Server.ContextPath
 	if !dynamicRoute {
-		regex := fmt.Sprintf(`^%s%s$`, app.GetContextPath(), strings.ReplaceAll(pattern, "*", "[a-zA-Z0-9]+"))
+		regex := fmt.Sprintf(`^%s%s$`, contextPath, strings.ReplaceAll(pattern, "*", "[a-zA-Z0-9]+"))
 		//pattern
 		phr := patternHandlerRoute{
 			regex:   regex,
@@ -74,7 +75,7 @@ func (a *App) route(method, pattern string, handler Handler, fields ...*Field) *
 			parameters = append(parameters, p)
 		}
 		regex := reg.ReplaceAllString(pattern, "([a-zA-Z0-9]+)")
-		regex = "^" + a.GetContextPath() + regex + "$"
+		regex = "^" + contextPath + regex + "$"
 		vhr := variableHandlerRoute{
 			regex:      regex,
 			pattern:    pattern,
@@ -99,12 +100,12 @@ func (a *App) route(method, pattern string, handler Handler, fields ...*Field) *
 func (a *App) printRoute() {
 	for _, routes := range a.patternRoutes {
 		for method, route := range routes {
-			a.LogInfo("Route route [%v:%v] with %v fields", method, route.pattern, len(route.fields))
+			a.Info("Route route [%v:%v] with %v fields", method, route.pattern, len(route.fields))
 		}
 	}
 	for _, routes := range a.variableRoutes {
 		for method, route := range routes {
-			a.LogInfo("Variables route [%v:%v] with %v fields", method, route.pattern, len(route.fields))
+			a.Info("Variables route [%v:%v] with %v fields", method, route.pattern, len(route.fields))
 		}
 	}
 }

@@ -38,7 +38,8 @@ func filter(filterType, pattern string, filterHandler FilterHandler) {
 	if pattern == "" {
 		return
 	}
-	regex := fmt.Sprintf(`^%s%s$`, app.GetContextPath(), strings.ReplaceAll(trim(pattern), "*", "[/a-zA-Z0-9]+"))
+	contextPath := app.Config.Flygo.Server.ContextPath
+	regex := fmt.Sprintf(`^%s%s$`, contextPath, strings.ReplaceAll(trim(pattern), "*", "[/a-zA-Z0-9]+"))
 	fr := filterRoute{
 		pattern:       pattern,
 		regex:         regex,
@@ -135,10 +136,10 @@ func (a *App) AfterFilter(pattern string, filterHandler FilterHandler) *App {
 //Print filter
 func (a *App) printFilter() {
 	for _, filter := range a.beforeFilters {
-		a.LogInfo("Before filter route [%s]", filter.route.pattern)
+		a.Info("Before filter route [%s]", filter.route.pattern)
 	}
 	for _, filter := range a.afterFilters {
-		a.LogInfo("After filter route [%s]", filter.route.pattern)
+		a.Info("After filter route [%s]", filter.route.pattern)
 	}
 }
 

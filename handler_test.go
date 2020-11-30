@@ -8,14 +8,14 @@ func TestHandler(t *testing.T) {
 	app := NewApp()
 
 	//Config default 404 not found
-	app.DefaultHandler(func(c *Context) {
+	app.NotFoundHandler = func(c *Context) {
 		c.Text("404")
-	})
+	}
 
 	//Config request not supported handler
-	app.RequestNotSupportedHandler(func(c *Context) {
+	app.MethodNotAllowedHandler = func(c *Context) {
 		c.Text("No impls")
-	})
+	}
 
 	app.Post("/post", func(c *Context) {
 		c.Text("post")

@@ -21,15 +21,15 @@ A simple and lightweight web framework, pure native and no third dependencies.
 - Support [Middleware](#middleware)
 
   - logger : Built in Logger
-  - [cors](https://gitee.com/flygotm/cors) : A Cors middleware for flygo
-  - [redisauth](https://gitee.com/flygotm/redisauth) : A simple authentication with redis middleware for flygo
-  - [redistoken](https://gitee.com/flygotm/redistoken) : A simple authorization with redis middleware for flygo
-  - [uploadfile](https://gitee.com/flygotm/uploadfile) : A upload file middleware for flygo
-  - [downfile](https://gitee.com/flygotm/downfile) : A download file middleware for flygo
+  - [cors](https://github.com/flygotm/cors) : A Cors middleware for flygo
+  - [redisauth](https://github.com/flygotm/redisauth) : A simple authentication with redis middleware for flygo
+  - [redistoken](https://github.com/flygotm/redistoken) : A simple authorization with redis middleware for flygo
+  - [uploadfile](https://github.com/flygotm/uploadfile) : A upload file middleware for flygo
+  - [downfile](https://github.com/flygotm/downfile) : A download file middleware for flygo
 
 - Session Provider
-  - [cookiprovider](https://gitee.com/flygotm/cookieprovider) : A default provider for flygo
-  - [redisprovider](https://gitee.com/flygotm/redisprovider) : A session provider using redis for flygo
+  - [cookiprovider](https://github.com/flygotm/cookieprovider) : A default provider for flygo
+  - [redisprovider](https://github.com/flygotm/redisprovider) : A session provider using redis for flygo
 
 ## Install
 
@@ -48,10 +48,6 @@ git clone https://github.com/billcoding/flygo.git flygo
 ```
 require github.com/billcoding/flygo TAG
 ```
-
-## Versions
-
-https://github.com/billcoding/flygo/releases
 
 ## Usage
 
@@ -73,29 +69,93 @@ func main() {
 }
 ```
 
-## Configuration
-
-| Name            | Key               | Config                                      | Default     | Description                       |
-| --------------- | ----------------- | ------------------------------------------- | ----------- | --------------------------------- |
-| WebRoot         | global.webRoot    | `app.SetWebRoot(WEB_ROOT)`                  | `./`        | The app webroot                   |
-| StaticEnable    | static.enable     | `app.SetStaticEnable(STATIC_ENABLE)`        | `false`     | Static resource enable            |
-| StaticPattern   | static.pattern    | `app.SetStaticPattern(STATIC_PATTERN)`      | `/static`   | Static resource request URL       |
-| StaticPrefix    | static.prefix     | `app.SetStaticPrefix(STATIC_PREFIX)`        | `static`    | Static resource local file prefix |
-| StaticCache     | static.cache      | `app.SetStaticCache(STATIC_CACHE)`          | `true`      | Static resource enable cache      |
-| ViewPrefix      | view.prefix       | `app.SetViewPrefix(VIEW_PREFIX)`            | `templates` | View local file prefix            |
-| ViewSuffix      | view.suffix       | `app.SetViewSuffix(VIEW_SUFFIX)`            | `html`      | View local file suffix            |
-| ViewCache       | view.cache        | `app.SetViewCache(VIEW_CACHE)`              | `true`      | View enable cache                 |
-| ValidateErrCode | validate.err.code | `app.SetValidateErrCode(Validate_ERR_CODE)` | `1`         | Route field validate err code     |
+## Yml Configuration
+```yaml
+flygo:
+  server:
+    host: localhost
+    port: 80
+    webRoot: ''
+    contextPath: ''
+  banner:
+    enable: true
+    type: default
+    text: ''
+    file: ''
+  static:
+    enable: false
+    pattern: static
+    prefix: static
+    cache: false
+    favicon:
+      enable: false
+    mimes:
+      - css: text/css;charset=utf-8
+      - json: application/json;charset=utf-8
+      - jpg: image/jpg
+      - png: image/png
+      - gif: image/gif
+      - ico: image/x-icon
+  view:
+    enable: false
+    prefix: templates
+    suffix: html
+    cache: false
+  template:
+    enable: false
+    delims:
+      left: '{{'
+      right: '}}'
+  session:
+    enable: false
+  validate:
+    err:
+      code: 1
+  log:
+    type: stdout
+    file:
+      out: out.log
+      err: err.log
+```
 
 ## Environment Variables
 
-| Name               | Description                      |
-| ------------------ | -------------------------------- |
-| FLYGO_HOST         | bind address                     |
-| FLYGO_PORT         | bind port                        |
-| FLYGO_WEB_ROOT     | app webroot                      |
-| FLYGO_STATIC_CACHE | app enable static resource cache |
-| FLYGO_VIEW_CACHE   | app view cache                   |
+```
+flggoConfig = "FLYGO_CONFIG" //env config file
+flygoHost   = "FLYGO_HOST"   //env host
+flygoPort   = "FLYGO_PORT"   //env port
+
+flygoContextPath = "FLYGO_CONTEXT_PATH" //env contextPath
+flygoWebRoot     = "FLYGO_WEB_ROOT"     //env webRoot
+
+flygoBannerEnable = "FLYGO_BANNER_ENABLE" //env banner enable
+flygoBannerType   = "FLYGO_BANNER_TYPE"   //env banner type
+flygoBannerText   = "FLYGO_BANNER_TEXT"   //env banner text
+flygoBannerFile   = "FLYGO_BANNER_ENABLE" //env banner file
+
+flygoTlsEnable   = "FLYGO_TLS_ENABLE"    //env tls enable
+flygoTlsCertFile = "FLYGO_TLS_CERT_FILE" //env tls cert file
+flygoTlsKeyFile  = "FLYGO_TLS_KEY_FILE"  //env tls key file
+
+flygoStaticEnable  = "FLYGO_STATIC_ENABLE"  //env static enable
+flygoStaticPattern = "FLYGO_STATIC_PATTERN" //env static pattern
+flygoStaticPrefix  = "FLYGO_STATIC_PREFIX"  //env static prefix
+flygoStaticCache   = "FLYGO_STATIC_CACHE"   //env static cache
+
+flygoStaticFaviconEnable = "FLYGO_STATIC_FAVICON_ENABLE" //env static favicon enable
+
+flygoViewEnable = "FLYGO_VIEW_ENABLE" //env view enable
+flygoViewPrefix = "FLYGO_VIEW_PREFIX" //env view prefix
+flygoViewSuffix = "FLYGO_VIEW_SUFFIX" //env view suffix
+flygoViewCache  = "FLYGO_VIEW_CACHE"  //env view cache
+
+flygoTemplateEnable     = "FLYGO_TEMPLATE_ENABLE"      //env template
+flygoTemplateDelimLeft  = "FLYGO_TEMPLATE_DELIM_LEFT"  //env template delim left
+flygoTemplateDelimRight = "FLYGO_TEMPLATE_DELIM_RIGHT" //env template delim right
+
+flygoSessionEnable  = "FLYGO_SESSION_ENABLE"  //env session enable
+flygoSessionTimeout = "FLYGO_SESSION_TIMEOUT" //env session timeout
+```
 
 ## Middleware
 
@@ -122,28 +182,6 @@ app.UseFilter(filtermiddlewares ...FilterMiddleware)
 ```
 app.UseInterceptor(interceptorMiddlewares ...InterceptorMiddleware)
 ```
-
-## Default Handler Config
-
-- Not found resource
-
-```
- app.DefaultHandler(HANDLER)
-```
-
-- Not supported request
-
-```
-app.RequestNotSupportedHandler(HANDLER)
-```
-
-- Favicon ico handler
-
-```
-app.FaviconIco()
-```
-
-_The favicon ico file should be stored at `$WEB_ROOT/$STATIC_PREFIX/favicon.ico`_
 
 ## Route Types
 

@@ -1,22 +1,21 @@
 package flygo
 
 import (
-	"path/filepath"
+	filepath "path/filepath"
 	"strings"
 )
 
 const (
-	contentTypeText   = "text/plain;charset=utf-8"
-	contentTypeHtml   = "text/html;charset=utf-8"
-	contentTypeJS     = "text/javascript;charset=utf-8"
-	contentTypeCSS    = "text/css;charset=utf-8"
-	contentTypeJson   = "application/json;charset=utf-8"
-	contentTypeBinary = "application/octet-stream"
-	contentTypeImage  = "image/jpg"
-	contentTypePng    = "image/png"
-	contentTypeJpg    = "image/jpg"
-	contentTypeGif    = "image/gif"
-	contentTypeIco    = "image/x-icon"
+	contentTypeText  = "text/plain;charset=utf-8"
+	contentTypeHtml  = "text/html;charset=utf-8"
+	contentTypeJS    = "text/javascript;charset=utf-8"
+	contentTypeCSS   = "text/css;charset=utf-8"
+	contentTypeJson  = "application/json;charset=utf-8"
+	contentTypeImage = "image/jpg"
+	contentTypePng   = "image/png"
+	contentTypeJpg   = "image/jpg"
+	contentTypeGif   = "image/gif"
+	contentTypeIco   = "image/x-icon"
 )
 
 //Define static handler
@@ -25,13 +24,15 @@ type StaticHandler func(c *Context, contentType, resourcePath string)
 //Match favicon.ico
 func (c *Context) matchFaviconStatic() (string, string) {
 	//favicon.ico
+	webRoot := app.Config.Flygo.Server.WebRoot
+	contextPath := app.Config.Flygo.Server.ContextPath
+	staticPrefix := app.Config.Flygo.Static.Prefix
 	path := "/" + strings.Trim(c.ParsedRequestURI, "/")
-	name := app.GetContextPath() + "/favicon.ico"
+	name := contextPath + "/favicon.ico"
 	realPath := ""
 	contentType := ""
-
 	if path == name {
-		realPath = strings.Join([]string{app.GetWebRoot(), app.GetStaticPrefix(), name}, string(filepath.Separator))
+		realPath = filepath.Join(webRoot, staticPrefix, name)
 		contentType = contentTypeIco
 	}
 	return contentType, realPath
@@ -39,20 +40,24 @@ func (c *Context) matchFaviconStatic() (string, string) {
 
 //Match static res
 func (c *Context) matchStatic() (string, string) {
-	regex := "^" + app.GetContextPath() + app.GetStaticPattern() + "/.+$"
+	webRoot := app.Config.Flygo.Server.WebRoot
+	contextPath := app.Config.Flygo.Server.ContextPath
+	staticPattern := app.Config.Flygo.Static.Pattern
+	staticPrefix := app.Config.Flygo.Static.Prefix
+	regex := "^" + strings.Join([]string{contextPath, staticPattern}, "/") + "/.+$"
 	if !c.matchPath(regex) {
 		return "", ""
 	}
-	cpLen := len(app.GetContextPath())
-	paLen := len(app.GetStaticPattern())
+	cpLen := len(contextPath)
+	paLen := len(staticPattern)
 	subName := c.ParsedRequestURI[cpLen+paLen+1:]
 	var contentType string
 	var realPath string
-	realPath = strings.Join([]string{app.GetWebRoot(), app.GetStaticPrefix(), subName}, string(filepath.Separator))
+	realPath = filepath.Join(webRoot, staticPrefix, subName)
 	suffix := subName[strings.LastIndexByte(subName, '.')+1:]
-	contentType = app.statics[suffix]
+	contentType = app.Config.Flygo.Static.Mimes[suffix]
 	if contentType == "" {
-		app.log.warn("static[%v] was not registered", suffix)
+		app.Warn("static[%v] was not registered", suffix)
 		return "", ""
 	}
 	return contentType, realPath
@@ -60,33 +65,20 @@ func (c *Context) matchStatic() (string, string) {
 
 //Invoke static
 func (c *Context) invokeStatic() bool {
-	if !app.GetStaticEnable() {
+	if !app.Config.Flygo.Static.Enable {
 		return false
 	}
-	if app.faviconIcon {
+	if app.Config.Flygo.Static.Favicon.Enable {
 		contentType, staticPath := c.matchFaviconStatic()
 		if staticPath != "" {
-			app.faviconIconHandler(c, contentType, staticPath)
+			app.FaviconIconHandler(c, contentType, staticPath)
 			return true
 		}
 	}
 	contentType, staticPath := c.matchStatic()
 	if staticPath != "" {
-		app.defaultStaticHandler(c, contentType, staticPath)
+		app.StaticHandler(c, contentType, staticPath)
 		return true
 	}
 	return false
-}
-
-//Register a static res
-func (a *App) RegisterStaticRes(fileExt, contentType string) *App {
-	a.statics[fileExt] = contentType
-	return a
-}
-
-//Print static
-func (a *App) printStatic() {
-	for ext := range a.statics {
-		a.LogInfo("Static resource : %s", ext)
-	}
 }

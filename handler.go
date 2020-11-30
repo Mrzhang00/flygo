@@ -86,12 +86,12 @@ func (c *Context) matchPatternHandler() ([]*Field, Handler) {
 		for _, r := range phrs {
 			ms = append(ms, r.method)
 		}
-		app.LogInfo("Request is not supported {config: [%s], request: [%s]}", strings.Join(ms, ","), c.RequestMethod)
-		return nil, app.requestNotSupportedHandler
+		app.Info("Request is not supported {config: [%s], request: [%s]}", strings.Join(ms, ","), c.RequestMethod)
+		return nil, app.NotFoundHandler
 	}
 
 	if c.RequestMethod == methodOptions || c.RequestMethod == methodHead {
-		return nil, app.preflightedHandler
+		return nil, app.PreflightedHandler
 	}
 
 	return phr.fields, *phr.handler
@@ -135,12 +135,12 @@ func (c *Context) matchVariableHandler() ([]*Field, Handler) {
 		for _, r := range vhrs {
 			ms = append(ms, r.method)
 		}
-		app.LogInfo("Request is not supported {config: [%s], request: [%s]}", strings.Join(ms, ","), c.RequestMethod)
-		return nil, app.requestNotSupportedHandler
+		app.Warn("Request is not supported {config: [%s], request: [%s]}", strings.Join(ms, ","), c.RequestMethod)
+		return nil, app.MethodNotAllowedHandler
 	}
 
 	if c.RequestMethod == methodOptions || c.RequestMethod == methodHead {
-		return nil, app.preflightedHandler
+		return nil, app.PreflightedHandler
 	}
 
 	//Setting parameters
@@ -164,7 +164,7 @@ func (c *Context) invokeHandler() {
 	//match handler
 	fields, handler := c.matchHandler()
 	if handler == nil {
-		app.defaultHandler(c)
+		app.NotFoundHandler(c)
 		return
 	}
 
@@ -178,24 +178,6 @@ func (c *Context) invokeHandler() {
 	}
 
 	handler(c)
-}
-
-//Config default handler
-func (a *App) DefaultHandler(handler Handler) *App {
-	a.defaultHandler = handler
-	return a
-}
-
-//Config request not supported handler
-func (a *App) RequestNotSupportedHandler(handler Handler) *App {
-	a.requestNotSupportedHandler = handler
-	return a
-}
-
-//Config preflighted handler
-func (a *App) PreflightedHandler(handler Handler) *App {
-	a.preflightedHandler = handler
-	return a
 }
 
 //trim quotas

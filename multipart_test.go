@@ -15,7 +15,7 @@ func TestMultipart(t *testing.T) {
 		c.ParseMultipart(1024 * 1024)
 
 		//Get file
-		file := c.GetMultipartFile("file")
+		file := c.MultipartFile("file")
 
 		if file != nil {
 			filename := file.Filename()

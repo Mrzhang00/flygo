@@ -42,7 +42,7 @@ type validateErr struct {
 //new validateErr
 func newValidateErr(msg string) *validateErr {
 	return &validateErr{
-		Code: app.GetValidateErrCode(),
+		Code: app.Config.Flygo.Validate.Err.Code,
 		Msg:  msg,
 	}
 }
@@ -51,7 +51,7 @@ func newValidateErr(msg string) *validateErr {
 func (validateErr *validateErr) json() string {
 	bytes, err := json.Marshal(validateErr)
 	if err != nil {
-		app.log.fatal("json err : %v", err)
+		app.Error("json err : %v", err)
 		return ""
 	}
 	return string(bytes)

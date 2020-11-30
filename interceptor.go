@@ -26,7 +26,8 @@ func interceptor(interceptorType, pattern string, interceptorHandler Interceptor
 	if pattern == "" {
 		return
 	}
-	regex := fmt.Sprintf(`^%s%s$`, app.GetContextPath(), strings.ReplaceAll(trim(pattern), "*", "[/a-zA-Z0-9]+"))
+	contexPath := app.Config.Flygo.Server.ContextPath
+	regex := fmt.Sprintf(`^%s%s$`, contexPath, strings.ReplaceAll(trim(pattern), "*", "[/a-zA-Z0-9]+"))
 	route := interceptorRoute{
 		pattern:            pattern,
 		regex:              regex,
@@ -115,9 +116,9 @@ func (a *App) AfterInterceptor(pattern string, interceptorHandler InterceptorHan
 //Print interceptor
 func (a *App) printInterceptor() {
 	for _, chain := range a.beforeInterceptors {
-		a.LogInfo("Before interceptor route [%s]", chain.route.pattern)
+		a.Info("Before interceptor route [%s]", chain.route.pattern)
 	}
 	for _, chain := range a.afterInterceptors {
-		a.LogInfo("After interceptor route [%s]", chain.route.pattern)
+		a.Info("After interceptor route [%s]", chain.route.pattern)
 	}
 }

@@ -96,7 +96,7 @@ func (*validateMiddleware) Pattern() string {
 
 func (*validateMiddleware) Process() InterceptorHandler {
 	return func(c *Context) {
-		if len(c.GetParameters("name")) <= 0 {
+		if len(c.Params("name")) <= 0 {
 			c.Text("Name is empty")
 			return
 		}

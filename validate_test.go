@@ -11,7 +11,7 @@ func TestValidateMin(t *testing.T) {
 	idField := NewField("id").Min(10)
 
 	app.Get("/", func(c *Context) {
-		c.Text("id = " + c.GetParameter("id"))
+		c.Text("id = " + c.Param("id"))
 	}, idField)
 
 	app.Run()
@@ -24,7 +24,7 @@ func TestValidateMax(t *testing.T) {
 	idField := NewField("id").Max(10)
 
 	app.Get("/", func(c *Context) {
-		c.Text("id = " + c.GetParameter("id"))
+		c.Text("id = " + c.Param("id"))
 	}, idField)
 
 	app.Run()
@@ -37,7 +37,7 @@ func TestValidateLength(t *testing.T) {
 	idField := NewField("id").Length(10)
 
 	app.Get("/", func(c *Context) {
-		c.Text("id = " + c.GetParameter("id"))
+		c.Text("id = " + c.Param("id"))
 	}, idField)
 
 	app.Run()
@@ -50,7 +50,7 @@ func TestValidateFixed(t *testing.T) {
 	idField := NewField("id").Fixed("123")
 
 	app.Get("/", func(c *Context) {
-		c.Text("id = " + c.GetParameter("id"))
+		c.Text("id = " + c.Param("id"))
 	}, idField)
 
 	app.Run()
@@ -63,7 +63,7 @@ func TestValidateMinLength(t *testing.T) {
 	idField := NewField("id").MinLength(5)
 
 	app.Get("/", func(c *Context) {
-		c.Text("id = " + c.GetParameter("id"))
+		c.Text("id = " + c.Param("id"))
 	}, idField)
 
 	app.Run()
@@ -76,7 +76,7 @@ func TestValidateMaxLength(t *testing.T) {
 	idField := NewField("id").MaxLength(10)
 
 	app.Get("/", func(c *Context) {
-		c.Text("id = " + c.GetParameter("id"))
+		c.Text("id = " + c.Param("id"))
 	}, idField)
 
 	app.Run()
@@ -89,7 +89,7 @@ func TestValidateOptional(t *testing.T) {
 	idField := NewField("id").Enums("10", "20")
 
 	app.Get("/", func(c *Context) {
-		c.Text("id = " + c.GetParameter("id"))
+		c.Text("id = " + c.Param("id"))
 	}, idField)
 
 	app.Run()
@@ -102,7 +102,7 @@ func TestValidateRegex(t *testing.T) {
 	idField := NewField("id").Regex("^\\d{5}$")
 
 	app.Get("/", func(c *Context) {
-		c.Text("id = " + c.GetParameter("id"))
+		c.Text("id = " + c.Param("id"))
 	}, idField)
 
 	app.Run()

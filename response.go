@@ -8,19 +8,19 @@ type Response struct {
 }
 
 //Set content type
-func (response *Response) SetContentType(contentType string) *Response {
-	response.contentType = contentType
-	return response
+func (r *Response) SetContentType(contentType string) *Response {
+	r.contentType = contentType
+	return r
 }
 
 //Get content type
-func (response *Response) GetContentType() string {
-	return response.contentType
+func (r *Response) GetContentType() string {
+	return r.contentType
 }
 
 //Get data
-func (response *Response) GetData() []byte {
-	return response.data
+func (r *Response) GetData() []byte {
+	return r.data
 }
 
 //Set done
@@ -30,7 +30,7 @@ func (c *Context) SetDone(done bool) *Context {
 }
 
 //Set done
-func (response *Response) SetDone(done bool) *Response {
-	response.done = done
-	return response
+func (r *Response) SetDone(done bool) *Response {
+	r.done = done
+	return r
 }

@@ -23,18 +23,18 @@ func (file *MultipartFile) Copy(distName string) error {
 	f, err = file.fileHeader.Open()
 	defer f.Close()
 	if err != nil {
-		app.log.fatal("%v", err)
+		app.Error("%v", err)
 		return err
 	}
 	dist, err = os.Create(distName)
 	defer dist.Close()
 	if err != nil {
-		app.log.fatal("%v", err)
+		app.Error("%v", err)
 		return err
 	}
 	_, err = io.Copy(dist, f)
 	if err != nil {
-		app.log.fatal("%v", err)
+		app.Error("%v", err)
 		return err
 	}
 	return nil
@@ -101,8 +101,8 @@ func (c *Context) ParseMultipart(maxMemory int64) error {
 }
 
 //Get multipart file
-func (c *Context) GetMultipartFile(name string) *MultipartFile {
-	files := c.GetMultipartFiles(name)
+func (c *Context) MultipartFile(name string) *MultipartFile {
+	files := c.MultipartFiles(name)
 	if len(files) <= 0 {
 		return nil
 	}
@@ -110,9 +110,9 @@ func (c *Context) GetMultipartFile(name string) *MultipartFile {
 }
 
 //Get request parameter
-func (c *Context) GetMultipartFiles(name string) []*MultipartFile {
+func (c *Context) MultipartFiles(name string) []*MultipartFile {
 	if !c.MultipartParsed {
-		app.log.warn("Multipart is not parsed")
+		app.Warn("Multipart is not parsed")
 		return nil
 	}
 	return c.Multipart[name]

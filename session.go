@@ -30,39 +30,27 @@ type SessionProvider interface {
 	Refresh(session Session, config *SessionConfig) //Refresh handler from provider
 }
 
-//Get app session provider
-func (a *App) SessionProvider(sessionProvider SessionProvider) *App {
-	a.sessionProvider = sessionProvider
-	return a
-}
-
 //Print SessionProvider
 func (a *App) printSessionProvider() {
-	if a.sessionEnable && a.sessionProvider != nil {
-		a.LogInfo(fmt.Sprintf("Use SessionProvider : %T", a.sessionProvider))
+	if app.Config.Flygo.Session.Enable && a.SessionProvider != nil {
+		a.Info(fmt.Sprintf("Use SessionProvider : %T", a.SessionProvider))
 	}
 }
 
 //Get sessions
 func (a *App) Sessions() map[string]Session {
-	return a.sessionProvider.GetAll()
-}
-
-//Enable sessions
-func (a *App) SessionEnable(sessionEnable bool) *App {
-	a.sessionEnable = sessionEnable
-	return a
+	return a.SessionProvider.GetAll()
 }
 
 //Init CookieSession
 func (c *Context) initSession() {
-	sessionId := app.sessionProvider.GetId(c.Request)
-	have := app.sessionProvider.Exists(sessionId)
+	sessionId := app.SessionProvider.GetId(c.Request)
+	have := app.SessionProvider.Exists(sessionId)
 	if have {
-		c.SessionId = app.sessionProvider.GetId(c.Request)
-		c.Session = app.sessionProvider.Get(c.SessionId)
+		c.SessionId = app.SessionProvider.GetId(c.Request)
+		c.Session = app.SessionProvider.Get(c.SessionId)
 		//Rrefresh session
-		app.sessionProvider.Refresh(c.Session, app.SessionConfig)
+		app.SessionProvider.Refresh(c.Session, app.SessionConfig)
 		//When RefreshedListener is set
 		refreshedListener := app.SessionConfig.RefreshedListener
 		if refreshedListener != nil {
@@ -74,7 +62,7 @@ func (c *Context) initSession() {
 		}
 	} else {
 		//Create new session
-		session := app.sessionProvider.New(app.SessionConfig)
+		session := app.SessionProvider.New(app.SessionConfig)
 		c.SessionId = session.Id()
 		c.Session = session
 		http.SetCookie(c.ResponseWriter, &http.Cookie{Name: headerSessionId, Value: session.Id()})

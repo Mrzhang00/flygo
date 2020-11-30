@@ -1,11 +1,15 @@
 package flygo
 
-import "testing"
+import (
+	"testing"
+)
 
 //Test banner
 func TestBanner(t *testing.T) {
 
 	//Disable banner
-	NewApp().Banner(false).Run()
+	app := NewApp()
+	app.ConfigFile = "test_ymls/test_banner.yml"
 
+	app.Run()
 }

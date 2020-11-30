@@ -8,9 +8,9 @@ import (
 //Test parameter
 func TestParameter(t *testing.T) {
 	NewApp().Get("/", func(c *Context) {
-		id := c.GetParameter("id")
-		name := c.GetParameter("name")
-		vals := c.GetParameters("vals")
+		id := c.Param("id")
+		name := c.Param("name")
+		vals := c.Params("vals")
 		fmt.Println(id)
 		fmt.Println(name)
 		fmt.Println(vals)
