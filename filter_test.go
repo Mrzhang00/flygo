@@ -14,7 +14,7 @@ func TestBeforeFilter(t *testing.T) {
 		c.Text("index")
 	})
 
-	app.BeforeFilter("/before/*", func(c *FilterContext) {
+	app.BeforeFilter("/before/**", func(c *FilterContext) {
 		fmt.Println("before filter")
 	})
 

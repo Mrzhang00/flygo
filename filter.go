@@ -30,25 +30,45 @@ type filterRouteChain struct {
 	route filterRoute
 }
 
+type froute struct {
+	t string
+	filterRoute
+}
+
 //Define filter handler
 type FilterHandler func(*FilterContext)
 
 //Route filter
-func filter(filterType, pattern string, filterHandler FilterHandler) {
+func (a *App) filter(filterType, pattern string, filterHandler FilterHandler) {
 	if pattern == "" {
 		return
 	}
-	contextPath := app.Config.Flygo.Server.ContextPath
-	regex := fmt.Sprintf(`^%s%s$`, contextPath, strings.ReplaceAll(trim(pattern), "*", "[/a-zA-Z0-9]+"))
-	fr := filterRoute{
-		pattern:       pattern,
-		regex:         regex,
-		filterHandler: filterHandler,
-	}
-	if filterType == "before" {
-		app.beforeFilters[regex] = filterRouteChain{regex: regex, route: fr}
-	} else {
-		app.afterFilters[regex] = filterRouteChain{regex: regex, route: fr}
+	a.froutes = append(a.froutes, froute{
+		t: filterType,
+		filterRoute: filterRoute{
+			pattern:       pattern,
+			filterHandler: filterHandler,
+		},
+	})
+}
+
+func (a *App) startFilter() {
+	for _, froute := range a.froutes {
+		filterType := froute.t
+		pattern := froute.pattern
+		filterHandler := froute.filterHandler
+		contextPath := app.Config.Flygo.Server.ContextPath
+		regex := fmt.Sprintf(`^%s%s$`, contextPath, strings.ReplaceAll(trim(pattern), "*", "[/a-zA-Z0-9]+"))
+		fr := filterRoute{
+			pattern:       pattern,
+			regex:         regex,
+			filterHandler: filterHandler,
+		}
+		if filterType == "before" {
+			a.beforeFilters[regex] = filterRouteChain{regex: regex, route: fr}
+		} else {
+			a.afterFilters[regex] = filterRouteChain{regex: regex, route: fr}
+		}
 	}
 }
 
@@ -123,13 +143,13 @@ func (c *Context) invokeFilterHandler(handler FilterHandler) {
 
 //Route before filter
 func (a *App) BeforeFilter(pattern string, filterHandler FilterHandler) *App {
-	filter("before", pattern, filterHandler)
+	a.filter("before", pattern, filterHandler)
 	return a
 }
 
 //Route after filter
 func (a *App) AfterFilter(pattern string, filterHandler FilterHandler) *App {
-	filter("after", pattern, filterHandler)
+	a.filter("after", pattern, filterHandler)
 	return a
 }
 

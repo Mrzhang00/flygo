@@ -37,62 +37,79 @@ func (a *App) Patch(pattern string, handler Handler, fields ...*Field) *App {
 }
 
 //Route handler
-func (a *App) route(method, pattern string, handler Handler, fields ...*Field) *App {
-	pattern = trim(pattern)
+func (a *App) startRoute() *App {
+	for _, route := range a.routes {
+		method := route.method
+		pattern := route.pattern
+		handler := route.handler
+		fields := route.fields
 
-	//pattern route : /index/path1 or /index/*.go
-	dynamicRoute := isVariableRoute(pattern)
+		pattern = trim(pattern)
 
-	contextPath := app.Config.Flygo.Server.ContextPath
-	if !dynamicRoute {
-		regex := fmt.Sprintf(`^%s%s$`, contextPath, strings.ReplaceAll(pattern, "*", "[a-zA-Z0-9]+"))
-		//pattern
-		phr := patternHandlerRoute{
-			regex:   regex,
-			pattern: pattern,
-			method:  method,
-			handler: &handler,
-			fields:  fields,
-		}
-		routes, have := a.patternRoutes[regex]
-		if have {
-			//have same route
-			routes[method] = phr
-			a.patternRoutes[regex] = routes
+		//pattern route : /index/path1 or /index/*.go
+		dynamicRoute := isVariableRoute(pattern)
+
+		contextPath := app.Config.Flygo.Server.ContextPath
+		if !dynamicRoute {
+			regex := fmt.Sprintf(`^%s%s$`, contextPath, strings.ReplaceAll(pattern, "*", "[a-zA-Z0-9]+"))
+			//pattern
+			phr := patternHandlerRoute{
+				regex:   regex,
+				pattern: pattern,
+				method:  method,
+				handler: handler,
+				fields:  fields,
+			}
+			routes, have := a.patternRoutes[regex]
+			if have {
+				//have same route
+				routes[method] = phr
+				a.patternRoutes[regex] = routes
+			} else {
+				a.patternRoutes[regex] = map[string]patternHandlerRoute{method: phr}
+			}
 		} else {
-			a.patternRoutes[regex] = map[string]patternHandlerRoute{method: phr}
-		}
-	} else {
-		//variable route : /index/{id}/{name}
-		reg := regexp.MustCompile("{[^{]+}")
-		matches := findMatches(pattern, "{[^{]+}")
-		if matches == nil || len(matches) <= 0 {
-			return a
-		}
-		parameters := make([]string, 0)
-		for _, mat := range matches {
-			p := strings.TrimRight(strings.TrimLeft(mat, "{"), "}")
-			parameters = append(parameters, p)
-		}
-		regex := reg.ReplaceAllString(pattern, "([a-zA-Z0-9]+)")
-		regex = "^" + contextPath + regex + "$"
-		vhr := variableHandlerRoute{
-			regex:      regex,
-			pattern:    pattern,
-			method:     method,
-			parameters: parameters,
-			handler:    &handler,
-			fields:     fields,
-		}
-		routes, have := a.variableRoutes[regex]
-		if have {
-			//have same route
-			routes[method] = vhr
-			a.variableRoutes[regex] = routes
-		} else {
-			a.variableRoutes[regex] = map[string]variableHandlerRoute{method: vhr}
+			//variable route : /index/{id}/{name}
+			reg := regexp.MustCompile("{[^{]+}")
+			matches := findMatches(pattern, "{[^{]+}")
+			if matches == nil || len(matches) <= 0 {
+				return a
+			}
+			parameters := make([]string, 0)
+			for _, mat := range matches {
+				p := strings.TrimRight(strings.TrimLeft(mat, "{"), "}")
+				parameters = append(parameters, p)
+			}
+			regex := reg.ReplaceAllString(pattern, "([a-zA-Z0-9]+)")
+			regex = "^" + contextPath + regex + "$"
+			vhr := variableHandlerRoute{
+				regex:      regex,
+				pattern:    pattern,
+				method:     method,
+				parameters: parameters,
+				handler:    handler,
+				fields:     fields,
+			}
+			routes, have := a.variableRoutes[regex]
+			if have {
+				//have same route
+				routes[method] = vhr
+				a.variableRoutes[regex] = routes
+			} else {
+				a.variableRoutes[regex] = map[string]variableHandlerRoute{method: vhr}
+			}
 		}
 	}
+	return a
+}
+
+func (a *App) route(method, pattern string, handler Handler, fields ...*Field) *App {
+	a.routes = append(a.routes, patternHandlerRoute{
+		pattern: pattern,
+		method:  method,
+		handler: &handler,
+		fields:  fields,
+	})
 	return a
 }
 

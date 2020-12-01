@@ -18,25 +18,45 @@ type interceptorRouteChain struct {
 	route interceptorRoute
 }
 
+type iroute struct {
+	t string
+	interceptorRoute
+}
+
 //Define interceptor handler
 type InterceptorHandler func(*Context)
 
 //Route interceptor handler
-func interceptor(interceptorType, pattern string, interceptorHandler InterceptorHandler) {
+func (a *App) interceptor(interceptorType, pattern string, interceptorHandler InterceptorHandler) {
 	if pattern == "" {
 		return
 	}
-	contexPath := app.Config.Flygo.Server.ContextPath
-	regex := fmt.Sprintf(`^%s%s$`, contexPath, strings.ReplaceAll(trim(pattern), "*", "[/a-zA-Z0-9]+"))
-	route := interceptorRoute{
-		pattern:            pattern,
-		regex:              regex,
-		interceptorHandler: interceptorHandler,
-	}
-	if interceptorType == "before" {
-		app.beforeInterceptors[regex] = interceptorRouteChain{regex: regex, route: route}
-	} else {
-		app.afterInterceptors[regex] = interceptorRouteChain{regex: regex, route: route}
+	a.iroutes = append(a.iroutes, iroute{
+		t: interceptorType,
+		interceptorRoute: interceptorRoute{
+			pattern:            pattern,
+			interceptorHandler: interceptorHandler,
+		},
+	})
+}
+
+func (a *App) startInterceptor() {
+	for _, iroute := range a.iroutes {
+		pattern := iroute.pattern
+		interceptorType := iroute.t
+		interceptorHandler := iroute.interceptorHandler
+		contexPath := app.Config.Flygo.Server.ContextPath
+		regex := fmt.Sprintf(`^%s%s$`, contexPath, strings.ReplaceAll(trim(pattern), "*", "[/a-zA-Z0-9]+"))
+		route := interceptorRoute{
+			pattern:            pattern,
+			regex:              regex,
+			interceptorHandler: interceptorHandler,
+		}
+		if interceptorType == "before" {
+			a.beforeInterceptors[regex] = interceptorRouteChain{regex: regex, route: route}
+		} else {
+			a.afterInterceptors[regex] = interceptorRouteChain{regex: regex, route: route}
+		}
 	}
 }
 
@@ -103,13 +123,13 @@ func (c *Context) invokeInterceptorHandler(handler InterceptorHandler) {
 
 //Route before interceptor
 func (a *App) BeforeInterceptor(pattern string, interceptorHandler InterceptorHandler) *App {
-	interceptor("before", pattern, interceptorHandler)
+	a.interceptor("before", pattern, interceptorHandler)
 	return a
 }
 
 //Route after interceptor
 func (a *App) AfterInterceptor(pattern string, interceptorHandler InterceptorHandler) *App {
-	interceptor("after", pattern, interceptorHandler)
+	a.interceptor("after", pattern, interceptorHandler)
 	return a
 }
 

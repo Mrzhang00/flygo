@@ -14,22 +14,25 @@ var app *App
 
 //Define app struct
 type App struct {
-	ConfigFile         string            //conf file
-	Config             *YmlConfig        //yml config
-	outLogger          *log.Logger       //app out log
-	errLogger          *log.Logger       //app err log
-	staticCaches       staticCache       //static res cache
-	staticMimeCaches   staticMimeCache   //static res mime cache
-	viewCaches         viewCache         //view cache
-	patternRoutes      patternRoute      //pattern route handlers
-	variableRoutes     variableRoute     //variable route handlers
-	beforeFilters      aroundFilter      //before filters
-	afterFilters       aroundFilter      //after filters
-	beforeInterceptors aroundInterceptor //before interceptors
-	afterInterceptors  aroundInterceptor //after interceptors
-	FaviconIconHandler StaticHandler     //default favicon ico handler
-	StaticHandler      StaticHandler     //default static handler
-	PreflightedHandler Handler           //preflighted handler
+	ConfigFile         string                //conf file
+	Config             *YmlConfig            //yml config
+	outLogger          *log.Logger           //app out log
+	errLogger          *log.Logger           //app err log
+	staticCaches       staticCache           //static res cache
+	staticMimeCaches   staticMimeCache       //static res mime cache
+	viewCaches         viewCache             //view cache
+	routes             []patternHandlerRoute //list routes
+	patternRoutes      patternRoute          //pattern route handlers
+	variableRoutes     variableRoute         //variable route handlers
+	froutes            []froute              //list froutes
+	beforeFilters      aroundFilter          //before filters
+	afterFilters       aroundFilter          //after filters
+	iroutes            []iroute              //list iroutes
+	beforeInterceptors aroundInterceptor     //before interceptors
+	afterInterceptors  aroundInterceptor     //after interceptors
+	FaviconIconHandler StaticHandler         //default favicon ico handler
+	StaticHandler      StaticHandler         //default static handler
+	PreflightedHandler Handler               //preflighted handler
 
 	NotFoundHandler         Handler //not found handler
 	MethodNotAllowedHandler Handler //method not allowed  handler
@@ -59,10 +62,13 @@ func defaultApp() *App {
 		staticCaches:            make(map[string][]byte),
 		staticMimeCaches:        make(map[string]string),
 		viewCaches:              make(map[string]string),
+		routes:                  make([]patternHandlerRoute, 0),
 		patternRoutes:           make(map[string]map[string]patternHandlerRoute),
 		variableRoutes:          make(map[string]map[string]variableHandlerRoute),
+		froutes:                 make([]froute, 0),
 		beforeFilters:           make(map[string]filterRouteChain),
 		afterFilters:            make(map[string]filterRouteChain),
+		iroutes:                 make([]iroute, 0),
 		beforeInterceptors:      make(map[string]interceptorRouteChain),
 		afterInterceptors:       make(map[string]interceptorRouteChain),
 		FaviconIconHandler:      faviconIconHandler,
@@ -102,6 +108,15 @@ func (a *App) Run() {
 
 	//parse env
 	a.parseEnv()
+
+	//start route
+	a.startRoute()
+
+	//start froute
+	a.startFilter()
+
+	//start iroute
+	a.startInterceptor()
 
 	//print banner
 	a.printBanner()
