@@ -8,20 +8,22 @@ import (
 
 const (
 	flggoConfig = "FLYGO_CONFIG" //env config file for web app
-	flygoHost   = "FLYGO_HOST"   //env host for web app
-	flygoPort   = "FLYGO_PORT"   //env port for web app
 
-	flygoContextPath = "FLYGO_CONTEXT_PATH" //env contextPath for web app
-	flygoWebRoot     = "FLYGO_WEB_ROOT"     //env webRoot for web app
+	flygoDevDebug = "FLYGO_DEV_DEBUG" //env dev debug for web app
+
+	flygoServerHost        = "FLYGO_SERVER_HOST"         //env server host for web app
+	flygoServerPort        = "FLYGO_SERVER_PORT"         //env server port for web app
+	flygoServerContextPath = "FLYGO_SERVER_CONTEXT_PATH" //env server contextPath for web app
+	flygoServerWebRoot     = "FLYGO_SERVER_WEB_ROOT"     //env server webRoot for web app
 
 	flygoBannerEnable = "FLYGO_BANNER_ENABLE" //env banner enable for web app
 	flygoBannerType   = "FLYGO_BANNER_TYPE"   //env banner type for web app
 	flygoBannerText   = "FLYGO_BANNER_TEXT"   //env banner text for web app
 	flygoBannerFile   = "FLYGO_BANNER_ENABLE" //env banner file for web app
 
-	flygoTlsEnable   = "FLYGO_TLS_ENABLE"    //env tls enable for web app
-	flygoTlsCertFile = "FLYGO_TLS_CERT_FILE" //env tls cert file for web app
-	flygoTlsKeyFile  = "FLYGO_TLS_KEY_FILE"  //env tls key file for web app
+	flygoServerTlsEnable   = "FLYGO_SERVER_TLS_ENABLE"    //env server tls enable for web app
+	flygoServerTlsCertFile = "FLYGO_SERVER_TLS_CERT_FILE" //env server tls cert file for web app
+	flygoServerTlsKeyFile  = "FLYGO_SERVER_TLS_KEY_FILE"  //env server tls key file for web app
 
 	flygoStaticEnable  = "FLYGO_STATIC_ENABLE"  //env static enable for web app
 	flygoStaticPattern = "FLYGO_STATIC_PATTERN" //env static pattern for web app
@@ -43,56 +45,210 @@ const (
 	flygoSessionTimeout = "FLYGO_SESSION_TIMEOUT" //env session timeout for web app
 )
 
-//Parse env
-func (a *App) parseEnv() {
-	a.ConfigFile = stringEnv(flggoConfig)
-
-	if a.ConfigFile != "" {
-		a.parseYml()
+//set config
+func (a *App) _setConfig() {
+	config := stringEnv(flggoConfig)
+	if config != "" {
+		a.ConfigFile = config
 	}
+}
 
-	if stringEnv(flygoHost) != "" {
-		a.Config.Flygo.Server.Host = stringEnv(flygoHost)
+//set dev debug
+func (a *App) _setDevDebug() {
+	debug := stringEnv(flygoDevDebug)
+	if debug != "" {
+		a.Config.Flygo.Dev.Debug = boolEnv(debug)
 	}
+}
 
-	port, err := intEnv(flygoPort)
+//set server host
+func (a *App) _setServerHost() {
+	host := stringEnv(flygoServerHost)
+	if host != "" {
+		a.Config.Flygo.Server.Host = host
+	}
+}
+
+//set server port
+func (a *App) _setServerPort() {
+	port, err := intEnv(flygoServerPort)
 	if err == nil {
 		a.Config.Flygo.Server.Port = port
 	}
+}
 
-	if stringEnv(flygoWebRoot) != "" {
-		a.Config.Flygo.Server.WebRoot = stringEnv(flygoWebRoot)
+//set server webRoot
+func (a *App) _setServerWebRoot() {
+	webRoot := stringEnv(flygoServerWebRoot)
+	if webRoot != "" {
+		a.Config.Flygo.Server.WebRoot = webRoot
 	}
+}
 
-	if stringEnv(flygoContextPath) != "" {
-		a.Config.Flygo.Server.ContextPath = stringEnv(flygoContextPath)
+//set server contextPath
+func (a *App) _setServerContextPath() {
+	contextPath := stringEnv(flygoServerContextPath)
+	if contextPath != "" {
+		a.Config.Flygo.Server.ContextPath = contextPath
 	}
+}
 
-	a.Config.Flygo.Banner.Enable = boolEnv(flygoBannerEnable)
-	if stringEnv(flygoBannerType) != "" {
-		a.Config.Flygo.Banner.Type = stringEnv(flygoBannerType)
+//set banner enable
+func (a *App) _setBannerEnable() {
+	bannerEnable := stringEnv(flygoBannerEnable)
+	if bannerEnable != "" {
+		a.Config.Flygo.Banner.Enable = boolEnv(flygoBannerEnable)
 	}
+}
+
+//set banner type
+func (a *App) _setBannerType() {
+	bannerType := stringEnv(flygoBannerType)
+	if bannerType != "" {
+		a.Config.Flygo.Banner.Type = bannerType
+	}
+}
+
+//set banner text
+func (a *App) _setBannerText() {
 	if stringEnv(flygoBannerText) != "" {
 		a.Config.Flygo.Banner.Text = stringEnv(flygoBannerText)
 	}
-	if stringEnv(flygoBannerFile) != "" {
-		a.Config.Flygo.Banner.File = stringEnv(flygoBannerFile)
+}
+
+//set banner file
+func (a *App) _setBannerFile() {
+	bannerFile := stringEnv(flygoBannerFile)
+	if bannerFile != "" {
+		a.Config.Flygo.Banner.File = bannerFile
+	}
+}
+
+//set server tls enable
+func (a *App) _setServerTlsEnable() {
+	serverTlsEnable := stringEnv(flygoServerTlsEnable)
+	if serverTlsEnable != "" {
+		a.Config.Flygo.Server.Tls.Enable = boolEnv(flygoServerTlsEnable)
+	}
+}
+
+//set server tls cert file
+func (a *App) _setServerTlsCertFile() {
+	serverTlsCertFile := stringEnv(flygoServerTlsCertFile)
+	if serverTlsCertFile != "" {
+		a.Config.Flygo.Server.Tls.CertFile = serverTlsCertFile
+	}
+}
+
+//set server tls key file
+func (a *App) _setServerTlsKeyFile() {
+	serverTlsKeyFile := stringEnv(flygoServerTlsKeyFile)
+	if serverTlsKeyFile != "" {
+		a.Config.Flygo.Server.Tls.KeyFile = serverTlsKeyFile
+	}
+}
+
+//set static enable
+func (a *App) _setStaticEnable() {
+	staticEnable := stringEnv(flygoStaticEnable)
+	if staticEnable != "" {
+		a.Config.Flygo.Static.Enable = boolEnv(flygoStaticEnable)
+	}
+}
+
+//set static cache
+func (a *App) _setStaticCache() {
+	staticCache := stringEnv(flygoStaticCache)
+	if staticCache != "" {
+		a.Config.Flygo.Static.Enable = boolEnv(flygoStaticCache)
+	}
+}
+
+//set static favicon enable
+func (a *App) _setStaticFaviconEnable() {
+	staticFaviconEnable := stringEnv(flygoStaticFaviconEnable)
+	if staticFaviconEnable != "" {
+		a.Config.Flygo.Static.Favicon.Enable = boolEnv(flygoStaticFaviconEnable)
+	}
+}
+
+//set static pattern
+func (a *App) _setStaticPattern() {
+	staticPattern := stringEnv(flygoStaticPattern)
+	if staticPattern != "" {
+		a.Config.Flygo.Static.Pattern = staticPattern
+	}
+}
+
+//set static prefix
+func (a *App) _setStaticPrefix() {
+	staticPrefix := stringEnv(flygoStaticPrefix)
+	if staticPrefix != "" {
+		a.Config.Flygo.Static.Prefix = staticPrefix
+	}
+}
+
+//Parse env
+func (a *App) parseEnv() {
+	//set config
+	a._setConfig()
+
+	if a.ConfigFile != "" {
+		//parse yml config
+		a.parseYml()
 	}
 
-	a.Config.Flygo.Server.Tls.Enable = boolEnv(flygoTlsEnable)
-	if stringEnv(flygoTlsCertFile) != "" {
-		a.Config.Flygo.Server.Tls.CertFile = stringEnv(flygoTlsCertFile)
-	}
-	if stringEnv(flygoTlsKeyFile) != "" {
-		a.Config.Flygo.Server.Tls.KeyFile = stringEnv(flygoTlsKeyFile)
-	}
+	//set dev debug
+	a._setDevDebug()
 
-	a.Config.Flygo.Static.Enable = boolEnv(flygoStaticEnable)
-	a.Config.Flygo.Static.Cache = boolEnv(flygoStaticCache)
-	a.Config.Flygo.Static.Favicon.Enable = boolEnv(flygoStaticFaviconEnable)
-	if stringEnv(flygoStaticPattern) != "" {
-		a.Config.Flygo.Static.Pattern = stringEnv(flygoStaticPattern)
-	}
+	//set server host
+	a._setServerHost()
+
+	//set server port
+	a._setServerPort()
+
+	//set server webRoot
+	a._setServerWebRoot()
+
+	//set server contextPath
+	a._setServerContextPath()
+
+	//set banner enable
+	a._setBannerEnable()
+
+	//set banner type
+	a._setBannerType()
+
+	//set banner type
+	a._setBannerText()
+
+	//set banner file
+	a._setBannerFile()
+
+	//set server tls enable
+	a._setServerTlsEnable()
+
+	//set server tls cert file
+	a._setServerTlsCertFile()
+
+	//set server tls key file
+	a._setServerTlsKeyFile()
+
+	//set static enable
+	a._setStaticEnable()
+
+	//set static cache
+	a._setStaticCache()
+
+	//set static favicon
+	a._setStaticFaviconEnable()
+
+	//set static pattern
+	a._setStaticPattern()
+
+	//set static prefix
+	a._setStaticPrefix()
+
 	if stringEnv(flygoStaticPrefix) != "" {
 		a.Config.Flygo.Static.Prefix = stringEnv(flygoStaticPrefix)
 	}

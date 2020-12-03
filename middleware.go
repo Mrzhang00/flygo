@@ -68,7 +68,7 @@ type InterceptorMiddlewareConfig struct {
 func (a *App) Use(middlewares ...Middleware) *App {
 	for _, middleware := range middlewares {
 		a.middlewares[middleware.Name()] = 0
-		a.route(strings.ToUpper(middleware.Name()), middleware.Pattern(), middleware.Process(), middleware.Fields()...)
+		a.route(strings.ToUpper(middleware.Method()), middleware.Pattern(), middleware.Process(), middleware.Fields()...)
 	}
 	return a
 }
