@@ -49,7 +49,7 @@ func (c *Context) matchStatic() (string, string) {
 		return "", ""
 	}
 	cpLen := len(contextPath)
-	paLen := len(staticPattern)
+	paLen := len(staticPattern) + 1
 	subName := c.ParsedRequestURI[cpLen+paLen+1:]
 	var contentType string
 	var realPath string

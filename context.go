@@ -9,22 +9,22 @@ import (
 
 //Define Context struct
 type Context struct {
-	Request          *http.Request                     //request
-	RequestURI       string                            //request uri
-	ParsedRequestURI string                            //parsed request uri
-	RequestMethod    string                            //request method
-	RequestHeader    http.Header                       //request header
-	ResponseWriter   http.ResponseWriter               //Response writer
-	ResponseHeader   *http.Header                      //Response header
-	Multipart        map[string][]*MultipartFile       //multipart map
-	Parameters       map[string][]string               //map[string][]string
-	MultipartParsed  bool                              //multipart parsed ?
-	Response         *Response                         //Response
-	middlewareCtx    map[string]map[string]interface{} //Middleware c
-	Cookies          map[string]*http.Cookie           //cookies
-	SessionId        string                            //session id
-	Session          Session                           //session
-	funcMap          template.FuncMap                  //Template funcMap
+	Request          *http.Request       //request
+	RequestURI       string              //request uri
+	ParsedRequestURI string              //parsed request uri
+	RequestMethod    string              //request method
+	RequestHeader    http.Header         //request header
+	ResponseWriter   http.ResponseWriter //Response writer
+	ResponseHeader   *http.Header        //Response header
+	Multipart        multipartFileMap    //multipart map
+	ParamMap         paramMap            //param map
+	MultipartParsed  bool                //multipart parsed ?
+	Response         *Response           //Response
+	middlewareMap    middlewareMap       //Middleware map
+	Cookies          cookieMap           //cookies
+	SessionId        string              //session id
+	Session          Session             //session
+	funcMap          template.FuncMap    //Template funcMap
 }
 
 //Set content type
@@ -100,7 +100,7 @@ func (c *Context) ViewWithData(name string, data map[string]interface{}) {
 		if data == nil {
 			data = make(map[string]interface{})
 		}
-		if app.Config.Flygo.Session.Enable && app.SessionProvider != nil {
+		if app.SessionConfig.Enable && app.SessionConfig.SessionProvider != nil {
 			data["session"] = c.Session.GetAll()
 		}
 		data["application"] = app.Caches
@@ -187,12 +187,12 @@ func (c *Context) setContextType() {
 
 //Get middleware c
 func (c *Context) GetMiddlewareCtx(name string) map[string]interface{} {
-	return c.middlewareCtx[name]
+	return c.middlewareMap[name]
 }
 
 //Clear middleware c
 func (c *Context) ClearMiddlewareCtx(name string) {
-	delete(c.middlewareCtx, name)
+	delete(c.middlewareMap, name)
 }
 
 //Remove middleware data
@@ -212,7 +212,7 @@ func (c *Context) SetMiddlewareData(name, key string, val interface{}) {
 	v = map[string]interface{}{
 		key: val,
 	}
-	c.middlewareCtx[name] = v
+	c.middlewareMap[name] = v
 }
 
 //Get middleware data

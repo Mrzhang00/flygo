@@ -7,6 +7,6 @@ func (c *Context) parseForm() {
 		return
 	}
 	for name, values := range c.Request.Form {
-		c.Parameters[name] = values
+		c.ParamMap[name] = values
 	}
 }

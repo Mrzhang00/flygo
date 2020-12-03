@@ -7,46 +7,46 @@ import (
 )
 
 const (
-	flggoConfig = "FLYGO_CONFIG" //env config file for web app
+	flggoConfig = "FLYGO_CONFIG" //env config file
 
-	flygoDevDebug = "FLYGO_DEV_DEBUG" //env dev debug for web app
+	flygoDevDebug = "FLYGO_DEV_DEBUG" //env dev debug
 
-	flygoServerHost        = "FLYGO_SERVER_HOST"         //env server host for web app
-	flygoServerPort        = "FLYGO_SERVER_PORT"         //env server port for web app
-	flygoServerContextPath = "FLYGO_SERVER_CONTEXT_PATH" //env server contextPath for web app
-	flygoServerWebRoot     = "FLYGO_SERVER_WEB_ROOT"     //env server webRoot for web app
+	flygoServerHost        = "FLYGO_SERVER_HOST"         //env server host
+	flygoServerPort        = "FLYGO_SERVER_PORT"         //env server port
+	flygoServerContextPath = "FLYGO_SERVER_CONTEXT_PATH" //env server contextPath
+	flygoServerWebRoot     = "FLYGO_SERVER_WEB_ROOT"     //env server webRoot
 
-	flygoBannerEnable = "FLYGO_BANNER_ENABLE" //env banner enable for web app
-	flygoBannerType   = "FLYGO_BANNER_TYPE"   //env banner type for web app
-	flygoBannerText   = "FLYGO_BANNER_TEXT"   //env banner text for web app
-	flygoBannerFile   = "FLYGO_BANNER_ENABLE" //env banner file for web app
+	flygoBannerEnable = "FLYGO_BANNER_ENABLE" //env banner enable
+	flygoBannerType   = "FLYGO_BANNER_TYPE"   //env banner type
+	flygoBannerText   = "FLYGO_BANNER_TEXT"   //env banner text
+	flygoBannerFile   = "FLYGO_BANNER_ENABLE" //env banner file
 
-	flygoServerTlsEnable   = "FLYGO_SERVER_TLS_ENABLE"    //env server tls enable for web app
-	flygoServerTlsCertFile = "FLYGO_SERVER_TLS_CERT_FILE" //env server tls cert file for web app
-	flygoServerTlsKeyFile  = "FLYGO_SERVER_TLS_KEY_FILE"  //env server tls key file for web app
+	flygoServerTlsEnable   = "FLYGO_SERVER_TLS_ENABLE"    //env server tls enable
+	flygoServerTlsCertFile = "FLYGO_SERVER_TLS_CERT_FILE" //env server tls cert file
+	flygoServerTlsKeyFile  = "FLYGO_SERVER_TLS_KEY_FILE"  //env server tls key file
 
-	flygoStaticEnable  = "FLYGO_STATIC_ENABLE"  //env static enable for web app
-	flygoStaticPattern = "FLYGO_STATIC_PATTERN" //env static pattern for web app
-	flygoStaticPrefix  = "FLYGO_STATIC_PREFIX"  //env static prefix for web app
-	flygoStaticCache   = "FLYGO_STATIC_CACHE"   //env static cache for web app
+	flygoStaticEnable  = "FLYGO_STATIC_ENABLE"  //env static enable
+	flygoStaticPattern = "FLYGO_STATIC_PATTERN" //env static pattern
+	flygoStaticPrefix  = "FLYGO_STATIC_PREFIX"  //env static prefix
+	flygoStaticCache   = "FLYGO_STATIC_CACHE"   //env static cache
 
-	flygoStaticFaviconEnable = "FLYGO_STATIC_FAVICON_ENABLE" //env static favicon enable for web app
+	flygoStaticFaviconEnable = "FLYGO_STATIC_FAVICON_ENABLE" //env static favicon enable
 
-	flygoViewEnable = "FLYGO_VIEW_ENABLE" //env view enable for web app
-	flygoViewPrefix = "FLYGO_VIEW_PREFIX" //env view prefix for web app
-	flygoViewSuffix = "FLYGO_VIEW_SUFFIX" //env view suffix for web app
-	flygoViewCache  = "FLYGO_VIEW_CACHE"  //env view cache for web app
+	flygoViewEnable = "FLYGO_VIEW_ENABLE" //env view enable
+	flygoViewPrefix = "FLYGO_VIEW_PREFIX" //env view prefix
+	flygoViewSuffix = "FLYGO_VIEW_SUFFIX" //env view suffix
+	flygoViewCache  = "FLYGO_VIEW_CACHE"  //env view cache
 
-	flygoTemplateEnable     = "FLYGO_TEMPLATE_ENABLE"      //env template for web app
-	flygoTemplateDelimLeft  = "FLYGO_TEMPLATE_DELIM_LEFT"  //env template delim left for web app
-	flygoTemplateDelimRight = "FLYGO_TEMPLATE_DELIM_RIGHT" //env template delim right for web app
+	flygoTemplateEnable      = "FLYGO_TEMPLATE_ENABLE"       //env template
+	flygoTemplateDelimsLeft  = "FLYGO_TEMPLATE_DELIMS_LEFT"  //env template delims left
+	flygoTemplateDelimsRight = "FLYGO_TEMPLATE_DELIMS_RIGHT" //env template delims right
 
-	flygoSessionEnable  = "FLYGO_SESSION_ENABLE"  //env session enable for web app
-	flygoSessionTimeout = "FLYGO_SESSION_TIMEOUT" //env session timeout for web app
+	flygoSessionEnable  = "FLYGO_SESSION_ENABLE"  //env session enable
+	flygoSessionTimeout = "FLYGO_SESSION_TIMEOUT" //env session timeout
 )
 
 //set config
-func (a *App) _setConfig() {
+func (a *App) setConfig() {
 	config := stringEnv(flggoConfig)
 	if config != "" {
 		a.ConfigFile = config
@@ -54,7 +54,7 @@ func (a *App) _setConfig() {
 }
 
 //set dev debug
-func (a *App) _setDevDebug() {
+func (a *App) setDevDebug() {
 	debug := stringEnv(flygoDevDebug)
 	if debug != "" {
 		a.Config.Flygo.Dev.Debug = boolEnv(debug)
@@ -62,7 +62,7 @@ func (a *App) _setDevDebug() {
 }
 
 //set server host
-func (a *App) _setServerHost() {
+func (a *App) setServerHost() {
 	host := stringEnv(flygoServerHost)
 	if host != "" {
 		a.Config.Flygo.Server.Host = host
@@ -70,7 +70,7 @@ func (a *App) _setServerHost() {
 }
 
 //set server port
-func (a *App) _setServerPort() {
+func (a *App) setServerPort() {
 	port, err := intEnv(flygoServerPort)
 	if err == nil {
 		a.Config.Flygo.Server.Port = port
@@ -78,7 +78,7 @@ func (a *App) _setServerPort() {
 }
 
 //set server webRoot
-func (a *App) _setServerWebRoot() {
+func (a *App) setServerWebRoot() {
 	webRoot := stringEnv(flygoServerWebRoot)
 	if webRoot != "" {
 		a.Config.Flygo.Server.WebRoot = webRoot
@@ -86,7 +86,7 @@ func (a *App) _setServerWebRoot() {
 }
 
 //set server contextPath
-func (a *App) _setServerContextPath() {
+func (a *App) setServerContextPath() {
 	contextPath := stringEnv(flygoServerContextPath)
 	if contextPath != "" {
 		a.Config.Flygo.Server.ContextPath = contextPath
@@ -94,7 +94,7 @@ func (a *App) _setServerContextPath() {
 }
 
 //set banner enable
-func (a *App) _setBannerEnable() {
+func (a *App) setBannerEnable() {
 	bannerEnable := stringEnv(flygoBannerEnable)
 	if bannerEnable != "" {
 		a.Config.Flygo.Banner.Enable = boolEnv(flygoBannerEnable)
@@ -102,7 +102,7 @@ func (a *App) _setBannerEnable() {
 }
 
 //set banner type
-func (a *App) _setBannerType() {
+func (a *App) setBannerType() {
 	bannerType := stringEnv(flygoBannerType)
 	if bannerType != "" {
 		a.Config.Flygo.Banner.Type = bannerType
@@ -110,14 +110,14 @@ func (a *App) _setBannerType() {
 }
 
 //set banner text
-func (a *App) _setBannerText() {
+func (a *App) setBannerText() {
 	if stringEnv(flygoBannerText) != "" {
 		a.Config.Flygo.Banner.Text = stringEnv(flygoBannerText)
 	}
 }
 
 //set banner file
-func (a *App) _setBannerFile() {
+func (a *App) setBannerFile() {
 	bannerFile := stringEnv(flygoBannerFile)
 	if bannerFile != "" {
 		a.Config.Flygo.Banner.File = bannerFile
@@ -125,7 +125,7 @@ func (a *App) _setBannerFile() {
 }
 
 //set server tls enable
-func (a *App) _setServerTlsEnable() {
+func (a *App) setServerTlsEnable() {
 	serverTlsEnable := stringEnv(flygoServerTlsEnable)
 	if serverTlsEnable != "" {
 		a.Config.Flygo.Server.Tls.Enable = boolEnv(flygoServerTlsEnable)
@@ -133,7 +133,7 @@ func (a *App) _setServerTlsEnable() {
 }
 
 //set server tls cert file
-func (a *App) _setServerTlsCertFile() {
+func (a *App) setServerTlsCertFile() {
 	serverTlsCertFile := stringEnv(flygoServerTlsCertFile)
 	if serverTlsCertFile != "" {
 		a.Config.Flygo.Server.Tls.CertFile = serverTlsCertFile
@@ -141,7 +141,7 @@ func (a *App) _setServerTlsCertFile() {
 }
 
 //set server tls key file
-func (a *App) _setServerTlsKeyFile() {
+func (a *App) setServerTlsKeyFile() {
 	serverTlsKeyFile := stringEnv(flygoServerTlsKeyFile)
 	if serverTlsKeyFile != "" {
 		a.Config.Flygo.Server.Tls.KeyFile = serverTlsKeyFile
@@ -149,7 +149,7 @@ func (a *App) _setServerTlsKeyFile() {
 }
 
 //set static enable
-func (a *App) _setStaticEnable() {
+func (a *App) setStaticEnable() {
 	staticEnable := stringEnv(flygoStaticEnable)
 	if staticEnable != "" {
 		a.Config.Flygo.Static.Enable = boolEnv(flygoStaticEnable)
@@ -157,7 +157,7 @@ func (a *App) _setStaticEnable() {
 }
 
 //set static cache
-func (a *App) _setStaticCache() {
+func (a *App) setStaticCache() {
 	staticCache := stringEnv(flygoStaticCache)
 	if staticCache != "" {
 		a.Config.Flygo.Static.Enable = boolEnv(flygoStaticCache)
@@ -165,7 +165,7 @@ func (a *App) _setStaticCache() {
 }
 
 //set static favicon enable
-func (a *App) _setStaticFaviconEnable() {
+func (a *App) setStaticFaviconEnable() {
 	staticFaviconEnable := stringEnv(flygoStaticFaviconEnable)
 	if staticFaviconEnable != "" {
 		a.Config.Flygo.Static.Favicon.Enable = boolEnv(flygoStaticFaviconEnable)
@@ -173,7 +173,7 @@ func (a *App) _setStaticFaviconEnable() {
 }
 
 //set static pattern
-func (a *App) _setStaticPattern() {
+func (a *App) setStaticPattern() {
 	staticPattern := stringEnv(flygoStaticPattern)
 	if staticPattern != "" {
 		a.Config.Flygo.Static.Pattern = staticPattern
@@ -181,17 +181,92 @@ func (a *App) _setStaticPattern() {
 }
 
 //set static prefix
-func (a *App) _setStaticPrefix() {
+func (a *App) setStaticPrefix() {
 	staticPrefix := stringEnv(flygoStaticPrefix)
 	if staticPrefix != "" {
 		a.Config.Flygo.Static.Prefix = staticPrefix
 	}
 }
 
+//set view enable
+func (a *App) setViewEnable() {
+	viewEnable := stringEnv(flygoViewEnable)
+	if viewEnable != "" {
+		a.Config.Flygo.View.Enable = boolEnv(flygoViewEnable)
+	}
+}
+
+//set view cache
+func (a *App) setViewCache() {
+	viewCache := stringEnv(flygoViewCache)
+	if viewCache != "" {
+		a.Config.Flygo.View.Cache = boolEnv(flygoViewCache)
+	}
+}
+
+//set view prefix
+func (a *App) setViewPrefix() {
+	viewPrefix := stringEnv(flygoViewPrefix)
+	if viewPrefix != "" {
+		a.Config.Flygo.View.Prefix = viewPrefix
+	}
+}
+
+//set view suffix
+func (a *App) setViewSuffix() {
+	viewSuffix := stringEnv(flygoViewSuffix)
+	if viewSuffix != "" {
+		a.Config.Flygo.View.Suffix = viewSuffix
+	}
+}
+
+//set template enable
+func (a *App) setTemplateEnable() {
+	templateEnable := stringEnv(flygoTemplateEnable)
+	if templateEnable != "" {
+		a.Config.Flygo.Template.Enable = boolEnv(flygoTemplateEnable)
+	}
+}
+
+//set template delims left
+func (a *App) setTemplateDelimsLeft() {
+	templateDelimsLeft := stringEnv(flygoTemplateDelimsLeft)
+	if templateDelimsLeft != "" {
+		a.Config.Flygo.Template.Delims.Left = templateDelimsLeft
+	}
+}
+
+//set template delims right
+func (a *App) setTemplateDelimsRight() {
+	templateDelimsRight := stringEnv(flygoTemplateDelimsRight)
+	if templateDelimsRight != "" {
+		a.Config.Flygo.Template.Delims.Left = flygoTemplateDelimsRight
+	}
+}
+
+//set session enable
+func (a *App) setSessionEnable() {
+	sessionEnable := stringEnv(flygoSessionEnable)
+	if sessionEnable != "" {
+		a.SessionConfig.Enable = boolEnv(flygoSessionEnable)
+	}
+}
+
+//set session timeout
+func (a *App) setSessionTimeout() {
+	sessionTimeout := stringEnv(flygoSessionTimeout)
+	if sessionTimeout != "" {
+		sessionTimeout, sessionTimeoutErr := durationEnv(flygoSessionTimeout)
+		if sessionTimeoutErr == nil {
+			a.SessionConfig.Timeout = sessionTimeout
+		}
+	}
+}
+
 //Parse env
 func (a *App) parseEnv() {
 	//set config
-	a._setConfig()
+	a.setConfig()
 
 	if a.ConfigFile != "" {
 		//parse yml config
@@ -199,82 +274,82 @@ func (a *App) parseEnv() {
 	}
 
 	//set dev debug
-	a._setDevDebug()
+	a.setDevDebug()
 
 	//set server host
-	a._setServerHost()
+	a.setServerHost()
 
 	//set server port
-	a._setServerPort()
+	a.setServerPort()
 
 	//set server webRoot
-	a._setServerWebRoot()
+	a.setServerWebRoot()
 
 	//set server contextPath
-	a._setServerContextPath()
+	a.setServerContextPath()
 
 	//set banner enable
-	a._setBannerEnable()
+	a.setBannerEnable()
 
 	//set banner type
-	a._setBannerType()
+	a.setBannerType()
 
 	//set banner type
-	a._setBannerText()
+	a.setBannerText()
 
 	//set banner file
-	a._setBannerFile()
+	a.setBannerFile()
 
 	//set server tls enable
-	a._setServerTlsEnable()
+	a.setServerTlsEnable()
 
 	//set server tls cert file
-	a._setServerTlsCertFile()
+	a.setServerTlsCertFile()
 
 	//set server tls key file
-	a._setServerTlsKeyFile()
+	a.setServerTlsKeyFile()
 
 	//set static enable
-	a._setStaticEnable()
+	a.setStaticEnable()
 
 	//set static cache
-	a._setStaticCache()
+	a.setStaticCache()
 
 	//set static favicon
-	a._setStaticFaviconEnable()
+	a.setStaticFaviconEnable()
 
 	//set static pattern
-	a._setStaticPattern()
+	a.setStaticPattern()
 
 	//set static prefix
-	a._setStaticPrefix()
+	a.setStaticPrefix()
 
-	if stringEnv(flygoStaticPrefix) != "" {
-		a.Config.Flygo.Static.Prefix = stringEnv(flygoStaticPrefix)
-	}
+	//set view enable
+	a.setViewEnable()
 
-	a.Config.Flygo.View.Enable = boolEnv(flygoViewEnable)
-	a.Config.Flygo.View.Cache = boolEnv(flygoViewCache)
-	if stringEnv(flygoViewPrefix) != "" {
-		a.Config.Flygo.View.Prefix = stringEnv(flygoStaticPrefix)
-	}
-	if stringEnv(flygoViewSuffix) != "" {
-		a.Config.Flygo.View.Suffix = stringEnv(flygoViewSuffix)
-	}
+	//set view cache
+	a.setViewCache()
 
-	a.Config.Flygo.Template.Enable = boolEnv(flygoTemplateEnable)
-	if stringEnv(flygoTemplateDelimLeft) != "" {
-		a.Config.Flygo.Template.Delims.Left = stringEnv(flygoTemplateDelimLeft)
-	}
-	if stringEnv(flygoTemplateDelimRight) != "" {
-		a.Config.Flygo.Template.Delims.Right = stringEnv(flygoTemplateDelimRight)
-	}
+	//set view prefix
+	a.setViewPrefix()
 
-	a.Config.Flygo.Session.Enable = boolEnv(flygoSessionEnable)
-	sessionTimeout, sessionTimeoutErr := durationEnv(flygoSessionTimeout)
-	if sessionTimeoutErr == nil {
-		a.SessionConfig.Timeout = sessionTimeout
-	}
+	//set view suffix
+	a.setViewSuffix()
+
+	//set template enable
+	a.setTemplateEnable()
+
+	//set template delims left
+	a.setTemplateDelimsLeft()
+
+	//set template delims right
+	a.setTemplateDelimsRight()
+
+	//set session enable
+	a.setSessionEnable()
+
+	//set session timeout
+	a.setSessionTimeout()
 }
 
 func stringEnv(key string) string {

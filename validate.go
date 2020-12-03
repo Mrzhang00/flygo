@@ -11,7 +11,8 @@ import (
 
 //Define field struct
 type Field struct {
-	name string //parameter name
+	name        string //parameter name
+	description string //parameter description
 
 	/**preset part*/
 	preset     bool   //set mode
@@ -42,7 +43,7 @@ type validateErr struct {
 //new validateErr
 func newValidateErr(msg string) *validateErr {
 	return &validateErr{
-		Code: app.Config.Flygo.Validate.Err.Code,
+		Code: app.Config.Flygo.Validate.Code,
 		Msg:  msg,
 	}
 }
@@ -59,22 +60,23 @@ func (validateErr *validateErr) json() string {
 
 func NewField(name string) *Field {
 	return &Field{
-		name:       name,
-		preset:     true,
-		defaultVal: "",
-		split:      false,
-		splitRune:  ',',
-		concat:     false,
-		concatRune: ',',
-		validate:   true,
-		length:     0,
-		min:        0,
-		max:        0,
-		minLength:  0,
-		maxLength:  0,
-		fixed:      "",
-		enums:      nil,
-		regex:      "",
+		name:        name,
+		description: name,
+		preset:      true,
+		defaultVal:  "",
+		split:       false,
+		splitRune:   ',',
+		concat:      false,
+		concatRune:  ',',
+		validate:    true,
+		length:      0,
+		min:         0,
+		max:         0,
+		minLength:   0,
+		maxLength:   0,
+		fixed:       "",
+		enums:       nil,
+		regex:       "",
 	}
 }
 
@@ -99,7 +101,7 @@ func presetField(field *Field, c *Context) {
 	if !field.preset || field.name == "" {
 		return
 	}
-	vals := c.Parameters[field.name]
+	vals := c.ParamMap[field.name]
 	if vals == nil || len(vals) == 0 {
 		//set default val
 		vals = []string{field.defaultVal}
@@ -116,7 +118,7 @@ func presetField(field *Field, c *Context) {
 	if field.concat {
 		vals = []string{strings.Join(vals, fmt.Sprintf("%c", field.concatRune))}
 	}
-	c.Parameters[field.name] = vals
+	c.ParamMap[field.name] = vals
 }
 
 //validate field
@@ -125,16 +127,16 @@ func validateField(field *Field, c *Context) error {
 		return nil
 	}
 
-	vals := c.Parameters[field.name]
+	vals := c.ParamMap[field.name]
 	if vals == nil {
-		return errors.New(newValidateErr(fmt.Sprintf("field[%v] is invalid", field.name)).json())
+		return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[null] fail", field.name)).json())
 	}
 
 	if field.min > 0 {
 		for _, v := range vals {
 			val, err := strconv.Atoi(v)
 			if err != nil || val < field.min {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] is invalid with %v", field.name, "field.min")).json())
+				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.min")).json())
 			}
 		}
 	}
@@ -143,7 +145,7 @@ func validateField(field *Field, c *Context) error {
 		for _, v := range vals {
 			val, err := strconv.Atoi(v)
 			if err != nil || val > field.max {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] is invalid with %v", field.name, "field.max")).json())
+				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.max")).json())
 			}
 		}
 	}
@@ -151,7 +153,7 @@ func validateField(field *Field, c *Context) error {
 	if field.length > 0 {
 		for _, v := range vals {
 			if len(v) != field.length {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] is invalid with %v", field.name, "field.length")).json())
+				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.length")).json())
 			}
 		}
 	}
@@ -159,7 +161,7 @@ func validateField(field *Field, c *Context) error {
 	if field.fixed != "" {
 		for _, v := range vals {
 			if v != field.fixed {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] is invalid with %v", field.name, "field.fixed")).json())
+				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.fixed")).json())
 			}
 		}
 	}
@@ -167,7 +169,7 @@ func validateField(field *Field, c *Context) error {
 	if field.minLength > 0 {
 		for _, v := range vals {
 			if len(v) < field.minLength {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] is invalid with %v", field.name, "field.minLength")).json())
+				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.minLength")).json())
 			}
 		}
 	}
@@ -175,7 +177,7 @@ func validateField(field *Field, c *Context) error {
 	if field.maxLength > 0 {
 		for _, v := range vals {
 			if len(v) > field.maxLength {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] is invalid with %v", field.name, "field.maxLength")).json())
+				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.maxLength")).json())
 			}
 		}
 	}
@@ -184,7 +186,7 @@ func validateField(field *Field, c *Context) error {
 		es := fmt.Sprintf("|%s|", strings.Join(field.enums, "|"))
 		for _, v := range vals {
 			if !strings.Contains(es, fmt.Sprintf("|%s|", v)) {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] is invalid with %v", field.name, "field.enums")).json())
+				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.enums")).json())
 			}
 		}
 	}
@@ -193,11 +195,17 @@ func validateField(field *Field, c *Context) error {
 		re := regexp.MustCompile(field.regex)
 		for _, v := range vals {
 			if !re.MatchString(v) {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] is invalid with %v", field.name, "field.regex")).json())
+				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.regex")).json())
 			}
 		}
 	}
 	return nil
+}
+
+//description
+func (field *Field) Description(description string) *Field {
+	field.description = description
+	return field
 }
 
 //set

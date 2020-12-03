@@ -15,6 +15,12 @@ type aroundInterceptor map[string]interceptorRouteChain
 type appCache map[string]interface{}
 type middleware map[string]int
 
+type multipartFileMap map[string][]*MultipartFile
+type paramMap map[string][]string
+type headerMap map[string][]string
+type middlewareMap map[string]map[string]interface{}
+type cookieMap map[string]*http.Cookie
+
 var faviconIconHandler = func(c *Context, contentType, resourcePath string) {
 	app.StaticHandler(c, contentTypeIco, resourcePath)
 }

@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-//Test parameter
-func TestParameter(t *testing.T) {
+//Test param
+func TestParam(t *testing.T) {
 	NewApp().Get("/", func(c *Context) {
 		id := c.Param("id")
 		name := c.Param("name")
@@ -15,5 +15,4 @@ func TestParameter(t *testing.T) {
 		fmt.Println(name)
 		fmt.Println(vals)
 	}).Run()
-
 }

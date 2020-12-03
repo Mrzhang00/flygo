@@ -33,11 +33,8 @@ flygo:
     delims:
       left: '{{'
       right: '}}'
-  session:
-    enable: false
   validate:
-    err:
-      code: 1
+    code: 1
   log:
     type: stdout
     file:

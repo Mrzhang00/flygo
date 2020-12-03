@@ -13,10 +13,17 @@ type SessionDestoryedListener sessionListener
 //call when the session be refreshed
 type SessionRefreshedListener sessionListener
 
+//Define SessionListener struct
+type SessionListener struct {
+	Created   sessionListener //SessionCreated
+	Destoryed sessionListener //SessionDestoryed
+	Refreshed sessionListener //SessionRefreshed
+}
+
 //Define SessionConfig struct
 type SessionConfig struct {
-	Timeout           time.Duration   //session idle timeout
-	CreatedListener   sessionListener //SessionCreatedListener
-	DestoryedListener sessionListener //SessionDestoryedListener
-	RefreshedListener sessionListener //SessionRefreshedListener
+	Enable          bool
+	SessionProvider SessionProvider
+	*SessionListener
+	Timeout time.Duration
 }

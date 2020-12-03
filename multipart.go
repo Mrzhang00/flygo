@@ -12,7 +12,7 @@ type MultipartFile struct {
 	contentType string                //mime type
 	size        int64                 //file length in byte
 	fileHeader  *multipart.FileHeader //file ptr
-	headers     map[string][]string   //file headers
+	headers     headerMap             //file headers
 }
 
 //Copy file to dist name
@@ -78,7 +78,7 @@ func (c *Context) ParseMultipart(maxMemory int64) error {
 	}
 	c.MultipartParsed = true
 	for name, values := range c.Request.MultipartForm.Value {
-		c.Parameters[name] = values
+		c.ParamMap[name] = values
 	}
 	for name, header := range c.Request.MultipartForm.File {
 		mfs := make([]*MultipartFile, 0)

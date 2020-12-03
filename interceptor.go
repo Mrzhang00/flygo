@@ -18,7 +18,7 @@ type interceptorRouteChain struct {
 	route interceptorRoute
 }
 
-type iroute struct {
+type interceptorRouteCache struct {
 	t string
 	interceptorRoute
 }
@@ -31,7 +31,7 @@ func (a *App) interceptor(interceptorType, pattern string, interceptorHandler In
 	if pattern == "" {
 		return
 	}
-	a.iroutes = append(a.iroutes, iroute{
+	a.interceptorRouteCaches = append(a.interceptorRouteCaches, interceptorRouteCache{
 		t: interceptorType,
 		interceptorRoute: interceptorRoute{
 			pattern:            pattern,
@@ -41,7 +41,7 @@ func (a *App) interceptor(interceptorType, pattern string, interceptorHandler In
 }
 
 func (a *App) startInterceptor() {
-	for _, iroute := range a.iroutes {
+	for _, iroute := range a.interceptorRouteCaches {
 		pattern := iroute.pattern
 		interceptorType := iroute.t
 		interceptorHandler := iroute.interceptorHandler

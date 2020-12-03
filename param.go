@@ -16,7 +16,7 @@ func (c *Context) Params(name string) []string {
 
 //Get request parameter with default
 func (c *Context) ParamWith(name, defaultValue string) string {
-	vals := c.Parameters[name]
+	vals := c.ParamMap[name]
 	if vals != nil {
 		if len(vals) == 0 || (len(vals) > 0 && vals[0] == "") {
 			return defaultValue
@@ -29,7 +29,7 @@ func (c *Context) ParamWith(name, defaultValue string) string {
 
 //Get request parameters with default
 func (c *Context) ParamsWith(name string, defaultValue []string) []string {
-	vals := c.Parameters[name]
+	vals := c.ParamMap[name]
 	if vals != nil {
 		return vals
 	}

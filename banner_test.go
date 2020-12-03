@@ -1,15 +1,44 @@
 package flygo
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
+	"time"
 )
 
-//Test banner
-func TestBanner(t *testing.T) {
+//Test banner text
+func TestBannerText(t *testing.T) {
 
 	//Disable banner
 	app := NewApp()
-	app.ConfigFile = "test_ymls/test_banner.yml"
+	app.Config.Flygo.Banner.Type = "text"
+	app.Config.Flygo.Banner.Text = `
+
+THIS IS FLYGO BANNER TEXT!!!!
+
+`
+	app.Run()
+}
+
+//Test banner
+func TestBannerFile(t *testing.T) {
+
+	ioutil.WriteFile("banner.txt", []byte(`
+
+THIS IS FLYGO BANNER FROM FILE!!!!
+
+`), 0760)
+
+	//Disable banner
+	app := NewApp()
+	app.Config.Flygo.Banner.Type = "file"
+
+	go func() {
+		time.AfterFunc(time.Second, func() {
+			os.Remove("banner.txt")
+		})
+	}()
 
 	app.Run()
 }

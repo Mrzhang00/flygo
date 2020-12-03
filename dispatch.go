@@ -28,16 +28,16 @@ func (d *dispatcher) initContext(writer http.ResponseWriter, request *http.Reque
 		RequestMethod:    strings.ToUpper(request.Method),
 		RequestHeader:    request.Header,
 		ResponseWriter:   writer,
-		Parameters:       make(map[string][]string, 0),
+		ParamMap:         make(map[string][]string, 0),
 		Multipart:        make(map[string][]*MultipartFile, 0),
 		Response: &Response{
 			contentType: contentTypeText,
 		},
-		middlewareCtx: app.initMiddlewareCtx(),
+		middlewareMap: app.initMiddlewareCtx(),
 		funcMap:       make(map[string]interface{}),
 	}
 
-	if app.Config.Flygo.Session.Enable && app.SessionProvider != nil {
+	if app.SessionConfig.Enable && app.SessionConfig.SessionProvider != nil {
 		d.c.initSession()
 	}
 

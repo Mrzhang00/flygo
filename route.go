@@ -104,7 +104,7 @@ func (a *App) startRoute() *App {
 }
 
 func (a *App) route(method, pattern string, handler Handler, fields ...*Field) *App {
-	a.routes = append(a.routes, patternHandlerRoute{
+	a.routes = append(a.routes, handlerRouteCache{
 		pattern: pattern,
 		method:  method,
 		handler: &handler,

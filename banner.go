@@ -1,6 +1,7 @@
 package flygo
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strings"
 )
@@ -23,10 +24,10 @@ func (a *App) printBanner() {
 	}
 	switch a.Config.Flygo.Banner.Type {
 	case "default":
-		a.Info(strings.Join(banners, "\n"))
+		fmt.Println(strings.Join(banners, "\n"))
 		break
 	case "text":
-		a.Info(a.Config.Flygo.Banner.Text)
+		fmt.Println(a.Config.Flygo.Banner.Text)
 		break
 	case "file":
 		bytes, err := ioutil.ReadFile(a.Config.Flygo.Banner.File)
@@ -34,8 +35,8 @@ func (a *App) printBanner() {
 			a.Error("%v", err)
 			return
 		}
-		a.Info("%v\n", string(bytes))
+		fmt.Printf("%v\n", string(bytes))
 		break
 	}
-	a.Info("\n")
+	fmt.Println()
 }

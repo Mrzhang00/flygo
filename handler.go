@@ -16,6 +16,8 @@ const (
 	methodHead    = "HEAD"
 )
 
+type handlerRouteCache patternHandlerRoute
+
 //Define pattern handler route struct
 type patternHandlerRoute struct {
 	regex   string
@@ -148,7 +150,7 @@ func (c *Context) matchVariableHandler() ([]*Field, Handler) {
 	if nil != matches && len(matches)-1 == len(vhr.parameters) {
 		for i, p := range matches {
 			pn := vhr.parameters[i]
-			c.Parameters[pn] = []string{p}
+			c.ParamMap[pn] = []string{p}
 		}
 	}
 

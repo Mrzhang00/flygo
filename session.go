@@ -32,45 +32,49 @@ type SessionProvider interface {
 
 //Print SessionProvider
 func (a *App) printSessionProvider() {
-	if app.Config.Flygo.Session.Enable && a.SessionProvider != nil {
-		a.Info(fmt.Sprintf("Use SessionProvider : %T", a.SessionProvider))
+	if app.SessionConfig.Enable && a.SessionConfig.SessionProvider != nil {
+		a.Info(fmt.Sprintf("Use SessionProvider : %T", a.SessionConfig.SessionProvider))
 	}
 }
 
 //Get sessions
 func (a *App) Sessions() map[string]Session {
-	return a.SessionProvider.GetAll()
+	return a.SessionConfig.SessionProvider.GetAll()
 }
 
 //Init CookieSession
 func (c *Context) initSession() {
-	sessionId := app.SessionProvider.GetId(c.Request)
-	have := app.SessionProvider.Exists(sessionId)
+	sessionId := app.SessionConfig.SessionProvider.GetId(c.Request)
+	have := app.SessionConfig.SessionProvider.Exists(sessionId)
 	if have {
-		c.SessionId = app.SessionProvider.GetId(c.Request)
-		c.Session = app.SessionProvider.Get(c.SessionId)
+		c.SessionId = app.SessionConfig.SessionProvider.GetId(c.Request)
+		c.Session = app.SessionConfig.SessionProvider.Get(c.SessionId)
 		//Rrefresh session
-		app.SessionProvider.Refresh(c.Session, app.SessionConfig)
-		//When RefreshedListener is set
-		refreshedListener := app.SessionConfig.RefreshedListener
-		if refreshedListener != nil {
+		app.SessionConfig.SessionProvider.Refresh(c.Session, app.SessionConfig)
+		//When Refreshed is set
+		refreshed := app.SessionConfig.SessionListener.Refreshed
+		if refreshed != nil {
 			go func(session Session) {
 				if session != nil {
-					refreshedListener(c.Session)
+					refreshed(c.Session)
 				}
 			}(c.Session)
 		}
 	} else {
 		//Create new session
-		session := app.SessionProvider.New(app.SessionConfig)
+		session := app.SessionConfig.SessionProvider.New(app.SessionConfig)
 		c.SessionId = session.Id()
 		c.Session = session
-		http.SetCookie(c.ResponseWriter, &http.Cookie{Name: headerSessionId, Value: session.Id()})
-		createdListener := app.SessionConfig.CreatedListener
-		if createdListener != nil {
+		http.SetCookie(c.ResponseWriter, &http.Cookie{
+			Name:  headerSessionId,
+			Value: session.Id(),
+			Path:  "/",
+		})
+		created := app.SessionConfig.SessionListener.Created
+		if created != nil {
 			go func(session Session) {
 				if session != nil {
-					createdListener(session)
+					created(session)
 				}
 			}(c.Session)
 		}

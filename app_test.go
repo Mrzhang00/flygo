@@ -1,20 +1,36 @@
 package flygo
 
 import (
+	"io/ioutil"
+	"net/http"
+	"os"
+	"reflect"
+	"syscall"
 	"testing"
+	"time"
 )
 
-var app2 = NewApp()
+func TestApp(t *testing.T) {
+	var a = NewApp()
+	sig := make(chan os.Signal, 1)
+	go func() {
+		get := func(c *Context) {
+			c.Text("get")
+		}
+		a.Get("/", get).Run()
+	}()
 
-func TestHelloworld(t *testing.T) {
-	app2.BeforeInterceptor("/**", func(c *Context) {
-		c.JSON(struct {
-			Code int    `json:"code"`
-			Msg  string `json:"msg"`
-		}{Code: 1,
-			Msg: "hellowofffrld"})
-	})
-	app2.Get("/", func(c *Context) {
-		c.Text("index")
-	}).Run()
+	go func() {
+		time.AfterFunc(time.Second, func() {
+
+			resp, _ := http.Get("http://localhost")
+			bytes, _ := ioutil.ReadAll(resp.Body)
+			if !reflect.DeepEqual(string(bytes), "get") {
+				t.Fail()
+			}
+
+			sig <- syscall.SIGHUP
+		})
+	}()
+	<-sig
 }

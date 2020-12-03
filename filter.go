@@ -30,7 +30,7 @@ type filterRouteChain struct {
 	route filterRoute
 }
 
-type froute struct {
+type filterRouteCache struct {
 	t string
 	filterRoute
 }
@@ -43,7 +43,7 @@ func (a *App) filter(filterType, pattern string, filterHandler FilterHandler) {
 	if pattern == "" {
 		return
 	}
-	a.froutes = append(a.froutes, froute{
+	a.filterRouteCaches = append(a.filterRouteCaches, filterRouteCache{
 		t: filterType,
 		filterRoute: filterRoute{
 			pattern:       pattern,
@@ -53,7 +53,7 @@ func (a *App) filter(filterType, pattern string, filterHandler FilterHandler) {
 }
 
 func (a *App) startFilter() {
-	for _, froute := range a.froutes {
+	for _, froute := range a.filterRouteCaches {
 		filterType := froute.t
 		pattern := froute.pattern
 		filterHandler := froute.filterHandler
@@ -136,7 +136,7 @@ func (c *Context) invokeFilterHandler(handler FilterHandler) {
 		RequestMethod:    c.RequestMethod,
 		RequestHeader:    c.RequestHeader,
 		ResponseHeader:   c.ResponseHeader,
-		Parameters:       c.Parameters,
+		Parameters:       c.ParamMap,
 		context:          c,
 	})
 }

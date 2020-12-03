@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 type YmlConfig struct {
@@ -18,14 +17,14 @@ func (yc *YmlConfig) Unmarshal(bytes []byte) error {
 }
 
 func (a *App) checkConfig() {
-	a.Config.Flygo.Server.WebRoot = strings.Trim(app.Config.Flygo.Server.WebRoot, string(filepath.Separator))
-	a.Config.Flygo.Server.ContextPath = strings.Trim(app.Config.Flygo.Server.WebRoot, "/")
+	a.Config.Flygo.Server.WebRoot = strings.TrimRight(app.Config.Flygo.Server.WebRoot, string(filepath.Separator))
+	a.Config.Flygo.Server.ContextPath = strings.TrimRight(app.Config.Flygo.Server.ContextPath, "/")
 
 	a.Config.Flygo.Static.Pattern = strings.Trim(app.Config.Flygo.Static.Pattern, "/")
 	a.Config.Flygo.Static.Prefix = strings.Trim(app.Config.Flygo.Static.Prefix, string(filepath.Separator))
 
 	a.Config.Flygo.View.Prefix = strings.Trim(app.Config.Flygo.View.Prefix, string(filepath.Separator))
-	a.Config.Flygo.View.Suffix = strings.TrimSpace(app.Config.Flygo.View.Suffix)
+	a.Config.Flygo.View.Suffix = strings.TrimLeft(app.Config.Flygo.View.Suffix, ".")
 }
 
 type YmlConfigFlygo struct {
@@ -35,7 +34,6 @@ type YmlConfigFlygo struct {
 	Static   YmlConfigStatic
 	View     YmlConfigView
 	Template YmlConfigTemplate
-	Session  YmlConfigSession
 	Validate YmlConfigValidate
 	Log      YmlConfigFlygoLog
 }
@@ -98,35 +96,39 @@ type YmlConfigTemplateDelims struct {
 	Right string `yaml:"right"`
 }
 
-type YmlConfigSession struct {
-	Enable  bool          `yaml:"enable"`
-	Timeout time.Duration `yaml:"timeout"`
-}
-
 type YmlConfigValidate struct {
-	Err YmlConfigValidateErr
+	Code int `yaml:"code"`
 }
 
-type YmlConfigValidateErr struct {
-	Code int `yaml:"code"`
+type YmlConfigFlygoLog struct {
+	Type string `yaml:"type"`
+	File YmlConfigFlygoLogFile
+}
+
+type YmlConfigFlygoLogFile struct {
+	Out string `yaml:"out"`
+	Err string `yaml:"err"`
 }
 
 func (a *App) parseYml() {
 	file := a.ConfigFile
-	if file == "" {
-		return
-	}
-	bytes, err := ioutil.ReadFile(file)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	err = a.Config.Unmarshal(bytes)
-	if err != nil {
-		fmt.Println(err)
-		return
+	if file != "" {
+		bytes, err := ioutil.ReadFile(file)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			err = a.Config.Unmarshal(bytes)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
 	}
 	a.inita()
+}
+
+func (a *App) printConfig() {
+	bytes, _ := yaml.Marshal(a.Config)
+	app.Info("\n%v", string(bytes))
 }
 
 func defaultYmlConfig() *YmlConfig {
@@ -158,6 +160,7 @@ func defaultYmlConfig() *YmlConfig {
 				Prefix:  "static",
 				Cache:   false,
 				Mimes: map[string]string{
+					"js":   "text/javascript;charset=utf-8",
 					"css":  "text/css;charset=utf-8",
 					"json": "application/json;charset=utf-8",
 					"jpg":  "image/jpg",
@@ -179,14 +182,8 @@ func defaultYmlConfig() *YmlConfig {
 					Right: "}}",
 				},
 			},
-			Session: YmlConfigSession{
-				Enable:  false,
-				Timeout: time.Hour,
-			},
 			Validate: YmlConfigValidate{
-				Err: YmlConfigValidateErr{
-					Code: 1,
-				},
+				Code: 1,
 			},
 			Log: YmlConfigFlygoLog{
 				Type: "stdout",
@@ -197,14 +194,4 @@ func defaultYmlConfig() *YmlConfig {
 			},
 		},
 	}
-}
-
-type YmlConfigFlygoLog struct {
-	Type string `yaml:"type"`
-	File YmlConfigFlygoLogFile
-}
-
-type YmlConfigFlygoLogFile struct {
-	Out string `yaml:"out"`
-	Err string `yaml:"err"`
 }
