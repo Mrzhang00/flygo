@@ -10,6 +10,8 @@ import (
 type Session interface {
 	Id() string                                     //Get session Id
 	SetExpiresTime(lifeTime time.Duration)          //Set expires time
+	Invalidate()                                    //Invalidate session
+	IsNew() bool                                    //session is new
 	Get(name string) interface{}                    //Get data
 	GetAll() map[string]interface{}                 //Get all data
 	Set(name string, val interface{})               //Set data

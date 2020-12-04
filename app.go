@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 //Global app
@@ -81,6 +82,7 @@ func defaultApp() *App {
 		TemplateFuncs:           make(map[string]interface{}),
 		SessionConfig: &SessionConfig{
 			SessionListener: &SessionListener{},
+			Timeout:         time.Hour * 24 * 30, //1 month
 		},
 	}
 }
