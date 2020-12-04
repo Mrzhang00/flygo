@@ -9,27 +9,39 @@ A simple and lightweight web framework, pure native and no third dependencies.
 - Pure native
 - No third dependencies
 - Support variables route
-- Support env variables for deploymenting
+- Support env variables
 - Support filter & interceptor
 - Field preset & validation
 - Session supports
 - Session listener supports
 - Go/Template supports
+- Middleware supports
 
-## New
+## Middlewares
 
-- Support [Middleware](#middleware)
+  - [cors](https://github.com/flygotm/cors)
+  
+  - [redisauth](https://github.com/flygotm/redisauth)
+  
+  - [redistoken](https://github.com/flygotm/redistoken)
+  
+  - [uploadfile](https://github.com/flygotm/uploadfile)
+  
+  - [downfile](https://github.com/flygotm/downfile)
+  
+  - [captcha](https://github.com/flygotm/captcha)
+  
+  - [gzip](https://github.com/flygotm/gzip)
+  
+  - ......
 
-  - logger : Built in Logger
-  - [cors](https://github.com/flygotm/cors) : A Cors middleware for flygo
-  - [redisauth](https://github.com/flygotm/redisauth) : A simple authentication with redis middleware for flygo
-  - [redistoken](https://github.com/flygotm/redistoken) : A simple authorization with redis middleware for flygo
-  - [uploadfile](https://github.com/flygotm/uploadfile) : A upload file middleware for flygo
-  - [downfile](https://github.com/flygotm/downfile) : A download file middleware for flygo
-
-- Session Provider
-  - [cookiprovider](https://github.com/flygotm/cookieprovider) : A default provider for flygo
-  - [redisprovider](https://github.com/flygotm/redisprovider) : A session provider using redis for flygo
+## Extensions
+      
+  - [cookiprovider](https://github.com/flygotm/cookieprovider)
+  
+  - [redisprovider](https://github.com/flygotm/redisprovider)
+  
+  - ......
 
 ## Install
 
@@ -90,12 +102,12 @@ flygo:
     favicon:
       enable: false
     mimes:
-      - css: text/css;charset=utf-8
-      - json: application/json;charset=utf-8
-      - jpg: image/jpg
-      - png: image/png
-      - gif: image/gif
-      - ico: image/x-icon
+      css: text/css;charset=utf-8
+      json: application/json;charset=utf-8
+      jpg: image/jpg
+      png: image/png
+      gif: image/gif
+      ico: image/x-icon
   view:
     enable: false
     prefix: templates
@@ -106,11 +118,8 @@ flygo:
     delims:
       left: '{{'
       right: '}}'
-  session:
-    enable: false
   validate:
-    err:
-      code: 1
+    code: 1
   log:
     type: stdout
     file:
@@ -122,20 +131,22 @@ flygo:
 
 ```
 flggoConfig = "FLYGO_CONFIG" //env config file
-flygoHost   = "FLYGO_HOST"   //env host
-flygoPort   = "FLYGO_PORT"   //env port
 
-flygoContextPath = "FLYGO_CONTEXT_PATH" //env contextPath
-flygoWebRoot     = "FLYGO_WEB_ROOT"     //env webRoot
+flygoDevDebug = "FLYGO_DEV_DEBUG" //env dev debug
+
+flygoServerHost        = "FLYGO_SERVER_HOST"         //env server host
+flygoServerPort        = "FLYGO_SERVER_PORT"         //env server port
+flygoServerContextPath = "FLYGO_SERVER_CONTEXT_PATH" //env server contextPath
+flygoServerWebRoot     = "FLYGO_SERVER_WEB_ROOT"     //env server webRoot
 
 flygoBannerEnable = "FLYGO_BANNER_ENABLE" //env banner enable
 flygoBannerType   = "FLYGO_BANNER_TYPE"   //env banner type
 flygoBannerText   = "FLYGO_BANNER_TEXT"   //env banner text
 flygoBannerFile   = "FLYGO_BANNER_ENABLE" //env banner file
 
-flygoTlsEnable   = "FLYGO_TLS_ENABLE"    //env tls enable
-flygoTlsCertFile = "FLYGO_TLS_CERT_FILE" //env tls cert file
-flygoTlsKeyFile  = "FLYGO_TLS_KEY_FILE"  //env tls key file
+flygoServerTlsEnable   = "FLYGO_SERVER_TLS_ENABLE"    //env server tls enable
+flygoServerTlsCertFile = "FLYGO_SERVER_TLS_CERT_FILE" //env server tls cert file
+flygoServerTlsKeyFile  = "FLYGO_SERVER_TLS_KEY_FILE"  //env server tls key file
 
 flygoStaticEnable  = "FLYGO_STATIC_ENABLE"  //env static enable
 flygoStaticPattern = "FLYGO_STATIC_PATTERN" //env static pattern
@@ -149,9 +160,9 @@ flygoViewPrefix = "FLYGO_VIEW_PREFIX" //env view prefix
 flygoViewSuffix = "FLYGO_VIEW_SUFFIX" //env view suffix
 flygoViewCache  = "FLYGO_VIEW_CACHE"  //env view cache
 
-flygoTemplateEnable     = "FLYGO_TEMPLATE_ENABLE"      //env template
-flygoTemplateDelimLeft  = "FLYGO_TEMPLATE_DELIM_LEFT"  //env template delim left
-flygoTemplateDelimRight = "FLYGO_TEMPLATE_DELIM_RIGHT" //env template delim right
+flygoTemplateEnable      = "FLYGO_TEMPLATE_ENABLE"       //env template
+flygoTemplateDelimsLeft  = "FLYGO_TEMPLATE_DELIMS_LEFT"  //env template delims left
+flygoTemplateDelimsRight = "FLYGO_TEMPLATE_DELIMS_RIGHT" //env template delims right
 
 flygoSessionEnable  = "FLYGO_SESSION_ENABLE"  //env session enable
 flygoSessionTimeout = "FLYGO_SESSION_TIMEOUT" //env session timeout
@@ -349,32 +360,6 @@ field.Enums(VALUE...)
 
 ```
 field.Regex(PATTERN)
-```
-
-## Global Cache
-
-- Set data
-
-```
-app.SetCache(KEY,DATA)
-```
-
-- Get data
-
-```
-app.GetCache(KEY)
-```
-
-- Remove data
-
-```
-app.RemoveCache(KEY)
-```
-
-- Clear caches
-
-```
-app.ClearCaches()
 ```
 
 ## Multipart Support

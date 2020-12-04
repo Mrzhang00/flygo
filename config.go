@@ -160,13 +160,20 @@ func defaultYmlConfig() *YmlConfig {
 				Prefix:  "static",
 				Cache:   false,
 				Mimes: map[string]string{
+					"txt":  "text/plain;charset=utf-8",
+					"html": "text/html;charset=utf-8",
 					"js":   "text/javascript;charset=utf-8",
-					"css":  "text/css;charset=utf-8",
+					"css":  "text/css; charset=utf-8",
 					"json": "application/json;charset=utf-8",
+					"xml":  "text/xml;charset=utf-8",
+					"bmp":  "image/bmp",
 					"jpg":  "image/jpg",
 					"png":  "image/png",
 					"gif":  "image/gif",
 					"ico":  "image/x-icon",
+				},
+				Favicon: YmlConfigStaticFavicon{
+					Enable: false,
 				},
 			},
 			View: YmlConfigView{

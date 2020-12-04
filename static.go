@@ -6,16 +6,19 @@ import (
 )
 
 const (
-	contentTypeText  = "text/plain;charset=utf-8"
-	contentTypeHtml  = "text/html;charset=utf-8"
-	contentTypeJS    = "text/javascript;charset=utf-8"
-	contentTypeCSS   = "text/css;charset=utf-8"
-	contentTypeJson  = "application/json;charset=utf-8"
-	contentTypeImage = "image/jpg"
-	contentTypePng   = "image/png"
-	contentTypeJpg   = "image/jpg"
-	contentTypeGif   = "image/gif"
-	contentTypeIco   = "image/x-icon"
+	contentTypeText   = "text/plain;charset=utf-8"
+	contentTypeHtml   = "text/html;charset=utf-8"
+	contentTypeJS     = "text/javascript;charset=utf-8"
+	contentTypeCSS    = "text/css;charset=utf-8"
+	contentTypeJson   = "application/json;charset=utf-8"
+	contentTypeXml    = "text/xml;charset=utf-8"
+	contentTypeImage  = "image/jpg"
+	contentTypePng    = "image/png"
+	contentTypeBmp    = "image/bmp"
+	contentTypeJpg    = "image/jpg"
+	contentTypeGif    = "image/gif"
+	contentTypeIco    = "image/x-icon"
+	contentTypeBinary = "application/octet-stream"
 )
 
 //Define static handler
