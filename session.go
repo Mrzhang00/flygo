@@ -9,9 +9,9 @@ import (
 //Define Session interface
 type Session interface {
 	Id() string                                     //Get session Id
-	SetExpiresTime(lifeTime time.Duration)          //Set expires time
+	Renew(lifeTime time.Duration)                   //Renew session
 	Invalidate()                                    //Invalidate session
-	IsNew() bool                                    //session is new
+	Invalidated() bool                              //Invalidated?
 	Get(name string) interface{}                    //Get data
 	GetAll() map[string]interface{}                 //Get all data
 	Set(name string, val interface{})               //Set data
