@@ -9,7 +9,7 @@ func (c *Context) Param(name string) string {
 	return c.ParamWith(name, "")
 }
 
-//Get request parameters
+//Get request params
 func (c *Context) Params(name string) []string {
 	return c.ParamsWith(name, nil)
 }
@@ -27,7 +27,7 @@ func (c *Context) ParamWith(name, defaultValue string) string {
 	return defaultValue
 }
 
-//Get request parameters with default
+//Get request params with default
 func (c *Context) ParamsWith(name string, defaultValue []string) []string {
 	vals := c.ParamMap[name]
 	if vals != nil {
