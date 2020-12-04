@@ -34,6 +34,11 @@ func (c *Context) JSON(data interface{}) {
 	c.Render(jsonData, contentTypeJson)
 }
 
+//Response json text to client
+func (c *Context) JSONText(json string) {
+	c.Render([]byte(json), contentTypeJson)
+}
+
 //Response json file to client
 func (c *Context) JSONFile(jsonFile string) {
 	bytes, err := readRealPath(jsonFile)
@@ -52,6 +57,11 @@ func (c *Context) XML(data interface{}) {
 		return
 	}
 	c.Render(xmlData, contentTypeXml)
+}
+
+//Response xml text to client
+func (c *Context) XMLText(xml string) {
+	c.Render([]byte(xml), contentTypeXml)
 }
 
 //Response xml file to client
@@ -150,8 +160,8 @@ func (c *Context) GIFFile(gifFile string) {
 }
 
 //Response html to client
-func (c *Context) HTML(buffer []byte) {
-	c.Render(buffer, contentTypeHtml)
+func (c *Context) HTML(html string) {
+	c.Render([]byte(html), contentTypeHtml)
 }
 
 //Response html file to client
@@ -161,12 +171,12 @@ func (c *Context) HTMLFile(htmlFile string) {
 		app.Error("%v", err)
 		return
 	}
-	c.HTML(bytes)
+	c.Render(bytes, contentTypeHtml)
 }
 
 //Response css to client
-func (c *Context) CSS(buffer []byte) {
-	c.Render(buffer, contentTypeCSS)
+func (c *Context) CSS(css string) {
+	c.Render([]byte(css), contentTypeCSS)
 }
 
 //Response css file to client
@@ -176,12 +186,12 @@ func (c *Context) CSSFile(cssFile string) {
 		app.Error("%v", err)
 		return
 	}
-	c.CSS(bytes)
+	c.Render(bytes, contentTypeCSS)
 }
 
 //Response js to client
-func (c *Context) JS(buffer []byte) {
-	c.Render(buffer, contentTypeJS)
+func (c *Context) JS(js string) {
+	c.Render([]byte(js), contentTypeJS)
 }
 
 //Response js file to client
@@ -191,7 +201,7 @@ func (c *Context) JSFile(jsFile string) {
 		app.Error("%v", err)
 		return
 	}
-	c.JS(bytes)
+	c.Render(bytes, contentTypeJS)
 }
 
 //Response file to client
