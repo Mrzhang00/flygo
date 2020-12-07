@@ -1,7 +1,6 @@
 package flygo
 
 import (
-	"regexp"
 	"strings"
 )
 
@@ -29,12 +28,12 @@ type patternHandlerRoute struct {
 
 //Define variable route struct
 type variableHandlerRoute struct {
-	regex      string
-	pattern    string
-	method     string
-	handler    *Handler
-	parameters []string
-	fields     []*Field
+	regex   string
+	pattern string
+	method  string
+	handler *Handler
+	params  []string
+	fields  []*Field
 }
 
 //Define handler
@@ -107,7 +106,7 @@ func (c *Context) matchVariableHandler() ([]*Field, Handler) {
 	var vhrs []variableHandlerRoute
 	for regex, routes := range c.app.variableRoutes {
 		for _, route := range routes {
-			if c.matchPath(regex) {
+			if route.pattern == c.ParsedRequestURI || c.matchPath(regex) {
 				vhrs = append(vhrs, route)
 			}
 		}
@@ -145,11 +144,11 @@ func (c *Context) matchVariableHandler() ([]*Field, Handler) {
 		return nil, c.app.PreflightedHandler
 	}
 
-	//Setting parameters
+	//Setting params
 	matches := c.contextMatches(vhr.regex)
-	if nil != matches && len(matches)-1 == len(vhr.parameters) {
+	if nil != matches && len(matches)-1 == len(vhr.params) {
 		for i, p := range matches {
-			pn := vhr.parameters[i]
+			pn := vhr.params[i]
 			c.ParamMap[pn] = []string{p}
 		}
 	}
@@ -180,16 +179,4 @@ func (c *Context) invokeHandler() {
 	}
 
 	handler(c)
-}
-
-//trim quotas
-func trim(pattern string) string {
-	//trim quotas
-	reg := regexp.MustCompile(`[^/*{}a-zA-Z0-9]`)
-	pattern = reg.ReplaceAllString(pattern, "")
-	//trim double `*`
-	for strings.Contains(pattern, "**") {
-		pattern = strings.ReplaceAll(pattern, "**", "*")
-	}
-	return pattern
 }

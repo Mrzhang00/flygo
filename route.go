@@ -75,20 +75,20 @@ func (a *App) startRoute() *App {
 			if matches == nil || len(matches) <= 0 {
 				return a
 			}
-			parameters := make([]string, 0)
+			params := make([]string, 0)
 			for _, mat := range matches {
 				p := strings.TrimRight(strings.TrimLeft(mat, "{"), "}")
-				parameters = append(parameters, p)
+				params = append(params, p)
 			}
 			regex := reg.ReplaceAllString(pattern, "([a-zA-Z0-9]+)")
 			regex = "^" + contextPath + regex + "$"
 			vhr := variableHandlerRoute{
-				regex:      regex,
-				pattern:    pattern,
-				method:     method,
-				parameters: parameters,
-				handler:    handler,
-				fields:     fields,
+				regex:   regex,
+				pattern: pattern,
+				method:  method,
+				params:  params,
+				handler: handler,
+				fields:  fields,
 			}
 			routes, have := a.variableRoutes[regex]
 			if have {
