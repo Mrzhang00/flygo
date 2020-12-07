@@ -11,7 +11,7 @@ import (
 )
 
 func TestApp(t *testing.T) {
-	var a = NewApp()
+	var a = GetApp()
 	sig := make(chan os.Signal, 1)
 	go func() {
 		get := func(c *Context) {

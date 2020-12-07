@@ -36,15 +36,17 @@ type Field struct {
 
 //Define validateErr struct
 type validateErr struct {
-	Code int    `json:"code"`
-	Msg  string `json:"msg"`
+	Code   int    `json:"code"`
+	Msg    string `json:"msg"`
+	logger *log
 }
 
 //new validateErr
-func newValidateErr(msg string) *validateErr {
+func newValidateErr(code int, msg string, logger *log) *validateErr {
 	return &validateErr{
-		Code: app.Config.Flygo.Validate.Code,
-		Msg:  msg,
+		Code:   code,
+		Msg:    msg,
+		logger: logger,
 	}
 }
 
@@ -52,7 +54,7 @@ func newValidateErr(msg string) *validateErr {
 func (validateErr *validateErr) json() string {
 	bytes, err := json.Marshal(validateErr)
 	if err != nil {
-		app.Error("json err : %v", err)
+		validateErr.logger.Error("json err : %v", err)
 		return ""
 	}
 	return string(bytes)
@@ -81,14 +83,14 @@ func NewField(name string) *Field {
 }
 
 //preset and validate
-func presetAndValidate(fields []*Field, c *Context) error {
+func (c *Context) presetAndValidate(fields []*Field) error {
 	if fields == nil || len(fields) <= 0 {
 		return nil
 	}
 	var err error
 	for _, field := range fields {
-		presetField(field, c)
-		err = validateField(field, c)
+		c.presetField(field)
+		err = c.validateField(field)
 		if err != nil {
 			break
 		}
@@ -97,7 +99,7 @@ func presetAndValidate(fields []*Field, c *Context) error {
 }
 
 //preset field
-func presetField(field *Field, c *Context) {
+func (c *Context) presetField(field *Field) {
 	if !field.preset || field.name == "" {
 		return
 	}
@@ -122,21 +124,27 @@ func presetField(field *Field, c *Context) {
 }
 
 //validate field
-func validateField(field *Field, c *Context) error {
+func (c *Context) validateField(field *Field) error {
+	code := c.app.Config.Flygo.Validate.Code
+	logger := c.app.Logger
 	if !field.validate || field.name == "" {
 		return nil
 	}
 
+	errFn := func(msg string) error {
+		return errors.New(newValidateErr(code, msg, logger).json())
+	}
+
 	vals := c.ParamMap[field.name]
 	if vals == nil {
-		return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[null] fail", field.name)).json())
+		return errFn(fmt.Sprintf("field[%v] validated[null] fail", field.name))
 	}
 
 	if field.min > 0 {
 		for _, v := range vals {
 			val, err := strconv.Atoi(v)
 			if err != nil || val < field.min {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.min")).json())
+				return errFn(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.min"))
 			}
 		}
 	}
@@ -145,7 +153,7 @@ func validateField(field *Field, c *Context) error {
 		for _, v := range vals {
 			val, err := strconv.Atoi(v)
 			if err != nil || val > field.max {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.max")).json())
+				return errFn(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.max"))
 			}
 		}
 	}
@@ -153,7 +161,7 @@ func validateField(field *Field, c *Context) error {
 	if field.length > 0 {
 		for _, v := range vals {
 			if len(v) != field.length {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.length")).json())
+				return errFn(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.length"))
 			}
 		}
 	}
@@ -161,7 +169,7 @@ func validateField(field *Field, c *Context) error {
 	if field.fixed != "" {
 		for _, v := range vals {
 			if v != field.fixed {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.fixed")).json())
+				return errFn(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.fixed"))
 			}
 		}
 	}
@@ -169,7 +177,7 @@ func validateField(field *Field, c *Context) error {
 	if field.minLength > 0 {
 		for _, v := range vals {
 			if len(v) < field.minLength {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.minLength")).json())
+				return errFn(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.minLength"))
 			}
 		}
 	}
@@ -177,7 +185,7 @@ func validateField(field *Field, c *Context) error {
 	if field.maxLength > 0 {
 		for _, v := range vals {
 			if len(v) > field.maxLength {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.maxLength")).json())
+				return errFn(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.maxLength"))
 			}
 		}
 	}
@@ -186,7 +194,7 @@ func validateField(field *Field, c *Context) error {
 		es := fmt.Sprintf("|%s|", strings.Join(field.enums, "|"))
 		for _, v := range vals {
 			if !strings.Contains(es, fmt.Sprintf("|%s|", v)) {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.enums")).json())
+				return errFn(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.enums"))
 			}
 		}
 	}
@@ -195,7 +203,7 @@ func validateField(field *Field, c *Context) error {
 		re := regexp.MustCompile(field.regex)
 		for _, v := range vals {
 			if !re.MatchString(v) {
-				return errors.New(newValidateErr(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.regex")).json())
+				return errFn(fmt.Sprintf("field[%v] validated[%v] fail", field.name, "field.regex"))
 			}
 		}
 	}

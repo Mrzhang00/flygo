@@ -21,6 +21,6 @@ func (log *logger) Pattern() string {
 func (log *logger) Process() FilterHandler {
 	return func(c *FilterContext) {
 		//logger
-		app.Info("[%s]%s", c.RequestMethod, c.RequestURI)
+		c.App().Logger.Info("[%s]%s", c.RequestMethod, c.RequestURI)
 	}
 }

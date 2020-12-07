@@ -161,13 +161,13 @@ func (a *App) UseInterceptorWithConfig(imwConfig InterceptorMiddlewareConfig, in
 //Print middlewares
 func (a *App) printMiddleware() {
 	for name := range a.middlewares {
-		a.Info("Middleware detected [%s]", name)
+		a.Logger.Info("Middleware detected [%s]", name)
 	}
 	for name := range a.filterMiddlewares {
-		a.Info("FilterMiddleware detected [%s]", name)
+		a.Logger.Info("FilterMiddleware detected [%s]", name)
 	}
 	for name := range a.interceptorMiddlewares {
-		a.Info("InterceptorMiddleware detected [%s]", name)
+		a.Logger.Info("InterceptorMiddleware detected [%s]", name)
 	}
 }
 

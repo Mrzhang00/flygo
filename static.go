@@ -27,9 +27,9 @@ type StaticHandler func(c *Context, contentType, resourcePath string)
 //Match favicon.ico
 func (c *Context) matchFaviconStatic() (string, string) {
 	//favicon.ico
-	webRoot := app.Config.Flygo.Server.WebRoot
-	contextPath := app.Config.Flygo.Server.ContextPath
-	staticPrefix := app.Config.Flygo.Static.Prefix
+	webRoot := c.app.Config.Flygo.Server.WebRoot
+	contextPath := c.app.Config.Flygo.Server.ContextPath
+	staticPrefix := c.app.Config.Flygo.Static.Prefix
 	path := "/" + strings.Trim(c.ParsedRequestURI, "/")
 	name := contextPath + "/favicon.ico"
 	realPath := ""
@@ -43,10 +43,10 @@ func (c *Context) matchFaviconStatic() (string, string) {
 
 //Match static res
 func (c *Context) matchStatic() (string, string) {
-	webRoot := app.Config.Flygo.Server.WebRoot
-	contextPath := app.Config.Flygo.Server.ContextPath
-	staticPattern := app.Config.Flygo.Static.Pattern
-	staticPrefix := app.Config.Flygo.Static.Prefix
+	webRoot := c.app.Config.Flygo.Server.WebRoot
+	contextPath := c.app.Config.Flygo.Server.ContextPath
+	staticPattern := c.app.Config.Flygo.Static.Pattern
+	staticPrefix := c.app.Config.Flygo.Static.Prefix
 	regex := "^" + strings.Join([]string{contextPath, staticPattern}, "/") + "/.+$"
 	if !c.matchPath(regex) {
 		return "", ""
@@ -58,9 +58,9 @@ func (c *Context) matchStatic() (string, string) {
 	var realPath string
 	realPath = filepath.Join(webRoot, staticPrefix, subName)
 	suffix := subName[strings.LastIndexByte(subName, '.')+1:]
-	contentType = app.Config.Flygo.Static.Mimes[suffix]
+	contentType = c.app.Config.Flygo.Static.Mimes[suffix]
 	if contentType == "" {
-		app.Warn("static[%v] was not registered", suffix)
+		c.app.Logger.Warn("static[%v] was not registered", suffix)
 		return "", ""
 	}
 	return contentType, realPath
@@ -68,19 +68,19 @@ func (c *Context) matchStatic() (string, string) {
 
 //Invoke static
 func (c *Context) invokeStatic() bool {
-	if !app.Config.Flygo.Static.Enable {
+	if !c.app.Config.Flygo.Static.Enable {
 		return false
 	}
-	if app.Config.Flygo.Static.Favicon.Enable {
+	if c.app.Config.Flygo.Static.Favicon.Enable {
 		contentType, staticPath := c.matchFaviconStatic()
 		if staticPath != "" {
-			app.FaviconIconHandler(c, contentType, staticPath)
+			c.app.FaviconIconHandler(c, contentType, staticPath)
 			return true
 		}
 	}
 	contentType, staticPath := c.matchStatic()
 	if staticPath != "" {
-		app.StaticHandler(c, contentType, staticPath)
+		c.app.StaticHandler(c, contentType, staticPath)
 		return true
 	}
 	return false

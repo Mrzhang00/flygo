@@ -8,6 +8,7 @@ import (
 
 //Define Context struct
 type Context struct {
+	app              *App                //bundle app
 	Request          *http.Request       //request
 	RequestURI       string              //request uri
 	ParsedRequestURI string              //parsed request uri
@@ -26,6 +27,11 @@ type Context struct {
 	funcMap          template.FuncMap    //Template funcMap
 }
 
+//Return bundle app
+func (c *Context) App() *App {
+	return c.app
+}
+
 //Set content type
 func (c *Context) SetHeader(name, value string) *Context {
 	c.ResponseWriter.Header().Set(name, value)
@@ -40,7 +46,7 @@ func (c *Context) AddHeader(name, value string) *Context {
 
 //Set view funcMap
 func (c *Context) SetViewFuncMap(funcMap template.FuncMap) *Context {
-	if app.Config.Flygo.Template.Enable {
+	if c.app.Config.Flygo.Template.Enable {
 		c.funcMap = funcMap
 	}
 	return c
@@ -54,7 +60,7 @@ func (c *Context) AddViewFuncMap(name string, fn interface{}) *Context {
 	if reflect.TypeOf(fn).Kind() != reflect.Func {
 		return c
 	}
-	if app.Config.Flygo.Template.Enable {
+	if c.app.Config.Flygo.Template.Enable {
 		c.funcMap[name] = fn
 	}
 	return c
@@ -67,46 +73,46 @@ func (c *Context) View(name string) {
 
 //Response view to client with data
 func (c *Context) ViewWithData(name string, data map[string]interface{}) {
-	if !app.Config.Flygo.View.Enable {
+	if !c.app.Config.Flygo.View.Enable {
 		return
 	}
-	viewData, err := parseView(name)
+	viewData, err := c.parseView(name)
 	if err != nil {
-		app.Error(err.Error())
+		c.app.Logger.Error(err.Error())
 		return
 	}
 
-	if app.Config.Flygo.Template.Enable {
+	if c.app.Config.Flygo.Template.Enable {
 		tt := template.New("template")
-		if app.TemplateFuncs != nil {
-			for k, fc := range app.TemplateFuncs {
+		if c.app.TemplateFuncs != nil {
+			for k, fc := range c.app.TemplateFuncs {
 				c.funcMap[k] = fc
 			}
 		}
 		if len(c.funcMap) > 0 {
 			tt.Funcs(c.funcMap)
 		}
-		left := app.Config.Flygo.Template.Delims.Left
-		right := app.Config.Flygo.Template.Delims.Right
+		left := c.app.Config.Flygo.Template.Delims.Left
+		right := c.app.Config.Flygo.Template.Delims.Right
 		if left != "" && right != "" {
 			tt.Delims(left, right)
 		}
 		templ := template.Must(tt.Parse(viewData))
 		if err != nil {
-			app.Error(err.Error())
+			c.app.Logger.Error(err.Error())
 			return
 		}
 		if data == nil {
 			data = make(map[string]interface{})
 		}
-		if app.SessionConfig.Enable && app.SessionConfig.SessionProvider != nil {
+		if c.app.SessionConfig.Enable && c.app.SessionConfig.SessionProvider != nil {
 			data["session"] = c.Session.GetAll()
 		}
-		data["application"] = app.Caches
+		data["application"] = c.app.Caches
 		c.setDefaultHeaders()
 		err = templ.Execute(c.ResponseWriter, data)
 		if err != nil {
-			app.Error(err.Error())
+			c.app.Logger.Error(err.Error())
 			return
 		}
 	} else {

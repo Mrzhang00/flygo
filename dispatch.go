@@ -9,12 +9,15 @@ import (
 //Define dispatcher struct
 type dispatcher struct {
 	mutex sync.Mutex
+	app   *App
 	c     *Context
 }
 
-func newDispatcher() *dispatcher {
+//New dispatcher
+func (a *App) newDispatcher() *dispatcher {
 	var mutex sync.Mutex
 	return &dispatcher{
+		app:   a,
 		mutex: mutex,
 	}
 }
@@ -22,6 +25,7 @@ func newDispatcher() *dispatcher {
 //Create app c
 func (d *dispatcher) initContext(writer http.ResponseWriter, request *http.Request) {
 	d.c = &Context{
+		app:              d.app,
 		Request:          request,
 		RequestURI:       request.RequestURI,
 		ParsedRequestURI: request.RequestURI,
@@ -33,11 +37,11 @@ func (d *dispatcher) initContext(writer http.ResponseWriter, request *http.Reque
 		Response: &Response{
 			contentType: contentTypeText,
 		},
-		middlewareMap: app.initMiddlewareCtx(),
+		middlewareMap: d.app.initMiddlewareCtx(),
 		funcMap:       make(map[string]interface{}),
 	}
 
-	if app.SessionConfig.Enable && app.SessionConfig.SessionProvider != nil {
+	if d.app.SessionConfig.Enable && d.app.SessionConfig.SessionProvider != nil {
 		d.c.initSession()
 	}
 

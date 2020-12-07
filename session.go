@@ -34,8 +34,8 @@ type SessionProvider interface {
 
 //Print SessionProvider
 func (a *App) printSessionProvider() {
-	if app.SessionConfig.Enable && a.SessionConfig.SessionProvider != nil {
-		a.Info(fmt.Sprintf("Use SessionProvider : %T", a.SessionConfig.SessionProvider))
+	if a.SessionConfig.Enable && a.SessionConfig.SessionProvider != nil {
+		a.Logger.Info(fmt.Sprintf("Use SessionProvider : %T", a.SessionConfig.SessionProvider))
 	}
 }
 
@@ -46,15 +46,15 @@ func (a *App) Sessions() map[string]Session {
 
 //Init CookieSession
 func (c *Context) initSession() {
-	sessionId := app.SessionConfig.SessionProvider.GetId(c.Request)
-	have := app.SessionConfig.SessionProvider.Exists(sessionId)
+	sessionId := c.app.SessionConfig.SessionProvider.GetId(c.Request)
+	have := c.app.SessionConfig.SessionProvider.Exists(sessionId)
 	if have {
-		c.SessionId = app.SessionConfig.SessionProvider.GetId(c.Request)
-		c.Session = app.SessionConfig.SessionProvider.Get(c.SessionId)
+		c.SessionId = c.app.SessionConfig.SessionProvider.GetId(c.Request)
+		c.Session = c.app.SessionConfig.SessionProvider.Get(c.SessionId)
 		//Rrefresh session
-		app.SessionConfig.SessionProvider.Refresh(c.Session, app.SessionConfig)
+		c.app.SessionConfig.SessionProvider.Refresh(c.Session, c.app.SessionConfig)
 		//When Refreshed is set
-		refreshed := app.SessionConfig.SessionListener.Refreshed
+		refreshed := c.app.SessionConfig.SessionListener.Refreshed
 		if refreshed != nil {
 			go func(session Session) {
 				if session != nil {
@@ -64,7 +64,7 @@ func (c *Context) initSession() {
 		}
 	} else {
 		//Create new session
-		session := app.SessionConfig.SessionProvider.New(app.SessionConfig)
+		session := c.app.SessionConfig.SessionProvider.New(c.app.SessionConfig)
 		c.SessionId = session.Id()
 		c.Session = session
 		http.SetCookie(c.ResponseWriter, &http.Cookie{
@@ -72,7 +72,7 @@ func (c *Context) initSession() {
 			Value: session.Id(),
 			Path:  "/",
 		})
-		created := app.SessionConfig.SessionListener.Created
+		created := c.app.SessionConfig.SessionListener.Created
 		if created != nil {
 			go func(session Session) {
 				if session != nil {

@@ -45,7 +45,7 @@ func (a *App) startInterceptor() {
 		pattern := iroute.pattern
 		interceptorType := iroute.t
 		interceptorHandler := iroute.interceptorHandler
-		contexPath := app.Config.Flygo.Server.ContextPath
+		contexPath := a.Config.Flygo.Server.ContextPath
 		regex := fmt.Sprintf(`^%s%s$`, contexPath, strings.ReplaceAll(trim(pattern), "*", "[/a-zA-Z0-9]+"))
 		route := interceptorRoute{
 			pattern:            pattern,
@@ -75,10 +75,10 @@ func (c *Context) matchInterceptor(interceptorType string) []InterceptorHandler 
 	var interceptorChains map[string]interceptorRouteChain
 	switch interceptorType {
 	case "before":
-		interceptorChains = app.beforeInterceptors
+		interceptorChains = c.app.beforeInterceptors
 		break
 	case "after":
-		interceptorChains = app.afterInterceptors
+		interceptorChains = c.app.afterInterceptors
 		break
 	}
 	if interceptorChains == nil {
@@ -136,9 +136,9 @@ func (a *App) AfterInterceptor(pattern string, interceptorHandler InterceptorHan
 //Print interceptor
 func (a *App) printInterceptor() {
 	for _, chain := range a.beforeInterceptors {
-		a.Info("Before interceptor route [%s]", chain.route.pattern)
+		a.Logger.Info("Before interceptor route [%s]", chain.route.pattern)
 	}
 	for _, chain := range a.afterInterceptors {
-		a.Info("After interceptor route [%s]", chain.route.pattern)
+		a.Logger.Info("After interceptor route [%s]", chain.route.pattern)
 	}
 }

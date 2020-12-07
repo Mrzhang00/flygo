@@ -17,14 +17,14 @@ func (yc *YmlConfig) Unmarshal(bytes []byte) error {
 }
 
 func (a *App) checkConfig() {
-	a.Config.Flygo.Server.WebRoot = strings.TrimRight(app.Config.Flygo.Server.WebRoot, string(filepath.Separator))
-	a.Config.Flygo.Server.ContextPath = strings.TrimRight(app.Config.Flygo.Server.ContextPath, "/")
+	a.Config.Flygo.Server.WebRoot = strings.TrimRight(a.Config.Flygo.Server.WebRoot, string(filepath.Separator))
+	a.Config.Flygo.Server.ContextPath = strings.TrimRight(a.Config.Flygo.Server.ContextPath, "/")
 
-	a.Config.Flygo.Static.Pattern = strings.Trim(app.Config.Flygo.Static.Pattern, "/")
-	a.Config.Flygo.Static.Prefix = strings.Trim(app.Config.Flygo.Static.Prefix, string(filepath.Separator))
+	a.Config.Flygo.Static.Pattern = strings.Trim(a.Config.Flygo.Static.Pattern, "/")
+	a.Config.Flygo.Static.Prefix = strings.Trim(a.Config.Flygo.Static.Prefix, string(filepath.Separator))
 
-	a.Config.Flygo.View.Prefix = strings.Trim(app.Config.Flygo.View.Prefix, string(filepath.Separator))
-	a.Config.Flygo.View.Suffix = strings.TrimLeft(app.Config.Flygo.View.Suffix, ".")
+	a.Config.Flygo.View.Prefix = strings.Trim(a.Config.Flygo.View.Prefix, string(filepath.Separator))
+	a.Config.Flygo.View.Suffix = strings.TrimLeft(a.Config.Flygo.View.Suffix, ".")
 }
 
 type YmlConfigFlygo struct {
@@ -114,9 +114,12 @@ func (a *App) parseYml() {
 	file := a.ConfigFile
 	if file != "" {
 		bytes, err := ioutil.ReadFile(file)
-		if err != nil {
-			fmt.Println(err)
-		} else {
+		a.DebugTrace(func() {
+			if err != nil {
+				a.Logger.Warn("[parseYml]%v", err)
+			}
+		})
+		if err == nil {
 			err = a.Config.Unmarshal(bytes)
 			if err != nil {
 				fmt.Println(err)
@@ -128,7 +131,7 @@ func (a *App) parseYml() {
 
 func (a *App) printConfig() {
 	bytes, _ := yaml.Marshal(a.Config)
-	app.Info("\n%v", string(bytes))
+	a.Logger.Info("\n%v", string(bytes))
 }
 
 func defaultYmlConfig() *YmlConfig {

@@ -8,6 +8,7 @@ import (
 
 //Define MultipartFile struct
 type MultipartFile struct {
+	logger      *log                  //bundle logger
 	filename    string                //original file name
 	contentType string                //mime type
 	size        int64                 //file length in byte
@@ -23,18 +24,18 @@ func (file *MultipartFile) Copy(distName string) error {
 	f, err = file.fileHeader.Open()
 	defer f.Close()
 	if err != nil {
-		app.Error("%v", err)
+		file.logger.Error("%v", err)
 		return err
 	}
 	dist, err = os.Create(distName)
 	defer dist.Close()
 	if err != nil {
-		app.Error("%v", err)
+		file.logger.Error("%v", err)
 		return err
 	}
 	_, err = io.Copy(dist, f)
 	if err != nil {
-		app.Error("%v", err)
+		file.logger.Error("%v", err)
 		return err
 	}
 	return nil
@@ -84,6 +85,7 @@ func (c *Context) ParseMultipart(maxMemory int64) error {
 		mfs := make([]*MultipartFile, 0)
 		for _, fileHeader := range header {
 			mf := &MultipartFile{
+				logger:      c.app.Logger,
 				filename:    fileHeader.Filename,
 				contentType: fileHeader.Header.Get(headerContentType),
 				size:        fileHeader.Size,
@@ -112,7 +114,7 @@ func (c *Context) MultipartFile(name string) *MultipartFile {
 //Get request parameter
 func (c *Context) MultipartFiles(name string) []*MultipartFile {
 	if !c.MultipartParsed {
-		app.Warn("Multipart is not parsed")
+		c.app.Logger.Warn("Multipart is not parsed")
 		return nil
 	}
 	return c.Multipart[name]

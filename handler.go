@@ -59,7 +59,7 @@ func (c *Context) matchHandler() ([]*Field, Handler) {
 //match pattern handler
 func (c *Context) matchPatternHandler() ([]*Field, Handler) {
 	var phrs []patternHandlerRoute
-	for regex, routes := range app.patternRoutes {
+	for regex, routes := range c.app.patternRoutes {
 		if c.matchPath(regex) {
 			for _, route := range routes {
 				phrs = append(phrs, route)
@@ -88,12 +88,12 @@ func (c *Context) matchPatternHandler() ([]*Field, Handler) {
 		for _, r := range phrs {
 			ms = append(ms, r.method)
 		}
-		app.Info("Request is not supported {config: [%s], request: [%s]}", strings.Join(ms, ","), c.RequestMethod)
-		return nil, app.NotFoundHandler
+		c.app.Logger.Info("Request is not supported {config: [%s], request: [%s]}", strings.Join(ms, ","), c.RequestMethod)
+		return nil, c.app.NotFoundHandler
 	}
 
 	if c.RequestMethod == methodOptions || c.RequestMethod == methodHead {
-		return nil, app.PreflightedHandler
+		return nil, c.app.PreflightedHandler
 	}
 
 	return phr.fields, *phr.handler
@@ -105,7 +105,7 @@ func (c *Context) matchVariableHandler() ([]*Field, Handler) {
 	//  pattern : /index/{id}/name
 	//  regex : /index/.+/name
 	var vhrs []variableHandlerRoute
-	for regex, routes := range app.variableRoutes {
+	for regex, routes := range c.app.variableRoutes {
 		for _, route := range routes {
 			if c.matchPath(regex) {
 				vhrs = append(vhrs, route)
@@ -137,12 +137,12 @@ func (c *Context) matchVariableHandler() ([]*Field, Handler) {
 		for _, r := range vhrs {
 			ms = append(ms, r.method)
 		}
-		app.Warn("Request is not supported {config: [%s], request: [%s]}", strings.Join(ms, ","), c.RequestMethod)
-		return nil, app.MethodNotAllowedHandler
+		c.app.Logger.Warn("Request is not supported {config: [%s], request: [%s]}", strings.Join(ms, ","), c.RequestMethod)
+		return nil, c.app.MethodNotAllowedHandler
 	}
 
 	if c.RequestMethod == methodOptions || c.RequestMethod == methodHead {
-		return nil, app.PreflightedHandler
+		return nil, c.app.PreflightedHandler
 	}
 
 	//Setting parameters
@@ -166,12 +166,12 @@ func (c *Context) invokeHandler() {
 	//match handler
 	fields, handler := c.matchHandler()
 	if handler == nil {
-		app.NotFoundHandler(c)
+		c.app.NotFoundHandler(c)
 		return
 	}
 
 	if fields != nil {
-		err := presetAndValidate(fields, c)
+		err := c.presetAndValidate(fields)
 		if err != nil {
 			c.Text(err.Error())
 			c.Response.SetDone(true)

@@ -22,7 +22,7 @@ type middlewareMap map[string]map[string]interface{}
 type cookieMap map[string]*http.Cookie
 
 var faviconIconHandler = func(c *Context, contentType, resourcePath string) {
-	app.StaticHandler(c, contentTypeIco, resourcePath)
+	c.app.StaticHandler(c, contentTypeIco, resourcePath)
 }
 
 var notFoundHandler = func(c *Context) {
@@ -38,9 +38,9 @@ var preflightedHandler = func(c *Context) {
 }
 
 var staticHandler = func(c *Context, contentType, resourcePath string) {
-	data := app.staticCaches[resourcePath]
+	data := c.app.staticCaches[resourcePath]
 	if data != nil {
-		c.Render(data, app.staticMimeCaches[resourcePath])
+		c.Render(data, c.app.staticMimeCaches[resourcePath])
 		return
 	}
 	buffer, err := ioutil.ReadFile(resourcePath)
@@ -48,9 +48,9 @@ var staticHandler = func(c *Context, contentType, resourcePath string) {
 		c.ResponseWriter.WriteHeader(http.StatusNotFound)
 		return
 	}
-	if app.Config.Flygo.Static.Cache {
-		app.staticCaches[resourcePath] = buffer
-		app.staticMimeCaches[resourcePath] = contentType
+	if c.app.Config.Flygo.Static.Cache {
+		c.app.staticCaches[resourcePath] = buffer
+		c.app.staticMimeCaches[resourcePath] = contentType
 	}
 	c.Render(buffer, contentType)
 }

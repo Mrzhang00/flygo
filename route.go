@@ -49,7 +49,7 @@ func (a *App) startRoute() *App {
 		//pattern route : /index/path1 or /index/*.go
 		dynamicRoute := isVariableRoute(pattern)
 
-		contextPath := app.Config.Flygo.Server.ContextPath
+		contextPath := a.Config.Flygo.Server.ContextPath
 		if !dynamicRoute {
 			regex := fmt.Sprintf(`^%s%s$`, contextPath, strings.ReplaceAll(pattern, "*", "[a-zA-Z0-9]+"))
 			//pattern
@@ -117,12 +117,12 @@ func (a *App) route(method, pattern string, handler Handler, fields ...*Field) *
 func (a *App) printRoute() {
 	for _, routes := range a.patternRoutes {
 		for method, route := range routes {
-			a.Info("Route route [%v:%v] with %v fields", method, route.pattern, len(route.fields))
+			a.Logger.Info("Route route [%v:%v] with %v fields", method, route.pattern, len(route.fields))
 		}
 	}
 	for _, routes := range a.variableRoutes {
 		for method, route := range routes {
-			a.Info("Variables route [%v:%v] with %v fields", method, route.pattern, len(route.fields))
+			a.Logger.Info("Variables route [%v:%v] with %v fields", method, route.pattern, len(route.fields))
 		}
 	}
 }

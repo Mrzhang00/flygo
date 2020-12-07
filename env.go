@@ -265,6 +265,10 @@ func (a *App) setSessionTimeout() {
 
 //Parse env
 func (a *App) parseEnv() {
+	if AppGroup.Count() > 1 {
+		return
+	}
+
 	//set config
 	a.setConfig()
 

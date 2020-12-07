@@ -1,23 +1,21 @@
 package flygo
 
 import (
+	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 )
 
-//Global app
-var app *App
-
 //Define app struct
 type App struct {
+	Id                     string                  //app id
+	Name                   string                  //app name
 	ConfigFile             string                  //conf file
 	Config                 *YmlConfig              //yml config
-	outLogger              *log.Logger             //app out log
-	errLogger              *log.Logger             //app err log
+	Logger                 *log                    //App logger
 	staticCaches           staticCache             //static res cache
 	staticMimeCaches       staticMimeCache         //static res mime cache
 	viewCaches             viewCache               //view cache
@@ -46,17 +44,44 @@ type App struct {
 	SessionConfig *SessionConfig   //Session config
 }
 
+var defaultApp *App
+
+func init() {
+	id := "MASTER"
+	defaultApp = NewAppWithId(id)
+	if AppGroup.Listener().created != nil {
+		AppGroup.Listener().created(newAppInfo(id, defaultApp))
+	}
+}
+
+//Get default app
 func GetApp() *App {
+	return defaultApp
+}
+
+//New app with named seq index
+func NewApp() *App {
+	return NewAppWithId("")
+}
+
+//New app with named id
+func NewAppWithId(id string) *App {
+	if id == "" {
+		id = AppGroup.nextAppId()
+	}
+	app := createApp(id)
+	AppGroup.addWithId(id, app)
 	return app
 }
 
-func init() {
-	NewApp()
-}
-
-func defaultApp() *App {
+func createApp(id string) *App {
+	if id == "" {
+		panic("[App]app is empty")
+	}
 	return &App{
-		ConfigFile:              "flygo.yml",
+		Id:                      id,
+		Name:                    AppGroup.prefix + id,
+		ConfigFile:              fmt.Sprintf("flygo-%s.yml", id),
 		Config:                  defaultYmlConfig(),
 		staticCaches:            make(map[string][]byte),
 		staticMimeCaches:        make(map[string]string),
@@ -87,15 +112,6 @@ func defaultApp() *App {
 	}
 }
 
-//Return new App
-func NewApp() *App {
-	if app != nil {
-		return app
-	}
-	app = defaultApp()
-	return app
-}
-
 //Init
 func (a *App) inita() {
 	a.checkConfig()
@@ -124,31 +140,23 @@ func (a *App) Run() {
 	//parse bind address
 	a.parseAddr()
 
-	if a.Config.Flygo.Dev.Debug {
+	//print config
+	a.DebugTrace(a.printConfig)
 
-		//print config
-		a.printConfig()
+	//print middleware
+	a.DebugTrace(a.printMiddleware)
 
-		//print middleware
-		a.printMiddleware()
+	//print route
+	a.DebugTrace(a.printRoute)
 
-		//print route
-		a.printRoute()
+	//print filter
+	a.DebugTrace(a.printFilter)
 
-		//print filter
-		a.printFilter()
+	//print interceptor
+	a.DebugTrace(a.printInterceptor)
 
-		//print interceptor
-		a.printInterceptor()
-
-		//print session provider
-		a.printSessionProvider()
-	}
-
-	//when sessionProvider is nil, turnoff sessionEnable
-	if a.SessionConfig.SessionProvider == nil {
-		a.SessionConfig.Enable = false
-	}
+	//print session provider
+	a.DebugTrace(a.printSessionProvider)
 
 	//start server
 	a.serve()
@@ -156,15 +164,15 @@ func (a *App) Run() {
 
 //Parse bind address
 func (a *App) parseAddr() {
-	host := app.Config.Flygo.Server.Host
-	port := app.Config.Flygo.Server.Port
+	host := a.Config.Flygo.Server.Host
+	port := a.Config.Flygo.Server.Port
 	if host == "" || host == "*" {
 		host = "0.0.0.0"
 	}
 	minPort := 0
 	maxPort := 65536
 	if port < minPort || port > maxPort {
-		a.Error("The port `%v` is invalid.[valid : %v - %v]", port, minPort, maxPort)
+		a.Logger.Error("The port `%v` is invalid.[valid : %v - %v]", port, minPort, maxPort)
 		os.Exit(0)
 	}
 }
@@ -173,27 +181,26 @@ func (a *App) parseAddr() {
 func (a *App) serve() {
 	defer func() {
 		if re := recover(); re != nil {
-			a.Error("%v", re)
+			a.Logger.Error("%v", re)
 		}
 	}()
-	log.SetPrefix("[FLYGO]")
-	host := app.Config.Flygo.Server.Host
-	port := app.Config.Flygo.Server.Port
-	tlsEnable := app.Config.Flygo.Server.Tls.Enable
+	host := a.Config.Flygo.Server.Host
+	port := a.Config.Flygo.Server.Port
+	tlsEnable := a.Config.Flygo.Server.Tls.Enable
 	addr := host + ":" + strconv.Itoa(port)
-	log.Printf("Bind on %s\n", addr)
-	log.Println("Server started")
+	a.Logger.Info("Bind on %s", addr)
+	a.Logger.Info("Server started")
 	var err error
 	if tlsEnable {
 		//tls support
-		certFile := app.Config.Flygo.Server.Tls.CertFile
-		keyFile := app.Config.Flygo.Server.Tls.KeyFile
-		err = http.ListenAndServeTLS(addr, certFile, keyFile, newDispatcher())
+		certFile := a.Config.Flygo.Server.Tls.CertFile
+		keyFile := a.Config.Flygo.Server.Tls.KeyFile
+		err = http.ListenAndServeTLS(addr, certFile, keyFile, a.newDispatcher())
 	} else {
 		//http
-		err = http.ListenAndServe(addr, newDispatcher())
+		err = http.ListenAndServe(addr, a.newDispatcher())
 	}
 	if err != nil {
-		a.Error(err.Error())
+		a.Logger.Error(err.Error())
 	}
 }

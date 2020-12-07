@@ -16,32 +16,33 @@ A simple and lightweight web framework, pure native and no third dependencies.
 - Session listener supports
 - Go/Template supports
 - Middleware supports
+- App Group supports
 
 ## Middlewares
 
-  - [cors](https://github.com/flygotm/cors)
-  
-  - [redisauth](https://github.com/flygotm/redisauth)
-  
-  - [redistoken](https://github.com/flygotm/redistoken)
-  
-  - [uploadfile](https://github.com/flygotm/uploadfile)
-  
-  - [downfile](https://github.com/flygotm/downfile)
-  
-  - [captcha](https://github.com/flygotm/captcha)
-  
-  - [gzip](https://github.com/flygotm/gzip)
-  
-  - ......
+- [cors](https://github.com/flygotm/cors)
+
+- [redisauth](https://github.com/flygotm/redisauth)
+
+- [redistoken](https://github.com/flygotm/redistoken)
+
+- [uploadfile](https://github.com/flygotm/uploadfile)
+
+- [downfile](https://github.com/flygotm/downfile)
+
+- [captcha](https://github.com/flygotm/captcha)
+
+- [gzip](https://github.com/flygotm/gzip)
+
+- ......
 
 ## Extensions
-      
-  - [cookiprovider](https://github.com/flygotm/cookieprovider)
-  
-  - [redisprovider](https://github.com/flygotm/redisprovider)
-  
-  - ......
+
+- [cookiprovider](https://github.com/flygotm/cookieprovider)
+
+- [redisprovider](https://github.com/flygotm/redisprovider)
+
+- ......
 
 ## Install
 
@@ -82,6 +83,7 @@ func main() {
 ```
 
 ## Yml Configuration
+
 ```yaml
 flygo:
   server:

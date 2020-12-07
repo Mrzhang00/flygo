@@ -16,9 +16,9 @@ func (c *Context) Text(text string) {
 
 //Response text file to client
 func (c *Context) TextFile(textFile string) {
-	bytes, err := readRealPath(textFile)
+	bytes, err := c.readRealPath(textFile)
 	if err != nil {
-		app.Error("%v", err)
+		c.app.Logger.Error("%v", err)
 		return
 	}
 	c.Text(string(bytes))
@@ -28,7 +28,7 @@ func (c *Context) TextFile(textFile string) {
 func (c *Context) JSON(data interface{}) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		app.Error(err.Error())
+		c.app.Logger.Error(err.Error())
 		return
 	}
 	c.Render(jsonData, contentTypeJson)
@@ -41,9 +41,9 @@ func (c *Context) JSONText(json string) {
 
 //Response json file to client
 func (c *Context) JSONFile(jsonFile string) {
-	bytes, err := readRealPath(jsonFile)
+	bytes, err := c.readRealPath(jsonFile)
 	if err != nil {
-		app.Error("%v", err)
+		c.app.Logger.Error("%v", err)
 		return
 	}
 	c.Render(bytes, contentTypeJson)
@@ -53,7 +53,7 @@ func (c *Context) JSONFile(jsonFile string) {
 func (c *Context) XML(data interface{}) {
 	xmlData, err := xml.Marshal(data)
 	if err != nil {
-		app.Error(err.Error())
+		c.app.Logger.Error(err.Error())
 		return
 	}
 	c.Render(xmlData, contentTypeXml)
@@ -66,9 +66,9 @@ func (c *Context) XMLText(xml string) {
 
 //Response xml file to client
 func (c *Context) XMLFile(xmlFile string) {
-	bytes, err := readRealPath(xmlFile)
+	bytes, err := c.readRealPath(xmlFile)
 	if err != nil {
-		app.Error("%v", err)
+		c.app.Logger.Error("%v", err)
 		return
 	}
 	c.Render(bytes, contentTypeXml)
@@ -81,9 +81,9 @@ func (c *Context) Image(buffer []byte) {
 
 //Response image file to client
 func (c *Context) ImageFile(imageFile string) {
-	bytes, err := readRealPath(imageFile)
+	bytes, err := c.readRealPath(imageFile)
 	if err != nil {
-		app.Error("%v", err)
+		c.app.Logger.Error("%v", err)
 		return
 	}
 	c.Image(bytes)
@@ -96,9 +96,9 @@ func (c *Context) BMP(buffer []byte) {
 
 //Response bmp image file to client
 func (c *Context) BMPFile(bmpFile string) {
-	bytes, err := readRealPath(bmpFile)
+	bytes, err := c.readRealPath(bmpFile)
 	if err != nil {
-		app.Error("%v", err)
+		c.app.Logger.Error("%v", err)
 		return
 	}
 	c.BMP(bytes)
@@ -111,9 +111,9 @@ func (c *Context) JPG(buffer []byte) {
 
 //Response jpg image file to client
 func (c *Context) JPGFile(jpgFile string) {
-	bytes, err := readRealPath(jpgFile)
+	bytes, err := c.readRealPath(jpgFile)
 	if err != nil {
-		app.Error("%v", err)
+		c.app.Logger.Error("%v", err)
 		return
 	}
 	c.JPG(bytes)
@@ -136,9 +136,9 @@ func (c *Context) PNG(buffer []byte) {
 
 //Response png image file to client
 func (c *Context) PNGFile(pngFile string) {
-	bytes, err := readRealPath(pngFile)
+	bytes, err := c.readRealPath(pngFile)
 	if err != nil {
-		app.Error("%v", err)
+		c.app.Logger.Error("%v", err)
 		return
 	}
 	c.PNG(bytes)
@@ -151,9 +151,9 @@ func (c *Context) GIF(buffer []byte) {
 
 //Response gif image file to client
 func (c *Context) GIFFile(gifFile string) {
-	bytes, err := readRealPath(gifFile)
+	bytes, err := c.readRealPath(gifFile)
 	if err != nil {
-		app.Error("%v", err)
+		c.app.Logger.Error("%v", err)
 		return
 	}
 	c.GIF(bytes)
@@ -166,9 +166,9 @@ func (c *Context) HTML(html string) {
 
 //Response html file to client
 func (c *Context) HTMLFile(htmlFile string) {
-	bytes, err := readRealPath(htmlFile)
+	bytes, err := c.readRealPath(htmlFile)
 	if err != nil {
-		app.Error("%v", err)
+		c.app.Logger.Error("%v", err)
 		return
 	}
 	c.Render(bytes, contentTypeHtml)
@@ -181,9 +181,9 @@ func (c *Context) CSS(css string) {
 
 //Response css file to client
 func (c *Context) CSSFile(cssFile string) {
-	bytes, err := readRealPath(cssFile)
+	bytes, err := c.readRealPath(cssFile)
 	if err != nil {
-		app.Error("%v", err)
+		c.app.Logger.Error("%v", err)
 		return
 	}
 	c.Render(bytes, contentTypeCSS)
@@ -196,9 +196,9 @@ func (c *Context) JS(js string) {
 
 //Response js file to client
 func (c *Context) JSFile(jsFile string) {
-	bytes, err := readRealPath(jsFile)
+	bytes, err := c.readRealPath(jsFile)
 	if err != nil {
-		app.Error("%v", err)
+		c.app.Logger.Error("%v", err)
 		return
 	}
 	c.Render(bytes, contentTypeJS)
@@ -211,9 +211,9 @@ func (c *Context) Binary(buffer []byte) {
 
 //Response file to client
 func (c *Context) File(file string) {
-	bytes, err := readRealPath(file)
+	bytes, err := c.readRealPath(file)
 	if err != nil {
-		app.Error("%v", err)
+		c.app.Logger.Error("%v", err)
 		return
 	}
 	c.Binary(bytes)
@@ -221,9 +221,9 @@ func (c *Context) File(file string) {
 
 //Response download file to client
 func (c *Context) Download(file, fileName string) {
-	bytes, err := readRealPath(file)
+	bytes, err := c.readRealPath(file)
 	if err != nil {
-		app.Error("%v", err)
+		c.app.Logger.Error("%v", err)
 		return
 	}
 	fn := url.PathEscape(fileName)
@@ -240,11 +240,11 @@ func (c *Context) Render(buffer []byte, contentType string) {
 	}
 }
 
-func getRealPath(fileName string) string {
-	return filepath.Join(app.Config.Flygo.Server.WebRoot, fileName)
+func (c *Context) getRealPath(fileName string) string {
+	return filepath.Join(c.app.Config.Flygo.Server.WebRoot, fileName)
 }
 
-func readRealPath(fileName string) ([]byte, error) {
-	rp := getRealPath(fileName)
+func (c *Context) readRealPath(fileName string) ([]byte, error) {
+	rp := c.getRealPath(fileName)
 	return ioutil.ReadFile(rp)
 }

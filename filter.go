@@ -57,7 +57,7 @@ func (a *App) startFilter() {
 		filterType := froute.t
 		pattern := froute.pattern
 		filterHandler := froute.filterHandler
-		contextPath := app.Config.Flygo.Server.ContextPath
+		contextPath := a.Config.Flygo.Server.ContextPath
 		regex := fmt.Sprintf(`^%s%s$`, contextPath, strings.ReplaceAll(trim(pattern), "*", "[/a-zA-Z0-9]+"))
 		fr := filterRoute{
 			pattern:       pattern,
@@ -87,10 +87,10 @@ func (c *Context) matchFilter(filterType string) []FilterHandler {
 	var filterChains map[string]filterRouteChain
 	switch filterType {
 	case "before":
-		filterChains = app.beforeFilters
+		filterChains = c.app.beforeFilters
 		break
 	case "after":
-		filterChains = app.afterFilters
+		filterChains = c.app.afterFilters
 		break
 	}
 	if filterChains == nil {
@@ -156,11 +156,16 @@ func (a *App) AfterFilter(pattern string, filterHandler FilterHandler) *App {
 //Print filter
 func (a *App) printFilter() {
 	for _, filter := range a.beforeFilters {
-		a.Info("Before filter route [%s]", filter.route.pattern)
+		a.Logger.Info("Before filter route [%s]", filter.route.pattern)
 	}
 	for _, filter := range a.afterFilters {
-		a.Info("After filter route [%s]", filter.route.pattern)
+		a.Logger.Info("After filter route [%s]", filter.route.pattern)
 	}
+}
+
+//Get bundle app
+func (c *FilterContext) App() *App {
+	return c.context.App()
 }
 
 //Get middleware ctx
