@@ -111,6 +111,7 @@ type YmlConfigFlygoLogFile struct {
 }
 
 func (a *App) parseYml() {
+	a.inita()
 	file := a.ConfigFile
 	if file != "" {
 		bytes, err := ioutil.ReadFile(file)
