@@ -35,3 +35,14 @@ func (c *Context) ParamsWith(name string, defaultValue []string) []string {
 	}
 	return defaultValue
 }
+
+//Get single val param map
+func (c *Context) SingleParamMap() map[string]string {
+	sm := make(map[string]string, 0)
+	for k, v := range c.ParamMap {
+		if v != nil && len(v) > 0 {
+			sm[k] = v[0]
+		}
+	}
+	return sm
+}
