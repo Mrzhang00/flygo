@@ -1,0 +1,15 @@
+flygo:
+  dev:
+    debug: true
+  server:
+    host: localhost
+    port: 8080
+    tls:
+      enable: true
+      certFile: '/Users/local/Desktop/Workspaces/Goland/src/github.com/billcoding/flygo/main/cert.pem'
+      keyFile: '/Users/local/Desktop/Workspaces/Goland/src/github.com/billcoding/flygo/main/cert.key'
+  banner:
+    enable: true
+    type: default
+    text: ''
+    file: ''

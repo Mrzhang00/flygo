@@ -12,9 +12,18 @@ func TestBannerText(t *testing.T) {
 
 	//Disable banner
 	app := NewApp()
-	app.Config.Flygo.Banner.Type = "text"
-	app.Config.Flygo.Banner.Text = `
+	app.Config.Banner.Type = "text"
+	app.Config.Banner.Text = `
 
+THIS IS FLYGO BANNER TEXT!!!!
+THIS IS FLYGO BANNER TEXT!!!!
+THIS IS FLYGO BANNER TEXT!!!!
+THIS IS FLYGO BANNER TEXT!!!!
+THIS IS FLYGO BANNER TEXT!!!!
+THIS IS FLYGO BANNER TEXT!!!!
+THIS IS FLYGO BANNER TEXT!!!!
+THIS IS FLYGO BANNER TEXT!!!!
+THIS IS FLYGO BANNER TEXT!!!!
 THIS IS FLYGO BANNER TEXT!!!!
 
 `
@@ -32,7 +41,7 @@ THIS IS FLYGO BANNER FROM FILE!!!!
 
 	//Disable banner
 	app := NewApp()
-	app.Config.Flygo.Banner.Type = "file"
+	app.Config.Banner.Type = "file"
 
 	go func() {
 		time.AfterFunc(time.Second, func() {

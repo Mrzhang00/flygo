@@ -1,8 +1,8 @@
 package flygo
 
-//Debug trace
+//DebugTrace
 func (a *App) DebugTrace(fn func()) *App {
-	if a.Config.Flygo.Dev.Debug {
+	if a.Config.Debug {
 		fn()
 	}
 	return a
