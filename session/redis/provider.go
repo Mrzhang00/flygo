@@ -43,10 +43,8 @@ func NewWithPrefixKey(options *redis.Options, prefixKey string) se.Provider {
 		client:    client,
 		sessions:  make(map[string]se.Session),
 	}
-	//First load session from redis
-	p.loadSession()
-	//Start sync session state from redis
-	p.syncSessionState()
+	//First sync session from redis
+	p.syncSession()
 	return p
 }
 
@@ -164,12 +162,13 @@ func (p *provider) Refresh(session se.Session, config *se.Config, listener *se.L
 //Clean
 func (p *provider) Clean(config *se.Config, listener *se.Listener) {
 	blocked := make(chan bool, 1)
+	go p.invalidatedSession(listener)
 	go p.cleanSession(listener)
 	<-blocked
 }
 
-//loadSession
-func (p *provider) loadSession() {
+//syncSession
+func (p *provider) syncSession() {
 	wait := make(chan bool, 1)
 	go func() {
 		keys := p.client.Keys(p.keyPrefix + "*")
@@ -186,22 +185,25 @@ func (p *provider) loadSession() {
 	wait <- true
 }
 
-//syncSessionState
-func (p *provider) syncSessionState() {
-	go func() {
-		for {
-			p.mu.Lock()
-			for sessionId, session := range p.sessions {
-				key := p.getRedisKey(sessionId)
-				existsCmd := p.client.Exists(key)
-				if existsCmd.Val() <= 0 {
-					session.Invalidate()
-				}
+//invalidatedSession
+func (p *provider) invalidatedSession(listener *se.Listener) {
+	for {
+		p.mu.Lock()
+		for sessionId, sess := range p.sessions {
+			key := p.getRedisKey(sessionId)
+			existsCmd := p.client.Exists(key)
+			if existsCmd.Val() <= 0 {
+				sess.Invalidate()
+				go func() {
+					if listener != nil && listener.Invalidated != nil {
+						listener.Invalidated(sess)
+					}
+				}()
 			}
-			p.mu.Unlock()
-			time.Sleep(time.Second)
 		}
-	}()
+		p.mu.Unlock()
+		time.Sleep(time.Second)
+	}
 }
 
 //cleanSession

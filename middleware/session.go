@@ -61,6 +61,8 @@ func (s *session) Handler() func(c *c.Context) {
 		if have {
 			//Get session
 			session := s.provider.Get(sessionId)
+			//Set session
+			s.setSession(c, session)
 			//Refresh session
 			s.provider.Refresh(session, s.config, s.listener)
 		} else {

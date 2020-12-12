@@ -43,8 +43,8 @@ func (a *App) UseHeader() *App {
 	return a
 }
 
-//UseMethodAllowed
-func (a *App) UseMethodAllowed() *App {
+//UseMethodNotAllowed
+func (a *App) UseMethodNotAllowed() *App {
 	a.defaultMWState.methodNotAllowed = true
 	return a
 }
