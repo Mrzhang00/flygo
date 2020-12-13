@@ -79,23 +79,27 @@ func (p *provider) Clear() {
 	p.sessions = make(map[string]se.Session)
 }
 
+//tmd5
+func tmd5(text string) string {
+	hashMd5 := md5.New()
+	io.WriteString(hashMd5, text)
+	return fmt.Sprintf("%x", hashMd5.Sum(nil))
+}
+
+//newSID
+func newSID() string {
+	nano := time.Now().UnixNano()
+	rand.Seed(nano)
+	rndNum := rand.Int63()
+	return strings.ToUpper(tmd5(tmd5(strconv.FormatInt(nano, 10)) + tmd5(strconv.FormatInt(rndNum, 10))))
+}
+
 //New
 func (p *provider) New(config *se.Config, listener *se.Listener) se.Session {
-	tmd5 := func(text string) string {
-		hashMd5 := md5.New()
-		io.WriteString(hashMd5, text)
-		return fmt.Sprintf("%x", hashMd5.Sum(nil))
-	}
-	newSID := func() string {
-		nano := time.Now().UnixNano()
-		rand.Seed(nano)
-		rndNum := rand.Int63()
-		return strings.ToUpper(tmd5(tmd5(strconv.FormatInt(nano, 10)) + tmd5(strconv.FormatInt(rndNum, 10))))
-	}
-	sessionId := newSID()
-	session := newSession(sessionId, config.Timeout)
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	sessionId := newSID()
+	session := newSession(sessionId, config.Timeout)
 	p.sessions[sessionId] = session
 	go func() {
 		if listener != nil && listener.Created != nil {

@@ -9,36 +9,44 @@ import (
 
 //Define dispatcher struct
 type dispatcher struct {
-	mu   *sync.Mutex //mu
-	app  *App        //app bundle
-	done chan bool   //done channel
+	pool *sync.Pool
+	mu   *sync.RWMutex //mu
+	app  *App          //app bundle
+	done chan bool     //done channel
 }
 
 //newDispatcher
 func (a *App) newDispatcher() *dispatcher {
 	return &dispatcher{
+		pool: &sync.Pool{
+			New: func() interface{} {
+				return c.New(nil, nil)
+			},
+		},
 		app:  a,
-		mu:   &sync.Mutex{},
+		mu:   &sync.RWMutex{},
 		done: make(chan bool, 1),
 	}
 }
 
 //ServeHTTP main entry point
 func (d *dispatcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	d.mu.Lock()
-	defer d.mu.Unlock()
+	d.mu.RLock()
+	defer d.mu.RUnlock()
 	d.dispatch(r, w)
-	d.waitDone()
+	//d.waitDone()
 }
 
 //dispatch
 func (d *dispatcher) dispatch(r *http.Request, w http.ResponseWriter) {
-	go func() {
+	func() {
 		//Finish done
-		defer d.doned()
+		//defer d.doned()
 
 		//Init context
-		ctx := c.New(r, w)
+		ctx := d.pool.Get().(*c.Context)
+		ctx.Request = r
+		ctx.Response = w
 
 		//Add chains into context
 		d.addChains(ctx,

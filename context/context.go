@@ -9,7 +9,7 @@ import (
 type Context struct {
 	logger       log.Logger             //logger
 	Request      *http.Request          //Request
-	response     http.ResponseWriter    //Response
+	Response     http.ResponseWriter    //Response
 	pos          int                    //Handler pos index
 	handlers     []func(c *Context)     //All handlers chain
 	Wrote        bool                   //Wrote
@@ -23,7 +23,7 @@ func New(r *http.Request, w http.ResponseWriter) *Context {
 	c := &Context{
 		logger:   log.New("[Context]"),
 		Request:  r,
-		response: w,
+		Response: w,
 		pos:      -1,
 		handlers: make([]func(c *Context), 0),
 		paramMap: make(map[string][]string, 0),
@@ -63,17 +63,17 @@ func (c *Context) Chain() {
 //Write
 func (c *Context) Write(buffer []byte) {
 	if !c.Wrote {
-		c.response.Write(buffer)
+		c.Response.Write(buffer)
 		c.Wrote = true
 	}
 }
 
 //WriteHeader
 func (c *Context) WriteHeader(code int) {
-	c.response.WriteHeader(code)
+	c.Response.WriteHeader(code)
 }
 
 //Header
 func (c *Context) Header() http.Header {
-	return c.response.Header()
+	return c.Response.Header()
 }

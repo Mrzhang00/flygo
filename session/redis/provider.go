@@ -20,7 +20,7 @@ const defaultPrefixKey = "session:"
 //Define provider struct
 type provider struct {
 	logger    log.Logger
-	mu        sync.Mutex
+	mu        *sync.Mutex
 	keyPrefix string
 	options   *redis.Options
 	client    *redis.Client
@@ -37,7 +37,7 @@ func NewWithPrefixKey(options *redis.Options, prefixKey string) se.Provider {
 	client := redis.NewClient(options)
 	p := &provider{
 		logger:    log.New("[Provider]"),
-		mu:        sync.Mutex{},
+		mu:        &sync.Mutex{},
 		keyPrefix: prefixKey,
 		options:   options,
 		client:    client,
@@ -69,12 +69,16 @@ func (p *provider) getRedisKey(id string) string {
 
 //Exists
 func (p *provider) Exists(id string) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	session, have := p.sessions[id]
 	return have && !session.Invalidated()
 }
 
 //Get
 func (p *provider) Get(id string) se.Session {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	session, have := p.sessions[id]
 	if have && !session.Invalidated() {
 		return session
@@ -84,19 +88,22 @@ func (p *provider) Get(id string) se.Session {
 
 //Del
 func (p *provider) Del(id string) {
-	p.client.Del(p.getRedisKey(id))
+	delCmd := p.client.Del(p.getRedisKey(id))
+	if delCmd.Err() != nil {
+		p.logger.Error("[Del]%s", delCmd.Err())
+	}
 }
 
 //GetAll
 func (p *provider) GetAll() map[string]se.Session {
-	keys := p.client.Keys(p.keyPrefix)
-	result, err := keys.Result()
-	if err != nil {
-		fmt.Errorf("%s", err)
+	keysCmd := p.client.Keys(p.keyPrefix)
+	if keysCmd.Err() != nil {
+		p.logger.Error("[GetAll]%s", keysCmd.Err())
 		return nil
 	}
+	keys, _ := keysCmd.Result()
 	sessionMap := make(map[string]se.Session)
-	for _, key := range result {
+	for _, key := range keys {
 		keys := strings.Split(key, ":")
 		if len(keys) > 1 {
 			sessionId := keys[1]
@@ -108,37 +115,49 @@ func (p *provider) GetAll() map[string]se.Session {
 
 //Clear
 func (p *provider) Clear() {
-	keys := p.client.Keys(p.keyPrefix)
-	result, err := keys.Result()
-	if err != nil {
-		fmt.Errorf("%s", err)
+	keysCmd := p.client.Keys(p.keyPrefix)
+	if keysCmd.Err() != nil {
+		p.logger.Error("[Clear]%s", keysCmd.Err())
 		return
 	}
-	for _, key := range result {
-		p.client.Del(key)
+	keys, _ := keysCmd.Result()
+	for _, key := range keys {
+		delCmd := p.client.Del(key)
+		if delCmd.Err() != nil {
+			p.logger.Error("[Clear]%s", delCmd.Err())
+		}
 	}
+}
+
+//tmd5
+func tmd5(text string) string {
+	hashMd5 := md5.New()
+	io.WriteString(hashMd5, text)
+	return fmt.Sprintf("%x", hashMd5.Sum(nil))
+}
+
+//newSID
+func newSID() string {
+	nano := time.Now().UnixNano()
+	rand.Seed(nano)
+	rndNum := rand.Int63()
+	return strings.ToUpper(tmd5(tmd5(strconv.FormatInt(nano, 10)) + tmd5(strconv.FormatInt(rndNum, 10))))
 }
 
 //New
 func (p *provider) New(config *se.Config, listener *se.Listener) se.Session {
-	tmd5 := func(text string) string {
-		hashMd5 := md5.New()
-		io.WriteString(hashMd5, text)
-		return fmt.Sprintf("%x", hashMd5.Sum(nil))
-	}
-	newSID := func() string {
-		nano := time.Now().UnixNano()
-		rand.Seed(nano)
-		rndNum := rand.Int63()
-		return strings.ToUpper(tmd5(tmd5(strconv.FormatInt(nano, 10)) + tmd5(strconv.FormatInt(rndNum, 10))))
-	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	sessionId := newSID()
 	session := newSession(p.client, sessionId, p.getRedisKey(sessionId))
-	boolCmd := p.client.HSet(p.getRedisKey(sessionId), sessionIdName, sessionId)
-	p.client.Expire(p.getRedisKey(sessionId), config.Timeout)
-	_, err := boolCmd.Result()
-	if err != nil {
-		fmt.Errorf("%v", err)
+	hsetCmd := p.client.HSet(p.getRedisKey(sessionId), sessionIdName, sessionId)
+	if hsetCmd.Err() != nil {
+		p.logger.Error("[New]%v", hsetCmd.Err())
+		return nil
+	}
+	expireCmd := p.client.Expire(p.getRedisKey(sessionId), config.Timeout)
+	if expireCmd.Err() != nil {
+		p.logger.Error("[New]%v", expireCmd.Err())
 		return nil
 	}
 	p.sessions[sessionId] = session
@@ -171,11 +190,20 @@ func (p *provider) Clean(config *se.Config, listener *se.Listener) {
 func (p *provider) syncSession() {
 	wait := make(chan bool, 1)
 	go func() {
-		keys := p.client.Keys(p.keyPrefix + "*")
+		keysCmd := p.client.Keys(p.keyPrefix + "*")
+		if keysCmd.Err() != nil {
+			p.logger.Error("[syncSession]%v", keysCmd.Err())
+			return
+		}
+		keys := keysCmd.Val()
 		sessionMap := make(map[string]se.Session, 0)
-		for _, key := range keys.Val() {
-			getAll := p.client.HGetAll(key)
-			vals := getAll.Val()
+		for _, key := range keys {
+			hgetAllCmd := p.client.HGetAll(key)
+			if hgetAllCmd.Err() != nil {
+				p.logger.Error("[syncSession]%v", hgetAllCmd.Err())
+				continue
+			}
+			vals := hgetAllCmd.Val()
 			sessionId := vals[sessionIdName]
 			rs := newSession(p.client, sessionId, key)
 			sessionMap[sessionId] = rs
@@ -192,6 +220,10 @@ func (p *provider) invalidatedSession(listener *se.Listener) {
 		for sessionId, sess := range p.sessions {
 			key := p.getRedisKey(sessionId)
 			existsCmd := p.client.Exists(key)
+			if existsCmd.Err() != nil {
+				p.logger.Error("[invalidatedSession]%v", existsCmd.Err())
+				continue
+			}
 			if existsCmd.Val() <= 0 {
 				sess.Invalidate()
 				go func() {
