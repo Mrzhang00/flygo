@@ -13,5 +13,5 @@ type Provider interface {
 	Clear()                                                      //Clear all Sessions
 	New(config *Config, listener *Listener) Session              //Get new Session
 	Refresh(session Session, config *Config, listener *Listener) //Refresh Session
-	Clean(config *Config, listener *Listener)                    //Clean invalidated session
+	Clean(config *Config, listener *Listener)                    //Clean Session
 }

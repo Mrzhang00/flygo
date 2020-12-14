@@ -7,6 +7,7 @@ import (
 
 //Redirect
 func (c *Context) Redirect(url string) {
-	c.Header().Set(headers.Location, url)
-	c.WriteHeader(http.StatusTemporaryRedirect)
+	c.render = RenderBuilder().Header(http.Header{
+		headers.Location: []string{url},
+	}).Code(http.StatusTemporaryRedirect).Build()
 }

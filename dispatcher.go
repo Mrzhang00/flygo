@@ -2,6 +2,7 @@ package flygo
 
 import (
 	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/headers"
 	mw "github.com/billcoding/flygo/middleware"
 	"net/http"
 	"sync"
@@ -9,7 +10,6 @@ import (
 
 //Define dispatcher struct
 type dispatcher struct {
-	pool *sync.Pool
 	mu   *sync.RWMutex //mu
 	app  *App          //app bundle
 	done chan bool     //done channel
@@ -18,11 +18,6 @@ type dispatcher struct {
 //newDispatcher
 func (a *App) newDispatcher() *dispatcher {
 	return &dispatcher{
-		pool: &sync.Pool{
-			New: func() interface{} {
-				return c.New(nil, nil)
-			},
-		},
 		app:  a,
 		mu:   &sync.RWMutex{},
 		done: make(chan bool, 1),
@@ -34,19 +29,17 @@ func (d *dispatcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
 	d.dispatch(r, w)
-	//d.waitDone()
+	d.waitWrite()
 }
 
 //dispatch
 func (d *dispatcher) dispatch(r *http.Request, w http.ResponseWriter) {
-	func() {
-		//Finish done
-		//defer d.doned()
-
+	go func() {
 		//Init context
-		ctx := d.pool.Get().(*c.Context)
-		ctx.Request = r
-		ctx.Response = w
+		ctx := c.New(r)
+
+		//Finish done
+		defer d.writeDone(ctx, w)
 
 		//Add chains into context
 		d.addChains(ctx,
@@ -93,11 +86,28 @@ func (d *dispatcher) addChains(c *c.Context,
 }
 
 //waitDone
-func (d *dispatcher) waitDone() {
+func (d *dispatcher) waitWrite() {
 	<-d.done
 }
 
-//makeDone
-func (d *dispatcher) doned() {
+//writeDoned
+func (d *dispatcher) writeDone(c *c.Context, w http.ResponseWriter) {
+	for k, v := range c.Render().Header {
+		for _, vv := range v {
+			w.Header().Add(k, vv)
+		}
+	}
+
+	for _, cookie := range c.Render().Cookies {
+		w.Header().Add(headers.SetCookie, cookie.String())
+	}
+
+	if c.Render().Code != 0 {
+		w.WriteHeader(c.Render().Code)
+	}
+
+	if c.Render().Buffer != nil {
+		w.Write(c.Render().Buffer)
+	}
 	d.done <- true
 }

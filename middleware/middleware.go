@@ -34,16 +34,26 @@ var (
 )
 
 const (
-	PatternAny   = Pattern("/*")
-	MethodAny    = Method("*")
-	MethodGet    = Method(http.MethodGet)
-	MethodPost   = Method(http.MethodPost)
-	MethodPut    = Method(http.MethodPut)
-	MethodDelete = Method(http.MethodDelete)
-	MethodPatch  = Method(http.MethodPatch)
+	PatternNoRoute = Pattern("")
+	PatternAny     = Pattern("/*")
+	MethodAny      = Method("*")
+	MethodGet      = Method(http.MethodGet)
+	MethodPost     = Method(http.MethodPost)
+	MethodPut      = Method(http.MethodPut)
+	MethodDelete   = Method(http.MethodDelete)
+	MethodPatch    = Method(http.MethodPatch)
 )
 
 //SetMWData
 func SetMWData(c *c.Context, name string, mwData map[string]interface{}) {
 	c.MWData[name] = mwData
+}
+
+//GetMWData
+func GetMWData(c *c.Context, name string) map[string]interface{} {
+	val, have := c.MWData[name]
+	if have {
+		return val.(map[string]interface{})
+	}
+	return nil
 }

@@ -17,31 +17,31 @@ func (h *HelloController) Prefix() string {
 func (h *HelloController) GET() func(c *Context) {
 	return func(c *Context) {
 		fmt.Println(c.RestId())
-		c.Write([]byte("get =>"))
+		c.Text("get =>")
 	}
 }
 
 func (h *HelloController) GETS() func(c *Context) {
 	return func(c *Context) {
-		c.Write([]byte("gets"))
+		c.Text("gets")
 	}
 }
 
 func (h *HelloController) POST() func(c *Context) {
 	return func(c *Context) {
-		c.Write([]byte("post"))
+		c.Text("post")
 	}
 }
 
 func (h *HelloController) PUT() func(c *Context) {
 	return func(c *Context) {
-		c.Write([]byte("put"))
+		c.Text("put")
 	}
 }
 
 func (h *HelloController) DELETE() func(c *Context) {
 	return func(c *Context) {
-		c.Write([]byte("delete"))
+		c.Text("delete")
 	}
 }
 
@@ -76,13 +76,13 @@ func main() {
 	//app.GET("/set", func(c *Context) {
 	//	sess := mw.GetSession(c)
 	//	sess.Set("name", "helloworld")
-	//	c.Write([]byte("set done"))
+	//	c.Text([]byte("set done"))
 	//})
 	//app.GET("/get", func(c *Context) {
 	//	sess := mw.GetSession(c)
-	//	c.Write([]byte("get " + sess.Get("name").(string)))
+	//	c.Text([]byte("get " + sess.Get("name").(string)))
 	//})
-	//app.REST(&HelloController{})
+	app.REST(&HelloController{})
 	//app.Use(&MyMW{})
 	//app.UseSession(redis.Provider(
 	//	&Options{Password: "123"}),
@@ -104,7 +104,7 @@ func main() {
 	//			log.Println("Destoryed")
 	//		},
 	//	})
-	//app.UseRecovered()
+	app.UseRecovery()
 	app.UseNotFound()
 	app.Config.Debug = true
 	//app.ConfigFile = `/Users/local/Desktop/Workspaces/Goland/src/github.com/billcoding/flygo/main/flygo.yml`

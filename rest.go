@@ -38,7 +38,7 @@ func (a *App) routeRestControllers() *App {
 		}
 
 		if c.DELETE() != nil {
-			deletePattern := fmt.Sprintf("%s/{id}", prefix)
+			deletePattern := fmt.Sprintf("%s/{RESTFUL_ID}", prefix)
 			a.Route(http.MethodDelete, deletePattern, c.DELETE())
 		}
 

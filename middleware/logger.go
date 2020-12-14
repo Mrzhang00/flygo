@@ -7,7 +7,8 @@ import (
 
 //Define logger struct
 type logger struct {
-	l.Logger
+	logger  l.Logger
+	handler func(c *c.Context)
 }
 
 //Type
@@ -17,7 +18,7 @@ func (l *logger) Type() *Type {
 
 //Name
 func (l *logger) Name() string {
-	return "Logger"
+	return "StdLogger"
 }
 
 //Method
@@ -27,19 +28,20 @@ func (l *logger) Method() Method {
 
 //Pattern
 func (l *logger) Pattern() Pattern {
-	return PatternAny
+	return PatternNoRoute
 }
 
 //Handler
 func (l *logger) Handler() func(c *c.Context) {
 	return func(c *c.Context) {
-		l.Logger.Info("%s => %s", c.Request.Method, c.Request.URL.Path)
+		l.logger.Info("%s => %s", c.Request.Method, c.Request.URL.Path)
 		c.Chain()
 	}
 }
 
+//StdLogger
 func StdLogger() Middleware {
 	return &logger{
-		Logger: l.New("[Middleware:Logger]"),
+		logger: l.New("[StdLogger]"),
 	}
 }

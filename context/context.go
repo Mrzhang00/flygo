@@ -9,25 +9,25 @@ import (
 type Context struct {
 	logger       log.Logger             //logger
 	Request      *http.Request          //Request
-	Response     http.ResponseWriter    //Response
+	render       *Render                //Render
 	pos          int                    //Handler pos index
 	handlers     []func(c *Context)     //All handlers chain
-	Wrote        bool                   //Wrote
 	MWData       map[string]interface{} //MWData
 	paramMap     map[string][]string    //The ParamMap
 	MultipartMap map[string][]*MultipartFile
 }
 
 //New
-func New(r *http.Request, w http.ResponseWriter) *Context {
+func New(r *http.Request) *Context {
 	c := &Context{
-		logger:   log.New("[Context]"),
-		Request:  r,
-		Response: w,
+		logger:  log.New("[Context]"),
+		Request: r,
+		//Response: w,
 		pos:      -1,
 		handlers: make([]func(c *Context), 0),
 		paramMap: make(map[string][]string, 0),
 		MWData:   make(map[string]interface{}, 0),
+		render:   RenderBuilder().DefaultBuild(),
 	}
 	c.onCreated()
 	return c
@@ -62,18 +62,21 @@ func (c *Context) Chain() {
 
 //Write
 func (c *Context) Write(buffer []byte) {
-	if !c.Wrote {
-		c.Response.Write(buffer)
-		c.Wrote = true
-	}
+	c.render.Buffer = buffer
 }
 
-//WriteHeader
-func (c *Context) WriteHeader(code int) {
-	c.Response.WriteHeader(code)
+//WriteCode
+func (c *Context) WriteCode(code int) {
+	c.render.Code = code
 }
 
 //Header
 func (c *Context) Header() http.Header {
-	return c.Response.Header()
+	return c.render.Header
+}
+
+//AddCookie
+func (c *Context) AddCookie(cookies ...*http.Cookie) *Context {
+	c.render.Cookies = append(c.render.Cookies, cookies...)
+	return c
 }

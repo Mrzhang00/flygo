@@ -14,7 +14,7 @@ type defaultMWState struct {
 	session          bool
 	header           bool
 	methodNotAllowed bool
-	recovered        bool
+	recovery         bool
 	notFound         bool
 	stdLogger        bool
 	provider         se.Provider
@@ -49,9 +49,9 @@ func (a *App) UseMethodNotAllowed() *App {
 	return a
 }
 
-//UseRecovered
-func (a *App) UseRecovered() *App {
-	a.defaultMWState.recovered = true
+//UseRecovery
+func (a *App) UseRecovery() *App {
+	a.defaultMWState.recovery = true
 	return a
 }
 
@@ -90,8 +90,8 @@ func (a *App) useDefaultMWs() *App {
 	}
 
 	//use recovered middleware
-	if a.defaultMWState.recovered {
-		a.middlewares = append(a.middlewares, mw.Recovered())
+	if a.defaultMWState.recovery {
+		a.middlewares = append(a.middlewares, mw.Recovery())
 	}
 
 	//use std logger middleware
@@ -115,7 +115,9 @@ func (a *App) Middlewares(c *c.Context, mtype *mw.Type) []mw.Middleware {
 			matched := false
 			if mtype == middleware.Type() {
 				if middleware.Method() == mw.MethodAny || string(middleware.Method()) == c.Request.Method {
-					if middleware.Pattern() == mw.PatternAny {
+					if middleware.Pattern() == mw.PatternNoRoute {
+						matched = true
+					} else if middleware.Pattern() == mw.PatternAny {
 						matched = true
 					} else if string(middleware.Pattern()) == c.Request.URL.Path {
 						matched = true
