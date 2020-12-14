@@ -5,13 +5,16 @@ import (
 	. "github.com/billcoding/flygo/middleware"
 	. "github.com/billcoding/flygo/rest"
 	. "github.com/billcoding/flygo/router"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 //Define app struct
 type App struct {
+	ServerConfig   *serverConfig   //Server Config
 	ConfigFile     string          //Config file
 	Config         *Config         //Yml config
 	Logger         Logger          //App logger
@@ -21,6 +24,15 @@ type App struct {
 	parsedRouters  *ParsedRouter   //parsed routers
 	middlewares    []Middleware    //middlewares
 	defaultMWState *defaultMWState //defaultMWState
+}
+
+//Define ServerConfig struct
+type serverConfig struct {
+	ReadTimeout       time.Duration
+	ReadHeaderTimeout time.Duration
+	WriteTimeout      time.Duration
+	IdleTimeout       time.Duration
+	MaxHeaderBytes    int
 }
 
 var defaultApp = NewApp()
@@ -33,6 +45,13 @@ func GetApp() *App {
 //NewApp
 func NewApp() *App {
 	return &App{
+		ServerConfig: &serverConfig{
+			ReadTimeout:       time.Hour,
+			ReadHeaderTimeout: time.Hour,
+			WriteTimeout:      time.Hour,
+			IdleTimeout:       0,
+			MaxHeaderBytes:    http.DefaultMaxHeaderBytes,
+		},
 		ConfigFile:  "flygo.yml",
 		Config:      defaultConfig(),
 		Logger:      New("[FLYGO]"),
@@ -85,14 +104,24 @@ func (a *App) serve() {
 	a.Logger.Info("[serve]Bind on %s", addr)
 	a.Logger.Info("[serve]Server started")
 	var err error
+	server := &http.Server{
+		Addr:              addr,
+		Handler:           a.newDispatcher(),
+		ReadTimeout:       a.ServerConfig.ReadTimeout,
+		ReadHeaderTimeout: a.ServerConfig.ReadHeaderTimeout,
+		WriteTimeout:      a.ServerConfig.WriteTimeout,
+		IdleTimeout:       a.ServerConfig.IdleTimeout,
+		MaxHeaderBytes:    a.ServerConfig.MaxHeaderBytes,
+		ErrorLog:          log.New(os.Stderr, "[http]", log.LstdFlags),
+	}
 	if tlsEnable {
 		//tls support
 		certFile := a.Config.TLS.CertFile
 		keyFile := a.Config.TLS.KeyFile
-		err = http.ListenAndServeTLS(addr, certFile, keyFile, a.newDispatcher())
+		err = server.ListenAndServeTLS(certFile, keyFile)
 	} else {
 		//http
-		err = http.ListenAndServe(addr, a.newDispatcher())
+		err = server.ListenAndServe()
 	}
 	if err != nil {
 		a.Logger.Error("[serve]%v", err.Error())

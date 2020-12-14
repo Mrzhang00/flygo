@@ -31,9 +31,33 @@ func (r *Render) Rended() bool {
 	return r.rended
 }
 
+//rende
+func (c *Context) rende(r *Render) {
+	c.render.rended = true
+	if r.Buffer != nil {
+		c.render.Buffer = r.Buffer
+	}
+	if r.ContentType != "" {
+		c.render.ContentType = r.ContentType
+	}
+	if len(r.Header) > 0 {
+		for k, v := range r.Header {
+			c.render.Header[k] = v
+		}
+	}
+	if len(r.Cookies) > 0 {
+		for _, cookie := range r.Cookies {
+			c.render.Cookies = append(c.render.Cookies, cookie)
+		}
+	}
+	if r.Code > 0 {
+		c.render.Code = r.Code
+	}
+}
+
 //Text
 func (c *Context) Text(text string) {
-	c.render = RenderBuilder().Buffer([]byte(text)).ContentType(mime.TEXT).Build()
+	c.rende(RenderBuilder().Buffer([]byte(text)).ContentType(mime.TEXT).Build())
 }
 
 //TextFile
@@ -43,7 +67,7 @@ func (c *Context) TextFile(textFile string) {
 		c.logger.Error("[TextFile]%v", err)
 		return
 	}
-	c.render = RenderBuilder().Buffer([]byte(string(bytes))).ContentType(mime.TEXT).Build()
+	c.rende(RenderBuilder().Buffer([]byte(string(bytes))).ContentType(mime.TEXT).Build())
 }
 
 //JSON
@@ -53,12 +77,12 @@ func (c *Context) JSON(data interface{}) {
 		c.logger.Error("[JSON]%v", err.Error())
 		return
 	}
-	c.render = RenderBuilder().Buffer(jsonData).ContentType(mime.JSON).Build()
+	c.rende(RenderBuilder().Buffer(jsonData).ContentType(mime.JSON).Build())
 }
 
 //JSONText
 func (c *Context) JSONText(json string) {
-	c.render = RenderBuilder().Buffer([]byte(json)).ContentType(mime.JSON).Build()
+	c.rende(RenderBuilder().Buffer([]byte(json)).ContentType(mime.JSON).Build())
 }
 
 //JSONFile
@@ -68,7 +92,7 @@ func (c *Context) JSONFile(jsonFile string) {
 		c.logger.Error("[JSONFile]%v", err)
 		return
 	}
-	c.render = RenderBuilder().Buffer(bytes).ContentType(mime.JSON).Build()
+	c.rende(RenderBuilder().Buffer(bytes).ContentType(mime.JSON).Build())
 }
 
 //XML
@@ -78,12 +102,12 @@ func (c *Context) XML(data interface{}) {
 		c.logger.Error("[XML]%v", err)
 		return
 	}
-	c.render = RenderBuilder().Buffer(xmlData).ContentType(mime.XML).Build()
+	c.rende(RenderBuilder().Buffer(xmlData).ContentType(mime.XML).Build())
 }
 
 //XMLText
 func (c *Context) XMLText(xml string) {
-	c.render = RenderBuilder().Buffer([]byte(xml)).ContentType(mime.XML).Build()
+	c.rende(RenderBuilder().Buffer([]byte(xml)).ContentType(mime.XML).Build())
 }
 
 //XMLFile
@@ -93,12 +117,12 @@ func (c *Context) XMLFile(xmlFile string) {
 		c.logger.Error("[XMLFile]%v", err)
 		return
 	}
-	c.render = RenderBuilder().Buffer(bytes).ContentType(mime.XML).Build()
+	c.rende(RenderBuilder().Buffer(bytes).ContentType(mime.XML).Build())
 }
 
 //Image
 func (c *Context) Image(buffer []byte) {
-	c.render = RenderBuilder().Buffer(buffer).ContentType(mime.JPG).Build()
+	c.rende(RenderBuilder().Buffer(buffer).ContentType(mime.JPG).Build())
 }
 
 //ImageFile
@@ -113,7 +137,7 @@ func (c *Context) ImageFile(imageFile string) {
 
 //ICO
 func (c *Context) ICO(buffer []byte) {
-	c.render = RenderBuilder().Buffer(buffer).ContentType(mime.ICO).Build()
+	c.rende(RenderBuilder().Buffer(buffer).ContentType(mime.ICO).Build())
 }
 
 //ICOFile
@@ -128,7 +152,7 @@ func (c *Context) ICOFile(icoFile string) {
 
 //BMP
 func (c *Context) BMP(buffer []byte) {
-	c.render = RenderBuilder().Buffer(buffer).ContentType(mime.BMP).Build()
+	c.rende(RenderBuilder().Buffer(buffer).ContentType(mime.BMP).Build())
 }
 
 //BMPFile
@@ -143,7 +167,7 @@ func (c *Context) BMPFile(bmpFile string) {
 
 //JPG
 func (c *Context) JPG(buffer []byte) {
-	c.render = RenderBuilder().Buffer(buffer).ContentType(mime.JPG).Build()
+	c.rende(RenderBuilder().Buffer(buffer).ContentType(mime.JPG).Build())
 }
 
 //JPGFile
@@ -158,7 +182,7 @@ func (c *Context) JPGFile(jpgFile string) {
 
 //JPEG
 func (c *Context) JPEG(buffer []byte) {
-	c.render = RenderBuilder().Buffer(buffer).ContentType(mime.JPG).Build()
+	c.rende(RenderBuilder().Buffer(buffer).ContentType(mime.JPG).Build())
 }
 
 //JPEGFile
@@ -168,7 +192,7 @@ func (c *Context) JPEGFile(jpegFile string) {
 
 //PNG
 func (c *Context) PNG(buffer []byte) {
-	c.render = RenderBuilder().Buffer(buffer).ContentType(mime.PNG).Build()
+	c.rende(RenderBuilder().Buffer(buffer).ContentType(mime.PNG).Build())
 }
 
 //PNGFile
@@ -183,7 +207,7 @@ func (c *Context) PNGFile(pngFile string) {
 
 //GIF
 func (c *Context) GIF(buffer []byte) {
-	c.render = RenderBuilder().Buffer(buffer).ContentType(mime.GIF).Build()
+	c.rende(RenderBuilder().Buffer(buffer).ContentType(mime.GIF).Build())
 }
 
 //GIFFile
@@ -198,7 +222,7 @@ func (c *Context) GIFFile(gifFile string) {
 
 //HTML
 func (c *Context) HTML(html string) {
-	c.render = RenderBuilder().Buffer([]byte(html)).ContentType(mime.HTML).Build()
+	c.rende(RenderBuilder().Buffer([]byte(html)).ContentType(mime.HTML).Build())
 }
 
 //HTMLFile
@@ -208,12 +232,12 @@ func (c *Context) HTMLFile(htmlFile string) {
 		c.logger.Error("[HTMLFile]%v", err)
 		return
 	}
-	c.render = RenderBuilder().Buffer(bytes).ContentType(mime.HTML).Build()
+	c.rende(RenderBuilder().Buffer(bytes).ContentType(mime.HTML).Build())
 }
 
 //CSS
 func (c *Context) CSS(css string) {
-	c.render = RenderBuilder().Buffer([]byte(css)).ContentType(mime.CSS).Build()
+	c.rende(RenderBuilder().Buffer([]byte(css)).ContentType(mime.CSS).Build())
 }
 
 //CSSFile
@@ -223,12 +247,12 @@ func (c *Context) CSSFile(cssFile string) {
 		c.logger.Error("[CSSFile]%v", err)
 		return
 	}
-	c.render = RenderBuilder().Buffer(bytes).ContentType(mime.CSS).Build()
+	c.rende(RenderBuilder().Buffer(bytes).ContentType(mime.CSS).Build())
 }
 
 //JS
 func (c *Context) JS(js string) {
-	c.render = RenderBuilder().Buffer([]byte(js)).ContentType(mime.JS).Build()
+	c.rende(RenderBuilder().Buffer([]byte(js)).ContentType(mime.JS).Build())
 }
 
 //JSFile
@@ -238,12 +262,12 @@ func (c *Context) JSFile(jsFile string) {
 		c.logger.Error("[JSFile]%v", err)
 		return
 	}
-	c.render = RenderBuilder().Buffer(bytes).ContentType(mime.JS).Build()
+	c.rende(RenderBuilder().Buffer(bytes).ContentType(mime.JS).Build())
 }
 
 //Binary
 func (c *Context) Binary(buffer []byte) {
-	c.render = RenderBuilder().Buffer(buffer).ContentType(mime.BINARY).Build()
+	c.rende(RenderBuilder().Buffer(buffer).ContentType(mime.BINARY).Build())
 }
 
 //File
@@ -264,9 +288,9 @@ func (c *Context) Download(file, fileName string) {
 		return
 	}
 	fn := url.PathEscape(fileName)
-	c.render = RenderBuilder().Buffer(bytes).ContentType(mime.BINARY).Header(http.Header{
+	c.rende(RenderBuilder().Buffer(bytes).ContentType(mime.BINARY).Header(http.Header{
 		headers.ContentDisposition: []string{fmt.Sprintf("attachment; filename=\"%s\"", fn)},
-	}).Build()
+	}).Build())
 }
 
 //readFile

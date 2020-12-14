@@ -41,6 +41,7 @@ func (h *HelloController) PUT() func(c *Context) {
 
 func (h *HelloController) DELETE() func(c *Context) {
 	return func(c *Context) {
+		panic("helloworld")
 		c.Text("delete")
 	}
 }
@@ -57,7 +58,7 @@ func (m *MyMW) Name() string {
 }
 
 func (m *MyMW) Method() mw.Method {
-	return mw.MethodAny
+	return mw.MethodGet
 }
 
 func (m *MyMW) Pattern() mw.Pattern {
@@ -73,6 +74,9 @@ func (m *MyMW) Handler() func(c *Context) {
 
 func main() {
 	app := flygo.GetApp()
+	//app.GET("/", func(c *Context) {
+	//	c.Text("index")
+	//})
 	//app.GET("/set", func(c *Context) {
 	//	sess := mw.GetSession(c)
 	//	sess.Set("name", "helloworld")
@@ -82,7 +86,7 @@ func main() {
 	//	sess := mw.GetSession(c)
 	//	c.Text([]byte("get " + sess.Get("name").(string)))
 	//})
-	app.REST(&HelloController{})
+	//app.REST(&HelloController{})
 	//app.Use(&MyMW{})
 	//app.UseSession(redis.Provider(
 	//	&Options{Password: "123"}),
@@ -104,9 +108,11 @@ func main() {
 	//			log.Println("Destoryed")
 	//		},
 	//	})
-	app.UseRecovery()
-	app.UseNotFound()
-	app.Config.Debug = true
+	//app.UseRecovery()
+	//app.UseMethodNotAllowed()
+	//app.UseNotFound()
+	//app.UseStdLogger()
+	//app.Config.Debug = true
 	//app.ConfigFile = `/Users/local/Desktop/Workspaces/Goland/src/github.com/billcoding/flygo/main/flygo.yml`
 	app.Run()
 }

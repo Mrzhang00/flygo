@@ -12,7 +12,6 @@ type builder struct {
 
 //Build
 func (r *builder) Build() *Render {
-	r.r.rended = true
 	return r.r
 }
 

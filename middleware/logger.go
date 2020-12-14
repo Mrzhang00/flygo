@@ -34,8 +34,8 @@ func (l *logger) Pattern() Pattern {
 //Handler
 func (l *logger) Handler() func(c *c.Context) {
 	return func(c *c.Context) {
-		l.logger.Info("%s => %s", c.Request.Method, c.Request.URL.Path)
 		c.Chain()
+		l.logger.Info("[%s]%s => %d", c.Request.Method, c.Request.URL.Path, c.Render().Code)
 	}
 }
 

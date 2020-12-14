@@ -89,14 +89,14 @@ func (a *App) useDefaultMWs() *App {
 		a.middlewares = append(a.middlewares, mw.MethodNotAllowed())
 	}
 
-	//use recovered middleware
-	if a.defaultMWState.recovery {
-		a.middlewares = append(a.middlewares, mw.Recovery())
-	}
-
 	//use std logger middleware
 	if a.defaultMWState.stdLogger {
 		a.middlewares = append(a.middlewares, mw.StdLogger())
+	}
+
+	//use recovered middleware
+	if a.defaultMWState.recovery {
+		a.middlewares = append(a.middlewares, mw.Recovery())
 	}
 
 	//use not found middleware
