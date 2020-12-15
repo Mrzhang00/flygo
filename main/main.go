@@ -74,9 +74,9 @@ func (m *MyMW) Handler() func(c *Context) {
 
 func main() {
 	app := flygo.GetApp()
-	//app.GET("/", func(c *Context) {
-	//	c.Text("index")
-	//})
+	app.GET("/", func(c *Context) {
+		c.Text("index")
+	})
 	//app.GET("/set", func(c *Context) {
 	//	sess := mw.GetSession(c)
 	//	sess.Set("name", "helloworld")
