@@ -6,21 +6,24 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"time"
 )
 
 //Define Item struct
 type Item struct {
-	Required    bool     `alias:"required"`
-	Min         float64  `alias:"min"`
-	Max         float64  `alias:"max"`
-	MinLength   int      `alias:"minLength"`
-	MaxLength   int      `alias:"maxLength"`
-	Length      int      `alias:"length"`
-	Fixed       string   `alias:"fixed"`
-	Enums       []string `alias:"enums"`
-	Regex       string   `alias:"regex"`
-	Message     string   `alias:"message"`
-	Code        int      `alias:"code"`
+	Required    bool      `alias:"required"`
+	Min         float64   `alias:"min"`
+	Max         float64   `alias:"max"`
+	MinLength   int       `alias:"minLength"`
+	MaxLength   int       `alias:"maxLength"`
+	Length      int       `alias:"length"`
+	Fixed       string    `alias:"fixed"`
+	Enums       []string  `alias:"enums"`
+	Regex       string    `alias:"regex"`
+	Before      time.Time `alias:"before"`
+	After       time.Time `alias:"after"`
+	Message     string    `alias:"message"`
+	Code        int       `alias:"code"`
 	defaultMsg  string
 	defaultCode int
 }
@@ -149,4 +152,9 @@ func (i *Item) vfloat(fieldv reflect.Value) bool {
 		passed = false
 	}
 	return passed
+}
+
+//vtime
+func (i *Item) vtime() bool {
+	return false
 }

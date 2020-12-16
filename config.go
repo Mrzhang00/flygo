@@ -17,9 +17,9 @@ func (yc *Config) Unmarshal(bytes []byte) error {
 
 //Define YmlConfig struct
 type YmlConfig struct {
-	*YmlConfigDev    `yaml:"dev"`
-	*YmlConfigBanner `yaml:"banner"`
-	*YmlConfigServer `yaml:"server"`
+	Dev    *YmlConfigDev    `yaml:"dev"`
+	Banner *YmlConfigBanner `yaml:"banner"`
+	Server *YmlConfigServer `yaml:"server"`
 }
 
 //Define YmlConfigDev struct
