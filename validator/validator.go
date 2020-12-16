@@ -2,52 +2,41 @@ package validator
 
 import (
 	"github.com/billcoding/flygo/reflectx"
-	"log"
+	"reflect"
 )
 
 //Define Validator struct
 type Validator struct {
-	structPtr interface{}
-	items     []*Item
-	fieldPos  map[string]int
+	structPtr   interface{}
+	items       []*Item
+	fields      []reflect.StructField
+	defaultMsg  string
+	defaultCode int
 }
-
-var (
-	defaultCode    = 500
-	defaultMessage = "parameter is invalid"
-)
 
 //New
-func New(structPtr interface{}) *Validator {
+func New(structPtr interface{}, defaultMsg string, defaultCode int) *Validator {
 	items := make([]*Item, 0)
-	reflectx.CreateFromTag(structPtr, &items, "alias", "validate")
-	fieldPos := reflectx.GetTagFieldPos(structPtr, "validate")
+	fields := reflectx.CreateFromTag(structPtr, &items, "alias", "validate")
+	if len(items) != len(fields) {
+		panic("[New]invalid pos both items and fields")
+	}
 	return &Validator{
-		structPtr: structPtr,
-		items:     items,
-		fieldPos:  fieldPos,
+		structPtr:   structPtr,
+		items:       items,
+		fields:      fields,
+		defaultMsg:  defaultMsg,
+		defaultCode: defaultCode,
 	}
-}
-
-//Pos
-func (v *Validator) Pos(pos int) string {
-	if v.fieldPos != nil {
-		for k, v := range v.fieldPos {
-			if v == pos {
-				return k
-			}
-		}
-	}
-	return ""
 }
 
 //Validate
-func (v *Validator) Validate() {
+func (v *Validator) Validate() error {
 	for pos, item := range v.items {
-		vresult := item.Validate(v.structPtr, v.Pos(pos))
-		if vresult != nil {
-			log.Println(vresult)
-			break
+		result := item.Validate(v.structPtr, v.fields[pos], v.defaultMsg, v.defaultCode)
+		if result != nil {
+			return result
 		}
 	}
+	return nil
 }

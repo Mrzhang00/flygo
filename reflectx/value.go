@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 //SetFieldValue
@@ -60,7 +61,9 @@ func SetFieldValue(val reflect.Value, fieldValue reflect.Value) {
 		}
 		fieldValue.Set(reflect.ValueOf(vfloatval))
 	default:
-		if val.Kind() == fieldValue.Kind() {
+		if val.Kind() == reflect.String && fieldValue.Kind() == reflect.Slice && fieldValue.Type().Elem().Kind() == reflect.String {
+			fieldValue.Set(reflect.ValueOf(strings.Split(val.String(), ",")))
+		} else if val.Kind() == fieldValue.Kind() {
 			fieldValue.Set(val)
 		}
 	}
