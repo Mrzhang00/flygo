@@ -6,7 +6,7 @@ import (
 )
 
 //CreateFromTag
-func CreateFromTag(structPtr, distPtr interface{}, alias, tag string) []reflect.StructField {
+func CreateFromTag(structPtr, distPtr interface{}, alias, tag string) []*reflect.StructField {
 	if reflect.TypeOf(distPtr).Kind() != reflect.Ptr {
 		panic("[CreateFromTag]distPtr of non-ptr type")
 	}
@@ -35,7 +35,7 @@ func CreateFromTag(structPtr, distPtr interface{}, alias, tag string) []reflect.
 		}
 	}
 	distValues := reflect.ValueOf(distPtr).Elem()
-	fields := make([]reflect.StructField, 0)
+	fields := make([]*reflect.StructField, 0)
 	for i := 0; i < structType.NumField(); i++ {
 		field := structType.Field(i)
 		validateTag, have := field.Tag.Lookup(tag)
@@ -64,11 +64,10 @@ func CreateFromTag(structPtr, distPtr interface{}, alias, tag string) []reflect.
 			vval := tag[sindex+1 : eindex]
 			fieldName, have := aliasMap[vname]
 			if have {
-				fieldValue := distValue.Elem().FieldByName(fieldName)
-				SetFieldValue(reflect.ValueOf(vval), fieldValue)
+				SetFieldValue(vval, distValue.Elem().FieldByName(fieldName))
 			}
 		}
-		fields = append(fields, field)
+		fields = append(fields, &field)
 		distValues.Set(reflect.Append(distValues, distValue))
 	}
 	return fields

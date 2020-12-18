@@ -2,8 +2,7 @@ package validator
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
+	"github.com/billcoding/flygo/validator/funcs"
 	"reflect"
 	"regexp"
 	"time"
@@ -11,45 +10,18 @@ import (
 
 //Define Item struct
 type Item struct {
-	Required    bool      `alias:"required"`
-	Min         float64   `alias:"min"`
-	Max         float64   `alias:"max"`
-	MinLength   int       `alias:"minLength"`
-	MaxLength   int       `alias:"maxLength"`
-	Length      int       `alias:"length"`
-	Fixed       string    `alias:"fixed"`
-	Enums       []string  `alias:"enums"`
-	Regex       string    `alias:"regex"`
-	Before      time.Time `alias:"before"`
-	After       time.Time `alias:"after"`
-	Message     string    `alias:"message"`
-	Code        int       `alias:"code"`
-	defaultMsg  string
-	defaultCode int
-}
-
-//setDefault
-func (i *Item) setDefault() {
-	if i.Message == "" {
-		i.Message = i.defaultMsg
-	}
-	if i.Code == 0 {
-		i.Code = i.defaultCode
-	}
-}
-
-//Error
-func (i *Item) Error(fieldName string) error {
-	i.setDefault()
-	err := struct {
-		Msg  string `json:"msg"`
-		Code int    `json:"code"`
-	}{
-		Msg:  fmt.Sprintf("[%s]%s", fieldName, i.Message),
-		Code: i.Code,
-	}
-	bytes, _ := json.Marshal(&err)
-	return errors.New(string(bytes))
+	Required  bool      `alias:"required"`
+	Min       float64   `alias:"min"`
+	Max       float64   `alias:"max"`
+	MinLength int       `alias:"minLength"`
+	MaxLength int       `alias:"maxLength"`
+	Length    int       `alias:"length"`
+	Fixed     string    `alias:"fixed"`
+	Enums     []string  `alias:"enums"`
+	Regex     string    `alias:"regex"`
+	Before    time.Time `alias:"before"`
+	After     time.Time `alias:"after"`
+	Message   string    `alias:"message"`
 }
 
 //contains
@@ -68,38 +40,39 @@ func match(pattern, str string) bool {
 	return matched
 }
 
-//Validate
-func (i *Item) Validate(modelPtr interface{}, field reflect.StructField, defaultMsg string, defaultCode int) error {
-	i.defaultMsg = defaultMsg
-	i.defaultCode = defaultCode
-	if !i.Required {
-		return nil
+//vfuncs
+func (i *Item) vfuncs() []funcs.VFunc {
+	return []funcs.VFunc{
+		funcs.RequiredFunc(),
+		funcs.MinFunc(i.Min),
+		funcs.MaxFunc(i.Max),
+		funcs.FixedFunc(i.Fixed),
+		funcs.EnumsFunc(i.Enums...),
+		funcs.MinLengthFunc(i.MinLength),
+		funcs.MaxLengthFunc(i.MaxLength),
+		funcs.RegexFunc(i.Regex),
+		funcs.BeforeFunc(i.Before),
+		funcs.AfterFunc(i.After),
 	}
-	fieldv := reflect.ValueOf(modelPtr).Elem().FieldByName(field.Name)
-	if !fieldv.IsValid() {
-		panic("[Validate]field value is invalid")
+}
+
+//Validate
+func (i *Item) Validate(field *reflect.StructField, value reflect.Value) (bool, string) {
+	if !i.Required {
+		return true, i.Message
 	}
 	passed := true
-	switch fieldv.Type().Kind() {
-	case reflect.String:
-		passed = i.vstring(fieldv)
-	case reflect.Int8, reflect.Int16, reflect.Int, reflect.Int32, reflect.Int64:
-		passed = i.vint(fieldv)
-	case reflect.Float32, reflect.Float64:
-		passed = i.vfloat(fieldv)
-	case reflect.Slice:
-		if fieldv.Type().Elem().Kind() == reflect.String {
-			for pos := 0; pos < fieldv.Len(); pos++ {
-				if passed = i.vstring(fieldv.Index(pos)); !passed {
-					break
-				}
-			}
+	vfuncs := i.vfuncs()
+	for _, vFunc := range vfuncs {
+		if !vFunc.Accept(field.Type) {
+			continue
+		}
+		passed = vFunc.Pass(value)
+		if !passed {
+			break
 		}
 	}
-	if !passed {
-		return i.Error(field.Name)
-	}
-	return nil
+	return passed, i.Message
 }
 
 //String

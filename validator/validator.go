@@ -9,7 +9,7 @@ import (
 type Validator struct {
 	structPtr   interface{}
 	items       []*Item
-	fields      []reflect.StructField
+	fields      []*reflect.StructField
 	defaultMsg  string
 	defaultCode int
 }
@@ -31,12 +31,25 @@ func New(structPtr interface{}, defaultMsg string, defaultCode int) *Validator {
 }
 
 //Validate
-func (v *Validator) Validate() error {
+func (v *Validator) Validate() *Result {
+	ritems := make([]*ResultItem, len(v.items), len(v.items))
+	passedCount := 0
 	for pos, item := range v.items {
-		result := item.Validate(v.structPtr, v.fields[pos], v.defaultMsg, v.defaultCode)
-		if result != nil {
-			return result
+		field := v.fields[pos]
+		value := reflect.ValueOf(v.structPtr).Elem().FieldByName(field.Name)
+		passed, msg := item.Validate(field, value)
+		if passed {
+			passedCount++
+		}
+		ritems[pos] = &ResultItem{
+			Field:   v.fields[pos],
+			Passed:  passed,
+			Message: msg,
 		}
 	}
-	return nil
+	return &Result{
+		StructPtr: v.structPtr,
+		Passed:    len(v.items) == passedCount,
+		Items:     ritems,
+	}
 }
