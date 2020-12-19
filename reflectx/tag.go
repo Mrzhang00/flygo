@@ -8,20 +8,23 @@ import (
 
 //CreateFromTag
 func CreateFromTag(structPtr, distPtr interface{}, alias, tag string) []*reflect.StructField {
+	if reflect.TypeOf(structPtr).Kind() != reflect.Ptr {
+		panic("[CreateFromTag]structPtr of non-pointer type")
+	}
+	if reflect.TypeOf(structPtr).Elem().Kind() != reflect.Struct {
+		panic("[CreateFromTag]structPtr Elem of non-struct type")
+	}
 	if reflect.TypeOf(distPtr).Kind() != reflect.Ptr {
 		panic("[CreateFromTag]distPtr of non-ptr type")
 	}
 	if reflect.TypeOf(distPtr).Elem().Kind() != reflect.Slice {
-		panic("[CreateFromTag]distPtr of non-slice type")
+		panic("[CreateFromTag]distPtr Elem of non-slice type")
 	}
 	if reflect.TypeOf(distPtr).Elem().Elem().Kind() != reflect.Ptr {
-		panic("[CreateFromTag]distPtr of non-ptr type")
+		panic("[CreateFromTag]distPtr Elem Elem of non-ptr type")
 	}
 	if reflect.TypeOf(distPtr).Elem().Elem().Elem().Kind() != reflect.Struct {
 		panic("[CreateFromTag]distPtr of non-struct type")
-	}
-	if reflect.TypeOf(structPtr).Kind() != reflect.Ptr {
-		panic("[CreateFromTag]structPtr of non-pointer type")
 	}
 	distType := reflect.TypeOf(distPtr).Elem().Elem().Elem()
 	structType := reflect.TypeOf(structPtr).Elem()
@@ -58,7 +61,7 @@ func CreateFromTag(structPtr, distPtr interface{}, alias, tag string) []*reflect
 			vval := strings.TrimSpace(matchs[2])
 			fieldName, have := aliasMap[vname]
 			if have {
-				SetFieldValue(vval, distValue.Elem().FieldByName(fieldName))
+				SetValue(reflect.ValueOf(vval), distValue.Elem().FieldByName(fieldName))
 			}
 		}
 		fields = append(fields, &field)

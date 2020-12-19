@@ -31,7 +31,6 @@ func (d *dispatcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	d.dispatch(r, w)
-	d.waitWrite()
 }
 
 //dispatch
@@ -86,11 +85,6 @@ func (d *dispatcher) addChains(c *c.Context,
 	}
 }
 
-//waitDone
-func (d *dispatcher) waitWrite() {
-	//<-d.done
-}
-
 //writeDoned
 func (d *dispatcher) writeDone(r *c.Render, w http.ResponseWriter) {
 	d.wmu.Lock()
@@ -112,5 +106,4 @@ func (d *dispatcher) writeDone(r *c.Render, w http.ResponseWriter) {
 	if r.Buffer != nil {
 		_, _ = w.Write(r.Buffer)
 	}
-	//d.done <- true
 }

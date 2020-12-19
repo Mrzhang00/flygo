@@ -2,109 +2,76 @@ package reflectx
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"reflect"
 	"strconv"
-	"strings"
 	"time"
 )
 
-//SetFieldValue
-func SetFieldValue(val string, fieldValue reflect.Value) {
-	switch fieldValue.Kind() {
+var logger = log.New(os.Stdout, "[reflectx]", log.LstdFlags)
+
+//SetValue
+func SetValue(sourceValue reflect.Value, distValue reflect.Value) {
+	switch distValue.Kind() {
 	case reflect.Bool:
-		vboolval, err := strconv.ParseBool(val)
-		if err != nil {
-			panic(fmt.Sprintf("[Validator]%v", err))
-		}
-		fieldValue.Set(reflect.ValueOf(vboolval))
-	case reflect.String:
-		fieldValue.Set(reflect.ValueOf(val))
-	case reflect.Int8:
-		vint8val, err := strconv.ParseInt(val, 10, 8)
-		if err != nil {
-			panic(fmt.Sprintf("[Validator]%v", err))
-		}
-		fieldValue.Set(reflect.ValueOf(int8(vint8val)))
-	case reflect.Int16:
-		vint16val, err := strconv.ParseInt(val, 10, 16)
-		if err != nil {
-			panic(fmt.Sprintf("[Validator]%v", err))
-		}
-		fieldValue.Set(reflect.ValueOf(int16(vint16val)))
-	case reflect.Int32:
-		vint32val, err := strconv.ParseInt(val, 10, 32)
-		if err != nil {
-			panic(fmt.Sprintf("[Validator]%v", err))
-		}
-		fieldValue.Set(reflect.ValueOf(int32(vint32val)))
-	case reflect.Int:
-		vint32val, err := strconv.ParseInt(val, 10, 32)
-		if err != nil {
-			panic(fmt.Sprintf("[Validator]%v", err))
-		}
-		fieldValue.Set(reflect.ValueOf(int(vint32val)))
-	case reflect.Int64:
-		vint64val, err := strconv.ParseInt(val, 10, 64)
-		if err != nil {
-			panic(fmt.Sprintf("[Validator]%v", err))
-		}
-		fieldValue.Set(reflect.ValueOf(vint64val))
-	case reflect.Uint8:
-		vint8val, err := strconv.ParseUint(val, 10, 8)
-		if err != nil {
-			panic(fmt.Sprintf("[Validator]%v", err))
-		}
-		fieldValue.Set(reflect.ValueOf(uint8(vint8val)))
-	case reflect.Uint16:
-		vint16val, err := strconv.ParseUint(val, 10, 16)
-		if err != nil {
-			panic(fmt.Sprintf("[Validator]%v", err))
-		}
-		fieldValue.Set(reflect.ValueOf(uint16(vint16val)))
-	case reflect.Uint32:
-		vint32val, err := strconv.ParseUint(val, 10, 32)
-		if err != nil {
-			panic(fmt.Sprintf("[Validator]%v", err))
-		}
-		fieldValue.Set(reflect.ValueOf(uint32(vint32val)))
-	case reflect.Uint:
-		vint32val, err := strconv.ParseUint(val, 10, 32)
-		if err != nil {
-			panic(fmt.Sprintf("[Validator]%v", err))
-		}
-		fieldValue.Set(reflect.ValueOf(uint(vint32val)))
-	case reflect.Uint64:
-		vint64val, err := strconv.ParseUint(val, 10, 64)
-		if err != nil {
-			panic(fmt.Sprintf("[Validator]%v", err))
-		}
-		fieldValue.Set(reflect.ValueOf(vint64val))
-	case reflect.Float32:
-		vfloatval, err := strconv.ParseFloat(val, 32)
-		if err != nil {
-			panic(fmt.Sprintf("[Validator]%v", err))
-		}
-		fieldValue.Set(reflect.ValueOf(float32(vfloatval)))
-	case reflect.Float64:
-		vfloatval, err := strconv.ParseFloat(val, 64)
-		if err != nil {
-			panic(fmt.Sprintf("[Validator]%v", err))
-		}
-		fieldValue.Set(reflect.ValueOf(vfloatval))
-	case reflect.Slice, reflect.Array:
-		if fieldValue.Type().Elem().Kind() == reflect.String {
-			fieldValue.Set(reflect.ValueOf(strings.Split(val, ",")))
-		}
-	case reflect.Struct:
-		if fieldValue.Type() == reflect.TypeOf(time.Time{}) {
-			t, err := time.Parse("2006-01-02T15:04:05", val)
+		accept(sourceValue.Type().Kind() == reflect.String, func() {
+			vboolval, err := strconv.ParseBool(sourceValue.String())
 			if err != nil {
-				t, err = time.Parse("2006-01-02 15:04:05", val)
-				if err != nil {
-					panic(fmt.Sprintf("[reflectx][SetFieldValue]%v", err))
-				}
+				logger.Println(fmt.Sprintf("[SetValue]%v", err))
 			}
-			fieldValue.Set(reflect.ValueOf(t))
+			distValue.SetBool(vboolval)
+		})
+		accept(sourceValue.Type().Kind() == reflect.Bool, func() {
+			distValue.Set(sourceValue)
+		})
+	case reflect.String:
+		distValue.SetString(fmt.Sprintf("%v", sourceValue.Interface()))
+	case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int, reflect.Int64:
+		accept(sourceValue.Type().Kind() == reflect.String, func() {
+			vintval, err := strconv.ParseInt(sourceValue.String(), 10, 8)
+			if err != nil {
+				logger.Println(fmt.Sprintf("[SetValue]%v", err))
+			}
+			distValue.SetInt(vintval)
+		})
+	case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint, reflect.Uint64:
+		accept(sourceValue.Type().Kind() == reflect.String, func() {
+			vuintval, err := strconv.ParseUint(sourceValue.String(), 10, 8)
+			if err != nil {
+				logger.Println(fmt.Sprintf("[SetValue]%v", err))
+			}
+			distValue.SetUint(vuintval)
+		})
+	case reflect.Float32, reflect.Float64:
+		accept(sourceValue.Type().Kind() == reflect.String, func() {
+			vfloatval, err := strconv.ParseFloat(sourceValue.String(), 32)
+			if err != nil {
+				logger.Println(fmt.Sprintf("[SetValue]%v", err))
+			}
+			distValue.SetFloat(vfloatval)
+		})
+	case reflect.Slice, reflect.Array:
+		accept(sourceValue.Type().Kind() == reflect.Array ||
+			sourceValue.Type().Kind() == reflect.Slice, func() {
+			distValue.Set(sourceValue)
+		})
+	case reflect.Struct:
+		switch distValue.Type() {
+		case reflect.TypeOf(time.Time{}):
+			accept(sourceValue.Type().Kind() == reflect.String, func() {
+				distValue.Set(reflect.ValueOf(ParseTime(sourceValue.String())))
+			})
+		case reflect.TypeOf(time.Second):
+			accept(sourceValue.Type().Kind() == reflect.String, func() {
+				distValue.Set(reflect.ValueOf(ParseDuration(sourceValue.String())))
+			})
 		}
+	}
+}
+
+func accept(ok bool, callFunc func()) {
+	if ok {
+		callFunc()
 	}
 }
