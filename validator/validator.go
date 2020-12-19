@@ -19,7 +19,7 @@ func New(structPtr interface{}, defaultMsg string, defaultCode int) *Validator {
 	items := make([]*Item, 0)
 	fields := reflectx.CreateFromTag(structPtr, &items, "alias", "validate")
 	if len(items) != len(fields) {
-		panic("[New]invalid pos both items and fields")
+		panic("[New]invalid len both items and fields")
 	}
 	return &Validator{
 		structPtr:   structPtr,

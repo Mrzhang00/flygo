@@ -27,13 +27,16 @@ func (f *afterFunc) Pass(value reflect.Value) bool {
 		return true
 	}
 	if value.Type().Kind() == reflect.String {
-		t, err := time.Parse(time.RFC3339, value.String())
+		t, err := time.Parse("2006-01-02T15:04:05", value.String())
 		if err != nil {
-			panic(fmt.Sprintf("[afterFunc][Pass]%v", err))
+			t, err = time.Parse("2006-01-02 15:04:05", value.String())
+			if err != nil {
+				panic(fmt.Sprintf("[afterFunc][Pass]%v", err))
+			}
 		}
-		return f.after.After(t)
-	} else if value.String() == reflect.TypeOf(time.Time{}).String() {
-		return f.after.After(value.Interface().(time.Time))
+		return f.Pass(reflect.ValueOf(t))
+	} else if value.Type() == reflect.TypeOf(time.Time{}) {
+		return f.after.Before(value.Interface().(time.Time))
 	}
 	return true
 }

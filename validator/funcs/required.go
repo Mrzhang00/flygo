@@ -1,6 +1,9 @@
 package funcs
 
-import "reflect"
+import (
+	"reflect"
+	"time"
+)
 
 //Define RequiredFunc struct
 type requiredFunc struct {
@@ -18,5 +21,12 @@ func (r *requiredFunc) Accept(typ reflect.Type) bool {
 
 //Pass
 func (r *requiredFunc) Pass(value reflect.Value) bool {
+	switch value.Type().Kind() {
+	case reflect.Array, reflect.Slice:
+		return !value.IsNil() && value.Len() > 0
+	}
+	if value.Type() == reflect.TypeOf(time.Time{}) {
+		return !value.Interface().(time.Time).IsZero()
+	}
 	return value.IsValid()
 }

@@ -2,6 +2,7 @@ package reflectx
 
 import (
 	"reflect"
+	"regexp"
 	"strings"
 )
 
@@ -42,26 +43,19 @@ func CreateFromTag(structPtr, distPtr interface{}, alias, tag string) []*reflect
 		if !have || validateTag == "" {
 			continue
 		}
-		tags := strings.Split(validateTag, " ")
-		if len(tags) <= 0 {
+		distValue := reflect.New(distType)
+		re := regexp.MustCompile(`([a-z]+)\(([^()]+)\)`)
+		tagMatchs := re.FindAllStringSubmatch(validateTag, -1)
+		if len(tagMatchs) <= 0 {
 			continue
 		}
-		distValue := reflect.New(distType)
-		for _, tag := range tags {
-			tag = strings.TrimSpace(tag)
-			if tag == "" {
+		for _, matchs := range tagMatchs {
+			if len(matchs) < 3 {
 				continue
 			}
-			sindex := strings.Index(tag, "(")
-			eindex := strings.LastIndex(tag, ")")
-			if sindex < 2 {
-				continue
-			}
-			if eindex == -1 || eindex <= sindex {
-				continue
-			}
-			vname := tag[:sindex]
-			vval := tag[sindex+1 : eindex]
+			_ = matchs[0] //fully match
+			vname := strings.TrimSpace(matchs[1])
+			vval := strings.TrimSpace(matchs[2])
 			fieldName, have := aliasMap[vname]
 			if have {
 				SetFieldValue(vval, distValue.Elem().FieldByName(fieldName))

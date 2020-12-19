@@ -49,6 +49,36 @@ func SetFieldValue(val string, fieldValue reflect.Value) {
 			panic(fmt.Sprintf("[Validator]%v", err))
 		}
 		fieldValue.Set(reflect.ValueOf(vint64val))
+	case reflect.Uint8:
+		vint8val, err := strconv.ParseUint(val, 10, 8)
+		if err != nil {
+			panic(fmt.Sprintf("[Validator]%v", err))
+		}
+		fieldValue.Set(reflect.ValueOf(uint8(vint8val)))
+	case reflect.Uint16:
+		vint16val, err := strconv.ParseUint(val, 10, 16)
+		if err != nil {
+			panic(fmt.Sprintf("[Validator]%v", err))
+		}
+		fieldValue.Set(reflect.ValueOf(uint16(vint16val)))
+	case reflect.Uint32:
+		vint32val, err := strconv.ParseUint(val, 10, 32)
+		if err != nil {
+			panic(fmt.Sprintf("[Validator]%v", err))
+		}
+		fieldValue.Set(reflect.ValueOf(uint32(vint32val)))
+	case reflect.Uint:
+		vint32val, err := strconv.ParseUint(val, 10, 32)
+		if err != nil {
+			panic(fmt.Sprintf("[Validator]%v", err))
+		}
+		fieldValue.Set(reflect.ValueOf(uint(vint32val)))
+	case reflect.Uint64:
+		vint64val, err := strconv.ParseUint(val, 10, 64)
+		if err != nil {
+			panic(fmt.Sprintf("[Validator]%v", err))
+		}
+		fieldValue.Set(reflect.ValueOf(vint64val))
 	case reflect.Float32:
 		vfloatval, err := strconv.ParseFloat(val, 32)
 		if err != nil {
@@ -67,9 +97,12 @@ func SetFieldValue(val string, fieldValue reflect.Value) {
 		}
 	case reflect.Struct:
 		if fieldValue.Type() == reflect.TypeOf(time.Time{}) {
-			t, err := time.Parse(time.RFC3339, val)
+			t, err := time.Parse("2006-01-02T15:04:05", val)
 			if err != nil {
-				panic(fmt.Sprintf("[reflectx][SetFieldValue]%v", err))
+				t, err = time.Parse("2006-01-02 15:04:05", val)
+				if err != nil {
+					panic(fmt.Sprintf("[reflectx][SetFieldValue]%v", err))
+				}
 			}
 			fieldValue.Set(reflect.ValueOf(t))
 		}
