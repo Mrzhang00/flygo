@@ -14,6 +14,9 @@ type joinFunc struct {
 
 //SplitFunc
 func JoinFunc(join bool, joinsp string) BFunc {
+	if joinsp == "" {
+		joinsp = ","
+	}
 	return &joinFunc{
 		join:   join,
 		joinsp: joinsp,
@@ -21,14 +24,14 @@ func JoinFunc(join bool, joinsp string) BFunc {
 }
 
 //Bind
-func (s *joinFunc) Bind(inValue reflect.Value) (outValue reflect.Value) {
-	if s.join && inValue.IsValid() {
+func (j *joinFunc) Bind(inValue reflect.Value) (outValue reflect.Value) {
+	if j.join && inValue.IsValid() {
 		if inValue.Type().Kind() == reflect.Slice || inValue.Type().Kind() == reflect.Array {
 			joins := make([]string, 0)
 			for i := 0; i < inValue.Len(); i++ {
 				joins = append(joins, fmt.Sprintf("%v", inValue.Index(i)))
 			}
-			return reflect.ValueOf(strings.Join(joins, s.joinsp))
+			return reflect.ValueOf(strings.Join(joins, j.joinsp))
 		}
 	}
 	return inValue

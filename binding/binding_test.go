@@ -10,7 +10,7 @@ import (
 
 func TestBinding(t *testing.T) {
 	type userModel struct {
-		Var []string `binding:"name(id) default(2020-10-11T00:56:00) split(T) splitsp(,) join(F) joinsp(,)"`
+		Var string `binding:"name(id) default(xx) split(F) join(T) joinsp(',') prefix(') suffix(')"`
 	}
 	um := &userModel{}
 
@@ -22,7 +22,9 @@ func TestBinding(t *testing.T) {
 	req.Form = make(url.Values, 0)
 	req.PostForm = make(url.Values, 0)
 
-	req.Form.Set("id", "aaa,bbb,ccc")
+	req.Form.Add("id", "aaa")
+	req.Form.Add("id", "bbb")
+	req.Form.Add("id", "ccc")
 
 	//req.PostForm.Set("Idx", "1000")
 	//req.PostForm.Set("Namex", "lisu")

@@ -13,6 +13,9 @@ type splitFunc struct {
 
 //SplitFunc
 func SplitFunc(split bool, splitsp string) BFunc {
+	if splitsp == "" {
+		splitsp = ","
+	}
 	return &splitFunc{
 		split:   split,
 		splitsp: splitsp,

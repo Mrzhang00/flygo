@@ -15,6 +15,8 @@ type Item struct {
 	Splitsp string `alias:"splitsp"`
 	Join    bool   `alias:"join"`
 	Joinsp  string `alias:"joinsp"`
+	Prefix  string `alias:"prefix"`
+	Suffix  string `alias:"suffix"`
 }
 
 //bfuncs
@@ -23,6 +25,8 @@ func (i *Item) bfuncs() []funcs.BFunc {
 		funcs.DefaultFunc(i.Default),
 		funcs.SplitFunc(i.Split, i.Splitsp),
 		funcs.JoinFunc(i.Join, i.Joinsp),
+		funcs.PrefixFunc(i.Prefix),
+		funcs.SuffixFunc(i.Suffix),
 	}
 }
 
