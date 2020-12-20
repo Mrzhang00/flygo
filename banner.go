@@ -19,18 +19,18 @@ func init() {
 
 //printBanner
 func (a *App) printBanner() {
-	if !a.Config.Enable {
+	if !a.Config.Banner.Enable {
 		return
 	}
-	switch a.Config.Type {
+	switch a.Config.Banner.Type {
 	case "default":
 		fmt.Println(strings.Join(banners, "\n"))
 		break
 	case "text":
-		fmt.Println(a.Config.Text)
+		fmt.Println(a.Config.Banner.Text)
 		break
 	case "file":
-		bytes, err := ioutil.ReadFile(a.Config.File)
+		bytes, err := ioutil.ReadFile(a.Config.Banner.File)
 		if err != nil {
 			a.Logger.Error("[printBanner]%v", err)
 			return

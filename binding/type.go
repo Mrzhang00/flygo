@@ -1,12 +1,12 @@
 package binding
 
 var (
-	Header = &Type{"header"}
-	Param  = &Type{"param"}
-	Body   = &Type{"body"}
+	Header = &btype{"header"}
+	Param  = &btype{"param"}
+	Body   = &btype{"body"}
 )
 
-//Define Type struct
-type Type struct {
+//Define btype struct
+type btype struct {
 	t string
 }

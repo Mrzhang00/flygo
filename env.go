@@ -36,7 +36,7 @@ func (a *App) setConfig() {
 func (a *App) setDevDebug() {
 	debug := stringEnv(flygoDevDebug)
 	if debug != "" {
-		a.Config.Debug = boolEnv(debug)
+		a.Config.Dev.Debug = boolEnv(debug)
 	}
 }
 
@@ -44,7 +44,7 @@ func (a *App) setDevDebug() {
 func (a *App) setServerHost() {
 	host := stringEnv(flygoServerHost)
 	if host != "" {
-		a.Config.Host = host
+		a.Config.Server.Host = host
 	}
 }
 
@@ -52,7 +52,7 @@ func (a *App) setServerHost() {
 func (a *App) setServerPort() {
 	port, err := intEnv(flygoServerPort)
 	if err == nil {
-		a.Config.Port = port
+		a.Config.Server.Port = port
 	}
 }
 
@@ -60,7 +60,7 @@ func (a *App) setServerPort() {
 func (a *App) setBannerEnable() {
 	bannerEnable := stringEnv(flygoBannerEnable)
 	if bannerEnable != "" {
-		a.Config.Enable = boolEnv(flygoBannerEnable)
+		a.Config.Banner.Enable = boolEnv(flygoBannerEnable)
 	}
 }
 
@@ -68,14 +68,14 @@ func (a *App) setBannerEnable() {
 func (a *App) setBannerType() {
 	bannerType := stringEnv(flygoBannerType)
 	if bannerType != "" {
-		a.Config.Type = bannerType
+		a.Config.Banner.Type = bannerType
 	}
 }
 
 //set banner text
 func (a *App) setBannerText() {
 	if stringEnv(flygoBannerText) != "" {
-		a.Config.Text = stringEnv(flygoBannerText)
+		a.Config.Banner.Text = stringEnv(flygoBannerText)
 	}
 }
 
@@ -83,7 +83,7 @@ func (a *App) setBannerText() {
 func (a *App) setBannerFile() {
 	bannerFile := stringEnv(flygoBannerFile)
 	if bannerFile != "" {
-		a.Config.File = bannerFile
+		a.Config.Banner.File = bannerFile
 	}
 }
 
@@ -91,7 +91,7 @@ func (a *App) setBannerFile() {
 func (a *App) setServerTlsEnable() {
 	serverTlsEnable := stringEnv(flygoServerTlsEnable)
 	if serverTlsEnable != "" {
-		a.Config.TLS.Enable = boolEnv(flygoServerTlsEnable)
+		a.Config.Server.TLS.Enable = boolEnv(flygoServerTlsEnable)
 	}
 }
 
@@ -99,7 +99,7 @@ func (a *App) setServerTlsEnable() {
 func (a *App) setServerTlsCertFile() {
 	serverTlsCertFile := stringEnv(flygoServerTlsCertFile)
 	if serverTlsCertFile != "" {
-		a.Config.TLS.CertFile = serverTlsCertFile
+		a.Config.Server.TLS.CertFile = serverTlsCertFile
 	}
 }
 
@@ -107,7 +107,7 @@ func (a *App) setServerTlsCertFile() {
 func (a *App) setServerTlsKeyFile() {
 	serverTlsKeyFile := stringEnv(flygoServerTlsKeyFile)
 	if serverTlsKeyFile != "" {
-		a.Config.TLS.KeyFile = serverTlsKeyFile
+		a.Config.Server.TLS.KeyFile = serverTlsKeyFile
 	}
 }
 

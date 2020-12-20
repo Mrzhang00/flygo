@@ -82,8 +82,8 @@ func (a *App) Run() {
 
 //parseAddr
 func (a *App) parseAddr() {
-	host := a.Config.Host
-	port := a.Config.Port
+	host := a.Config.Server.Host
+	port := a.Config.Server.Port
 	if host == "" || host == "*" {
 		host = "0.0.0.0"
 	}
@@ -97,9 +97,9 @@ func (a *App) parseAddr() {
 
 //serve
 func (a *App) serve() {
-	host := a.Config.Host
-	port := a.Config.Port
-	tlsEnable := a.Config.TLS.Enable
+	host := a.Config.Server.Host
+	port := a.Config.Server.Port
+	tlsEnable := a.Config.Server.TLS.Enable
 	addr := host + ":" + strconv.Itoa(port)
 	a.Logger.Info("[serve]Bind on %s", addr)
 	a.Logger.Info("[serve]Server started")
@@ -116,8 +116,8 @@ func (a *App) serve() {
 	}
 	if tlsEnable {
 		//tls support
-		certFile := a.Config.TLS.CertFile
-		keyFile := a.Config.TLS.KeyFile
+		certFile := a.Config.Server.TLS.CertFile
+		keyFile := a.Config.Server.TLS.KeyFile
 		err = server.ListenAndServeTLS(certFile, keyFile)
 	} else {
 		//http

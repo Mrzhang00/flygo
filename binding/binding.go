@@ -13,7 +13,7 @@ import (
 //Define Binding struct
 type Binding struct {
 	structPtr interface{}
-	typ       *Type
+	typ       *btype
 	items     []*Item
 	fields    []*reflect.StructField
 	logger    log.Logger
@@ -21,7 +21,7 @@ type Binding struct {
 }
 
 //New
-func New(structPtr interface{}, typ *Type) *Binding {
+func New(structPtr interface{}, typ *btype) *Binding {
 	items := make([]*Item, 0)
 	fields := reflectx.CreateFromTag(structPtr, &items, "alias", "binding")
 	if len(items) != len(fields) {
@@ -67,8 +67,13 @@ func (b *Binding) initMap(req *http.Request) {
 		}
 		switch req.Header.Get("Content-Type") {
 		case "multipart/form-data":
-			// TODO what can i do?
-		case "application/x-www-form-urlencoded":
+			err := req.ParseMultipartForm(0)
+			if err == nil {
+				for k, v := range req.MultipartForm.Value {
+					setMap(b.dataMap, k, v)
+				}
+			}
+		default:
 			err := req.ParseForm()
 			if err == nil {
 				for k, v := range req.PostForm {

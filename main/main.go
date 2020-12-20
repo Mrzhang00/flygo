@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/billcoding/flygo"
+	"github.com/billcoding/flygo/binding"
 	. "github.com/billcoding/flygo/context"
 	mw "github.com/billcoding/flygo/middleware"
 )
@@ -73,10 +74,17 @@ func (m *MyMW) Handler() func(c *Context) {
 }
 
 func main() {
+	type model struct {
+		Id   int    `binding:"name(id)" default(100)`
+		Name string `binding:"name(name) default(zhangsan)"`
+	}
+	aa := func(c *Context) {
+		m := model{}
+		binding.New(&m, binding.Param).Bind(c.Request)
+		c.JSON(&m)
+	}
 	app := flygo.GetApp()
-	app.GET("/", func(c *Context) {
-		c.Text("index")
-	})
+	app.GET("/", aa)
 	//app.GET("/set", func(c *Context) {
 	//	sess := mw.GetSession(c)
 	//	sess.Set("name", "helloworld")
