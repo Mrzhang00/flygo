@@ -2,7 +2,7 @@ package reflectx
 
 import (
 	"fmt"
-	"github.com/billcoding/flygo/calls"
+	"github.com/billcoding/calls"
 	"log"
 	"os"
 	"reflect"
@@ -33,7 +33,7 @@ func SetValue(sourceValue reflect.Value, distValue reflect.Value) {
 		})
 	case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int, reflect.Int64:
 		calls.True(sourceValue.Type().Kind() == reflect.String && sourceValue.String() != "", func() {
-			vintval, err := strconv.ParseInt(sourceValue.String(), 10, 8)
+			vintval, err := strconv.ParseInt(sourceValue.String(), 10, 64)
 			if err != nil {
 				logger.Println(fmt.Sprintf("[SetValue]%v", err))
 			} else {
@@ -42,7 +42,7 @@ func SetValue(sourceValue reflect.Value, distValue reflect.Value) {
 		})
 	case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint, reflect.Uint64:
 		calls.True(sourceValue.Type().Kind() == reflect.String && sourceValue.String() != "", func() {
-			vuintval, err := strconv.ParseUint(sourceValue.String(), 10, 8)
+			vuintval, err := strconv.ParseUint(sourceValue.String(), 10, 64)
 			if err != nil {
 				logger.Println(fmt.Sprintf("[SetValue]%v", err))
 			} else {

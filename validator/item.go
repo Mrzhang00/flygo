@@ -12,8 +12,8 @@ type Item struct {
 	Required  bool      `alias:"required"`
 	Min       float64   `alias:"min"`
 	Max       float64   `alias:"max"`
-	MinLength int       `alias:"minLength"`
-	MaxLength int       `alias:"maxLength"`
+	MinLength int       `alias:"minlength"`
+	MaxLength int       `alias:"maxlength"`
 	Length    int       `alias:"length"`
 	Fixed     string    `alias:"fixed"`
 	Enums     []string  `alias:"enums"`

@@ -21,7 +21,12 @@ type Binding struct {
 }
 
 //New
-func New(structPtr interface{}, typ *btype) *Binding {
+func New(structPtr interface{}) *Binding {
+	return NewWithType(structPtr, Param)
+}
+
+//New
+func NewWithType(structPtr interface{}, typ *btype) *Binding {
 	items := make([]*Item, 0)
 	fields := reflectx.CreateFromTag(structPtr, &items, "alias", "binding")
 	if len(items) != len(fields) {
@@ -62,6 +67,7 @@ func (b *Binding) initMap(req *http.Request) {
 			setMap(b.dataMap, k, v)
 		}
 	case Param:
+		_ = req.ParseForm()
 		for k, v := range req.Form {
 			setMap(b.dataMap, k, v)
 		}
@@ -70,13 +76,6 @@ func (b *Binding) initMap(req *http.Request) {
 			err := req.ParseMultipartForm(0)
 			if err == nil {
 				for k, v := range req.MultipartForm.Value {
-					setMap(b.dataMap, k, v)
-				}
-			}
-		default:
-			err := req.ParseForm()
-			if err == nil {
-				for k, v := range req.PostForm {
 					setMap(b.dataMap, k, v)
 				}
 			}
