@@ -41,7 +41,7 @@ func (c *Context) onDestoryed() {
 }
 
 //OnPreparedAdd
-func (c *Context) OnPreparedAdd(handlers ...func(c *Context)) {
+func (c *Context) onPreparedAdd(handlers ...func(c *Context)) {
 	if len(listeners) > 0 {
 		for _, listener := range listeners {
 			if listener.PreparedAdd != nil {

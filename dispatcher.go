@@ -1,6 +1,7 @@
 package flygo
 
 import (
+	"github.com/billcoding/calls"
 	c "github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/headers"
 	mw "github.com/billcoding/flygo/middleware"
@@ -89,11 +90,16 @@ func (d *dispatcher) addChains(c *c.Context,
 func (d *dispatcher) writeDone(r *c.Render, w http.ResponseWriter) {
 	d.wmu.Lock()
 	defer d.wmu.Unlock()
+
 	for k, v := range r.Header {
 		for _, vv := range v {
 			w.Header().Add(k, vv)
 		}
 	}
+
+	calls.NEmpty(r.ContentType, func() {
+		w.Header().Set(headers.MIME, r.ContentType)
+	})
 
 	for _, cookie := range r.Cookies {
 		w.Header().Add(headers.SetCookie, cookie.String())

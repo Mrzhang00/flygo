@@ -62,7 +62,7 @@ func NewApp() *App {
 			Simples:  make(map[string]*Simple),
 			Dynamics: make(map[string]map[string]*Dynamic),
 		},
-		middlewares: make([]Middleware, 0),
+		middlewares: make([]Middleware, 6, 6),
 		defaultMWState: &defaultMWState{
 			header: true,
 		},

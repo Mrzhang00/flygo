@@ -39,7 +39,7 @@ func (c *Context) Add(handlers ...func(c *Context)) *Context {
 		return c
 	}
 	c.onPreparedAddOnce(handlers...)
-	c.OnPreparedAdd(handlers...)
+	c.onPreparedAdd(handlers...)
 	c.handlers = append(c.handlers, handlers...)
 	c.onAddedOnce(handlers...)
 	c.onAdded(handlers...)

@@ -2,6 +2,7 @@ package flygo
 
 import (
 	"gopkg.in/yaml.v2"
+	"html/template"
 	"io/ioutil"
 )
 
@@ -17,9 +18,10 @@ func (yc *Config) Unmarshal(bytes []byte) error {
 
 //Define YmlConfig struct
 type YmlConfig struct {
-	Dev    *YmlConfigDev    `yaml:"dev"`
-	Banner *YmlConfigBanner `yaml:"banner"`
-	Server *YmlConfigServer `yaml:"server"`
+	Dev      *YmlConfigDev      `yaml:"dev"`
+	Banner   *YmlConfigBanner   `yaml:"banner"`
+	Server   *YmlConfigServer   `yaml:"server"`
+	Template *YmlConfigTemplate `yaml:"template"`
 }
 
 //Define YmlConfigDev struct
@@ -40,6 +42,14 @@ type YmlConfigServer struct {
 	Host string              `yaml:"host"`
 	Port int                 `yaml:"port"`
 	TLS  *YmlConfigServerTls `yaml:"tls"`
+}
+
+//Define YmlConfigTemplate struct
+type YmlConfigTemplate struct {
+	Enable  bool   `yaml:"enable"`
+	Cache   bool   `yaml:"cache"`
+	Root    string `yaml:"root"`
+	FuncMap template.FuncMap
 }
 
 //Define YmlConfigServerTls struct
@@ -109,6 +119,12 @@ func defaultConfig() *Config {
 				CertFile: "",
 				KeyFile:  "",
 			},
+		},
+		&YmlConfigTemplate{
+			Enable:  false,
+			Cache:   false,
+			Root:    "",
+			FuncMap: nil,
 		},
 	}}
 }

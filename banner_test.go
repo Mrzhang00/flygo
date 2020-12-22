@@ -1,7 +1,7 @@
 package flygo
 
 import (
-	"io/ioutil"
+	ioutil "io/ioutil"
 	"os"
 	"testing"
 	"time"

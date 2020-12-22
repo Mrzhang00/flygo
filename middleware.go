@@ -11,15 +11,20 @@ import (
 
 //Define defaultMWState struct
 type defaultMWState struct {
-	session          bool
 	header           bool
 	methodNotAllowed bool
 	recovery         bool
 	notFound         bool
 	stdLogger        bool
-	provider         se.Provider
-	config           *se.Config
-	listener         *se.Listener
+
+	session  bool
+	provider se.Provider
+	config   *se.Config
+	listener *se.Listener
+
+	static      bool
+	staticCache bool
+	staticRoot  string
 }
 
 //Use
@@ -67,41 +72,50 @@ func (a *App) UseStdLogger() *App {
 	return a
 }
 
+//UseStatic
+func (a *App) UseStatic(cache bool, root string) *App {
+	a.defaultMWState.static = true
+	a.defaultMWState.staticCache = cache
+	a.defaultMWState.staticRoot = root
+	return a
+}
+
 //Use default
 func (a *App) useDefaultMWs() *App {
 
 	//use session middleware
 	if a.defaultMWState.session {
-		a.middlewares = append(a.middlewares, mw.Session(
-			a.defaultMWState.provider,
-			a.defaultMWState.config,
-			a.defaultMWState.listener),
-		)
+		a.middlewares[0] = mw.Session(a.defaultMWState.provider, a.defaultMWState.config, a.defaultMWState.listener)
 	}
 
 	//use header middleware
 	if a.defaultMWState.header {
-		a.middlewares = append(a.middlewares, mw.Header())
+		a.middlewares[1] = mw.Header()
 	}
 
 	//use method not allowed middleware
 	if a.defaultMWState.methodNotAllowed {
-		a.middlewares = append(a.middlewares, mw.MethodNotAllowed())
+		a.middlewares[2] = mw.MethodNotAllowed()
 	}
 
 	//use std logger middleware
 	if a.defaultMWState.stdLogger {
-		a.middlewares = append(a.middlewares, mw.StdLogger())
+		a.middlewares[3] = mw.StdLogger()
 	}
 
 	//use recovered middleware
 	if a.defaultMWState.recovery {
-		a.middlewares = append(a.middlewares, mw.Recovery())
+		a.middlewares[4] = mw.Recovery()
 	}
 
 	//use not found middleware
 	if a.defaultMWState.notFound {
-		a.middlewares = append(a.middlewares, mw.NotFound())
+		a.middlewares[5] = mw.NotFound()
+	}
+
+	//use static
+	if a.defaultMWState.static {
+		a.middlewares = append(a.middlewares, mw.Static(a.defaultMWState.staticCache, a.defaultMWState.staticRoot))
 	}
 
 	return a
@@ -112,6 +126,9 @@ func (a *App) Middlewares(c *c.Context, mtype *mw.Type) []mw.Middleware {
 	mws := make([]mw.Middleware, 0)
 	if len(a.middlewares) > 0 {
 		for _, middleware := range a.middlewares {
+			if middleware == nil {
+				continue
+			}
 			matched := false
 			if mtype == middleware.Type() {
 				if middleware.Method() == mw.MethodAny || string(middleware.Method()) == c.Request.Method {
