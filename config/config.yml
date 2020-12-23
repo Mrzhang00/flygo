@@ -10,4 +10,5 @@ flygo:
   template:
     enable: false
     cache: true
-    root: ''
+    root: ./
+    suffix: .html

@@ -37,7 +37,7 @@ func (d *dispatcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 //dispatch
 func (d *dispatcher) dispatch(r *http.Request, w http.ResponseWriter) {
 	//Init context
-	ctx := c.New(r)
+	ctx := c.New(r, d.app.Config.Template)
 
 	//Add chains into context
 	d.addChains(ctx,

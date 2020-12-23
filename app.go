@@ -1,6 +1,7 @@
 package flygo
 
 import (
+	. "github.com/billcoding/flygo/config"
 	. "github.com/billcoding/flygo/log"
 	. "github.com/billcoding/flygo/middleware"
 	. "github.com/billcoding/flygo/rest"
@@ -53,7 +54,7 @@ func NewApp() *App {
 			MaxHeaderBytes:    http.DefaultMaxHeaderBytes,
 		},
 		ConfigFile:  "flygo.yml",
-		Config:      defaultConfig(),
+		Config:      Default(),
 		Logger:      New("[FLYGO]"),
 		controllers: make([]Controller, 0),
 		groups:      make([]*Group, 0),
@@ -77,6 +78,7 @@ func (a *App) Run() {
 	a.routeRestControllers()
 	a.parseRouters()
 	a.useDefaultMWs()
+	a.parseConfig()
 	a.serve()
 }
 

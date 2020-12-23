@@ -65,6 +65,7 @@ func (s *session) Handler() func(c *c.Context) {
 			s.setSession(c, session)
 			//Refresh session
 			s.provider.Refresh(session, s.config, s.listener)
+			c.SetData("session", session.GetAll())
 		} else {
 			//Create new session
 			session := s.provider.New(s.config, s.listener)
@@ -76,6 +77,7 @@ func (s *session) Handler() func(c *c.Context) {
 				Value: session.Id(),
 				Path:  "/",
 			}).String())
+			c.SetData("session", session.GetAll())
 		}
 		c.Chain()
 	}

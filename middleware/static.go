@@ -23,9 +23,14 @@ type static struct {
 //Static
 func Static(cache bool, root string) Middleware {
 	rot := root
-	calls.Empty(rot, func() {
+	// "" "." "./" "./static"
+	calls.True(rot == "" || rot == "." || rot == "./", func() {
 		execdir, _ := os.Executable()
 		rot = filepath.Dir(execdir)
+	})
+	calls.NEmpty(strings.TrimPrefix(rot, "./"), func() {
+		execdir, _ := os.Executable()
+		rot = filepath.Join(filepath.Dir(execdir), strings.TrimPrefix(rot, "./"))
 	})
 	return &static{
 		cache:  cache,

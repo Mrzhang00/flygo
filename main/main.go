@@ -6,6 +6,9 @@ import (
 	"github.com/billcoding/flygo"
 	. "github.com/billcoding/flygo/context"
 	mw "github.com/billcoding/flygo/middleware"
+	se "github.com/billcoding/flygo/session"
+	"github.com/billcoding/flygo/session/memory"
+	"time"
 )
 
 type HelloController struct {
@@ -99,8 +102,19 @@ func handler(c *Context) {
 
 func main() {
 	app := flygo.GetApp()
-	app.UseStatic(false, `/Users/local/tmp2`)
+	app.UseStatic(false, `./abc`)
 	app.POST("/", handler)
+	app.GET("/1", func(c *Context) {
+		mw.GetSession(c).Set("xxx", "dsfdsfds")
+		mw.GetSession(c).Set("xxx2", "dsfdsfds")
+		mw.GetSession(c).Set("xxx222", "dsfdsfds")
+	})
+	app.GET("/2", func(c *Context) {
+		c.SetData("aaa", "zzzz")
+		c.SetData("bbb", "zzzz")
+		c.SetData("ccc", "zzzz")
+		c.Template(`index`, nil)
+	})
 	//app.GET("/set", func(c *Context) {
 	//	sess := mw.GetSession(c)
 	//	sess.Set("name", "helloworld")
@@ -112,6 +126,7 @@ func main() {
 	//})
 	//app.REST(&HelloController{})
 	//app.Use(&MyMW{})
+	app.UseSession(memory.Provider(), &se.Config{Timeout: time.Minute}, nil)
 	//app.UseSession(redis.Provider(
 	//	&Options{Password: "123"}),
 	//	&se.Config{Timeout: time.Second * 20},
