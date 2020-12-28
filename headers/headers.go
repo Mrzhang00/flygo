@@ -9,6 +9,8 @@ const (
 	Location           = "Location"            //Header of Location
 
 	//cors headers
+	Allow                     = "Allow"
 	AccessControlAllowOrigin  = "Access-Control-Allow-Origin"
+	AccessControlAllowHeaders = "Access-Control-Allow-Headers"
 	AccessControlAllowMethods = "Access-Control-Allow-Methods"
 )
