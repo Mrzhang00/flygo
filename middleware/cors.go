@@ -10,17 +10,19 @@ import (
 
 //Define cors struct
 type cors struct {
-	origin  string
-	methods []string
-	header  http.Header
+	origin       string
+	methods      []string
+	allowHeaders []string
+	header       http.Header
 }
 
 //Cors
 func Cors() *cors {
 	return &cors{
-		origin:  "*",
-		methods: []string{"GET", "POST", "PUT", "DELETE", "PATCH"},
-		header:  make(http.Header, 0),
+		origin:       "*",
+		methods:      strings.Split("GET,POST,DELETE,PUT,PATCH,HEAD,OPTIONS", ","),
+		allowHeaders: make([]string, 0),
+		header:       make(http.Header, 0),
 	}
 }
 
@@ -47,6 +49,8 @@ func (cs *cors) Pattern() Pattern {
 //Handler
 func (cs *cors) Handler() func(c *c.Context) {
 	return func(c *c.Context) {
+		cs.header.Set(headers.Allow, strings.Join(cs.methods, ","))
+		cs.header.Set(headers.AccessControlAllowHeaders, strings.Join(cs.allowHeaders, ","))
 		cs.header.Set(headers.AccessControlAllowOrigin, cs.origin)
 		cs.header.Set(headers.AccessControlAllowMethods, strings.Join(cs.methods, ","))
 		for k, v := range cs.header {
@@ -55,6 +59,7 @@ func (cs *cors) Handler() func(c *c.Context) {
 			}
 		}
 		calls.True(c.Request.Method != http.MethodHead && c.Request.Method != http.MethodOptions, func() {
+			//not preflighted request
 			c.Chain()
 		})
 	}
@@ -69,5 +74,11 @@ func (cs *cors) Origin(origin string) *cors {
 //Methods
 func (cs *cors) Methods(methods ...string) *cors {
 	cs.methods = methods
+	return cs
+}
+
+//AllowHeaders
+func (cs *cors) AllowHeaders(headers ...string) *cors {
+	cs.allowHeaders = headers
 	return cs
 }
