@@ -7,6 +7,7 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -15,15 +16,13 @@ import (
 
 //Define provider struct
 type provider struct {
-	sessions map[string]se.Session
-	mu       sync.RWMutex
+	sessions *sync.Map //map[string]se.Session
 }
 
 //Provider
 func Provider() se.Provider {
 	p := &provider{
-		sessions: make(map[string]se.Session),
-		mu:       sync.RWMutex{},
+		sessions: &sync.Map{},
 	}
 	return p
 }
@@ -44,39 +43,49 @@ func (p *provider) GetId(r *http.Request) string {
 
 //Exists
 func (p *provider) Exists(id string) bool {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-	_, have := p.sessions[id]
+	_, have := p.sessions.Load(id)
 	return have
 }
 
 //Get
 func (p *provider) Get(id string) se.Session {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-	session, _ := p.sessions[id]
-	return session
+	value, have := p.sessions.Load(id)
+	if !have {
+		return nil
+	}
+	return value.(se.Session)
 }
 
 //Del
 func (p *provider) Del(id string) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	delete(p.sessions, id)
+	p.sessions.Delete(id)
 }
 
 //GetAll
 func (p *provider) GetAll() map[string]se.Session {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-	return p.sessions
+	m := make(map[string]se.Session, 0)
+	p.sessions.Range(func(k, v interface{}) bool {
+		m[k.(string)] = v.(se.Session)
+		return true
+	})
+	return m
 }
 
 //Clear
 func (p *provider) Clear() {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.sessions = make(map[string]se.Session)
+	copy := p.sessions
+	p.sessions = &sync.Map{}
+	go func(copy *sync.Map) {
+		keys := make([]string, 0)
+		copy.Range(func(key, value interface{}) bool {
+			keys = append(keys, key.(string))
+			return true
+		})
+		for _, key := range keys {
+			copy.Delete(key)
+		}
+		runtime.GC()
+	}(copy)
 }
 
 //tmd5
@@ -96,17 +105,15 @@ func newSID() string {
 
 //New
 func (p *provider) New(config *se.Config, listener *se.Listener) se.Session {
-	p.mu.Lock()
-	defer p.mu.Unlock()
 	sessionId := newSID()
-	session := newSession(sessionId, config.Timeout)
-	p.sessions[sessionId] = session
+	sess := newSession(sessionId, config.Timeout)
+	p.sessions.Store(sessionId, sess)
 	go func() {
 		if listener != nil && listener.Created != nil {
-			listener.Created(session)
+			listener.Created(sess)
 		}
 	}()
-	return session
+	return sess
 }
 
 //Refresh
@@ -121,51 +128,43 @@ func (p *provider) Refresh(session se.Session, config *se.Config, listener *se.L
 
 //Clean
 func (p *provider) Clean(config *se.Config, listener *se.Listener) {
-	blocked := make(chan bool, 1)
-	go p.invalidatedSession(listener)
-	go p.destoryedSession(listener)
-	<-blocked
+	//go func() {
+	//	for {
+	//		p.cleanSession(listener)
+	//		time.Sleep(time.Second)
+	//	}
+	//}()
 }
 
-//invalidatedSession
-func (p *provider) invalidatedSession(listener *se.Listener) {
-	for {
-		for _, sess := range p.GetAll() {
-			nu := time.Now().Unix()
-			cu := sess.(*session).expiresTime.Unix()
-			invalidate := false
-			if cu == 0 {
-				invalidate = true
-			} else if cu <= nu {
-				invalidate = true
-			}
-			if invalidate {
-				sess.Invalidate()
-				go func() {
-					if listener != nil && listener.Invalidated != nil {
-						listener.Invalidated(sess)
-					}
-				}()
-			}
-		}
-		time.Sleep(time.Microsecond * 10)
+//cleanSession
+func (p *provider) cleanSession(listener *se.Listener) {
+	if len(p.GetAll()) <= 0 {
+		return
 	}
-}
-
-//destoryedSession
-func (p *provider) destoryedSession(listener *se.Listener) {
-	for {
-		for sessionId, sess := range p.GetAll() {
-			cs := sess.(*session)
-			if cs.Invalidated() {
-				p.Del(sessionId)
-				go func() {
-					if listener != nil && listener.Destoryed != nil {
-						listener.Destoryed(sess)
-					}
-				}()
-			}
+	for _, sess := range p.GetAll() {
+		nu := time.Now().Unix()
+		cu := sess.(*session).expiresTime.Unix()
+		invalidate := false
+		if cu == 0 {
+			invalidate = true
+		} else if cu <= nu {
+			invalidate = true
+		}
+		if invalidate {
+			sess.Invalidate()
+			go func() {
+				if listener != nil && listener.Invalidated != nil {
+					listener.Invalidated(sess)
+				}
+			}()
+		}
+		if sess.Invalidated() {
+			p.Del(sess.Id())
+			go func() {
+				if listener != nil && listener.Destoryed != nil {
+					listener.Destoryed(sess)
+				}
+			}()
 		}
 	}
-	time.Sleep(time.Microsecond * 10)
 }

@@ -8,15 +8,19 @@ var allMethods = []string{
 	http.MethodPut,
 	http.MethodDelete,
 	http.MethodPatch,
+	http.MethodHead,
+	http.MethodOptions,
 }
 
 var routeMethods = map[string]int{
-	"*":               0,
-	http.MethodGet:    0,
-	http.MethodPost:   0,
-	http.MethodPut:    0,
-	http.MethodDelete: 0,
-	http.MethodPatch:  0,
+	"*":                0,
+	http.MethodGet:     0,
+	http.MethodPost:    0,
+	http.MethodPut:     0,
+	http.MethodDelete:  0,
+	http.MethodPatch:   0,
+	http.MethodHead:    0,
+	http.MethodOptions: 0,
 }
 
 var requestMethods = map[string]int{

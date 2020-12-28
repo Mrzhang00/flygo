@@ -6,9 +6,6 @@ import (
 	"github.com/billcoding/flygo"
 	. "github.com/billcoding/flygo/context"
 	mw "github.com/billcoding/flygo/middleware"
-	se "github.com/billcoding/flygo/session"
-	"github.com/billcoding/flygo/session/memory"
-	"time"
 )
 
 type HelloController struct {
@@ -103,7 +100,9 @@ func handler(c *Context) {
 func main() {
 	app := flygo.GetApp()
 	app.UseStatic(false, `./abc`)
-	app.POST("/", handler)
+	app.GET("/", func(c *Context) {
+		c.Text(fmt.Sprintf("%v", mw.GetSession(c).GetAll()))
+	})
 	app.GET("/1", func(c *Context) {
 		mw.GetSession(c).Set("xxx", "dsfdsfds")
 		mw.GetSession(c).Set("xxx2", "dsfdsfds")
@@ -115,6 +114,10 @@ func main() {
 		c.SetData("ccc", "zzzz")
 		c.Template(`index`, nil)
 	})
+	//app.Use(mw.Cors())
+	//app.HEAD("/*", func(c *Context) {
+	//	c.WriteCode(401)
+	//})
 	//app.GET("/set", func(c *Context) {
 	//	sess := mw.GetSession(c)
 	//	sess.Set("name", "helloworld")
@@ -126,10 +129,37 @@ func main() {
 	//})
 	//app.REST(&HelloController{})
 	//app.Use(&MyMW{})
-	app.UseSession(memory.Provider(), &se.Config{Timeout: time.Minute}, nil)
+	//app.Use(mw.RedisToken(&rds.Options{
+	//	Addr:     "139.196.40.100:6379",
+	//	Password: "OQYG22dfd45gfgfgfB84V",
+	//	DB:       15,
+	//}))
+	//app.UseSession(memory.Provider(), &se.Config{Timeout: time.Minute},
+	//	&se.Listener{
+	//		Created: func(s se.Session) {
+	//			log.Println("Created")
+	//		},
+	//
+	//		Refreshed: func(s se.Session) {
+	//			log.Println("Refreshed")
+	//		},
+	//
+	//		Invalidated: func(s se.Session) {
+	//			log.Println("Invalidated")
+	//		},
+	//
+	//		Destoryed: func(s se.Session) {
+	//			log.Println("Destoryed")
+	//		},
+	//	},
+	//)
 	//app.UseSession(redis.Provider(
-	//	&Options{Password: "123"}),
-	//	&se.Config{Timeout: time.Second * 20},
+	//	&rds.Options{
+	//		Addr:     "139.196.40.100:6379",
+	//		Password: "OQYG22dfd45gfgfgfB84V",
+	//		DB:       15,
+	//	}),
+	//	&se.Config{Timeout: time.Hour},
 	//	&se.Listener{
 	//		Created: func(s se.Session) {
 	//			log.Println("Created")

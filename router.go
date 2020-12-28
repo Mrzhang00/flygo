@@ -40,6 +40,16 @@ func (a *App) PATCH(pattern string, handler Handler) *App {
 	return a.Route(http.MethodPatch, pattern, handler)
 }
 
+//Route Handler for HEAD method
+func (a *App) HEAD(pattern string, handler Handler) *App {
+	return a.Route(http.MethodHead, pattern, handler)
+}
+
+//Route Handler for OPTIONS method
+func (a *App) OPTIONS(pattern string, handler Handler) *App {
+	return a.Route(http.MethodOptions, pattern, handler)
+}
+
 //Route Handler for PATCH method
 func (a *App) Route(method, pattern string, handler Handler) *App {
 	a.routers[0].Route(method, pattern, handler)

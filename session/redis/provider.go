@@ -3,6 +3,7 @@ package redis
 import (
 	"crypto/md5"
 	"fmt"
+	"github.com/billcoding/calls"
 	"github.com/billcoding/flygo/log"
 	se "github.com/billcoding/flygo/session"
 	"github.com/go-redis/redis"
@@ -20,11 +21,10 @@ const defaultPrefixKey = "session:"
 //Define provider struct
 type provider struct {
 	logger    log.Logger
-	mu        *sync.Mutex
 	keyPrefix string
 	options   *redis.Options
 	client    *redis.Client
-	sessions  map[string]se.Session
+	sessions  *sync.Map
 }
 
 //Get new SessionProvider
@@ -35,14 +35,17 @@ func Provider(options *redis.Options) se.Provider {
 //Get new SessionProvider with prefix key
 func NewWithPrefixKey(options *redis.Options, prefixKey string) se.Provider {
 	client := redis.NewClient(options)
+	ping := client.Ping()
 	p := &provider{
 		logger:    log.New("[Provider]"),
-		mu:        &sync.Mutex{},
 		keyPrefix: prefixKey,
 		options:   options,
 		client:    client,
-		sessions:  make(map[string]se.Session),
+		sessions:  &sync.Map{},
 	}
+	calls.NNil(ping.Err(), func() {
+		p.logger.Warn("%v", ping.Err())
+	})
 	//First sync session from redis
 	p.syncSession()
 	return p
@@ -69,21 +72,17 @@ func (p *provider) getRedisKey(id string) string {
 
 //Exists
 func (p *provider) Exists(id string) bool {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	session, have := p.sessions[id]
-	return have && !session.Invalidated()
+	get := p.Get(id)
+	return get != nil && !get.Invalidated()
 }
 
 //Get
 func (p *provider) Get(id string) se.Session {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	session, have := p.sessions[id]
-	if have && !session.Invalidated() {
-		return session
+	sess, have := p.sessions.Load(id)
+	if !have {
+		return nil
 	}
-	return nil
+	return sess.(se.Session)
 }
 
 //Del
@@ -146,8 +145,6 @@ func newSID() string {
 
 //New
 func (p *provider) New(config *se.Config, listener *se.Listener) se.Session {
-	p.mu.Lock()
-	defer p.mu.Unlock()
 	sessionId := newSID()
 	session := newSession(p.client, sessionId, p.getRedisKey(sessionId))
 	hsetCmd := p.client.HSet(p.getRedisKey(sessionId), sessionIdName, sessionId)
@@ -160,7 +157,7 @@ func (p *provider) New(config *se.Config, listener *se.Listener) se.Session {
 		p.logger.Error("[New]%v", expireCmd.Err())
 		return nil
 	}
-	p.sessions[sessionId] = session
+	p.sessions.Store(sessionId, session)
 	return session
 }
 
@@ -180,10 +177,7 @@ func (p *provider) Refresh(session se.Session, config *se.Config, listener *se.L
 
 //Clean
 func (p *provider) Clean(config *se.Config, listener *se.Listener) {
-	blocked := make(chan bool, 1)
-	go p.invalidatedSession(listener)
 	go p.cleanSession(listener)
-	<-blocked
 }
 
 //syncSession
@@ -207,53 +201,42 @@ func (p *provider) syncSession() {
 			sessionId := vals[sessionIdName]
 			rs := newSession(p.client, sessionId, key)
 			sessionMap[sessionId] = rs
+			p.sessions.Store(sessionId, newSession(p.client, sessionId, key))
 		}
-		p.sessions = sessionMap
 	}()
 	wait <- true
-}
-
-//invalidatedSession
-func (p *provider) invalidatedSession(listener *se.Listener) {
-	for {
-		p.mu.Lock()
-		for sessionId, sess := range p.sessions {
-			key := p.getRedisKey(sessionId)
-			existsCmd := p.client.Exists(key)
-			if existsCmd.Err() != nil {
-				p.logger.Error("[invalidatedSession]%v", existsCmd.Err())
-				continue
-			}
-			if existsCmd.Val() <= 0 {
-				sess.Invalidate()
-				go func() {
-					if listener != nil && listener.Invalidated != nil {
-						listener.Invalidated(sess)
-					}
-				}()
-			}
-		}
-		p.mu.Unlock()
-		time.Sleep(time.Second)
-	}
 }
 
 //cleanSession
 func (p *provider) cleanSession(listener *se.Listener) {
 	for {
-		p.mu.Lock()
-		for sessionId, session := range p.sessions {
-			if session.Invalidated() {
-				delete(p.sessions, sessionId)
-				p.Del(sessionId)
+		p.sessions.Range(func(k, v interface{}) bool {
+			sessionId := k.(string)
+			sess := v.(se.Session)
+			key := p.getRedisKey(sessionId)
+			existsCmd := p.client.Exists(key)
+			if existsCmd.Err() != nil {
+				p.logger.Error("[invalidatedSession]%v", existsCmd.Err())
+			} else {
+				if existsCmd.Val() <= 0 {
+					sess.Invalidate()
+					go func() {
+						if listener != nil && listener.Invalidated != nil {
+							listener.Invalidated(sess)
+						}
+					}()
+				}
+			}
+			if sess.Invalidated() {
+				p.sessions.Delete(sessionId)
 				go func() {
 					if listener != nil && listener.Destoryed != nil {
-						listener.Destoryed(session)
+						listener.Destoryed(sess)
 					}
 				}()
 			}
-		}
-		p.mu.Unlock()
+			return true
+		})
 		time.Sleep(time.Second)
 	}
 }

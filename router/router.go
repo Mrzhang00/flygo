@@ -52,6 +52,16 @@ func (r *Router) PATCH(pattern string, handler func(c *c.Context)) *Router {
 	return r.Route(http.MethodPatch, pattern, handler)
 }
 
+//Route Handler for HEAD method
+func (r *Router) HEAD(pattern string, handler func(c *c.Context)) *Router {
+	return r.Route(http.MethodHead, pattern, handler)
+}
+
+//Route Handler for OPTIONS method
+func (r *Router) OPTIONS(pattern string, handler func(c *c.Context)) *Router {
+	return r.Route(http.MethodOptions, pattern, handler)
+}
+
 //Route Handler for PATCH method
 func (r *Router) Route(method, pattern string, handler func(c *c.Context)) *Router {
 	//first check method supported?

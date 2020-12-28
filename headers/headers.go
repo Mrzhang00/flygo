@@ -7,4 +7,8 @@ const (
 	SetCookie          = "Set-Cookie"          //Header of Set-Cookie
 	ContentDisposition = "Content-Disposition" //Header of Content-Disposition
 	Location           = "Location"            //Header of Location
+
+	//cors headers
+	AccessControlAllowOrigin  = "Access-Control-Allow-Origin"
+	AccessControlAllowMethods = "Access-Control-Allow-Methods"
 )

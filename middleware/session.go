@@ -85,8 +85,8 @@ func (s *session) Handler() func(c *c.Context) {
 
 //Session
 func Session(provider se.Provider, config *se.Config, listener *se.Listener) Middleware {
-	//Start clean goroutine
-	go provider.Clean(config, listener)
+	//Start clean
+	provider.Clean(config, listener)
 	return &session{
 		provider: provider,
 		config:   config,

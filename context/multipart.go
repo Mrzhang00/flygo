@@ -47,12 +47,12 @@ func (file *MultipartFile) Copy(distName string) error {
 }
 
 //ParseMultipart
-func (c *Context) ParseMultipart(maxMemory int64) {
+func (c *Context) ParseMultipart(maxMemory int64) error {
 	var err error
 	err = c.Request.ParseMultipartForm(maxMemory)
 	if err != nil {
 		c.logger.Error("[ParseMultipart]%v", err)
-		return
+		return err
 	}
 	paramMap := make(map[string][]string, 0)
 	for name, values := range c.Request.MultipartForm.Value {
@@ -77,6 +77,7 @@ func (c *Context) ParseMultipart(maxMemory int64) {
 		}
 		c.MultipartMap[name] = mfs
 	}
+	return nil
 }
 
 //MultipartFile
