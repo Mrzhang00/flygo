@@ -22,7 +22,7 @@ type downFile struct {
 }
 
 //downFile
-func DownFile() Middleware {
+func DownFile() *downFile {
 	return &downFile{
 		logger:  log.New(os.Stdout, "[downFile]", log.LstdFlags),
 		root:    os.TempDir(),

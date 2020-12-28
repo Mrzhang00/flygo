@@ -33,7 +33,7 @@ type uploadFile struct {
 }
 
 //Return new uploadFile
-func UploadFile() Middleware {
+func UploadFile() *uploadFile {
 	return &uploadFile{
 		logger:  log.New(os.Stdout, "[uploadFile]", log.LstdFlags),
 		root:    os.TempDir(),

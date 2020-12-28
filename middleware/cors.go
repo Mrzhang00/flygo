@@ -16,7 +16,7 @@ type cors struct {
 }
 
 //Cors
-func Cors() Middleware {
+func Cors() *cors {
 	return &cors{
 		origin:  "*",
 		methods: []string{"GET", "POST", "PUT", "DELETE", "PATCH"},

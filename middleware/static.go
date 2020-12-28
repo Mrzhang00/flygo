@@ -21,7 +21,7 @@ type static struct {
 }
 
 //Static
-func Static(cache bool, root string) Middleware {
+func Static(cache bool, root string) *static {
 	rot := root
 	// "" "." "./" "./static"
 	calls.True(rot == "" || rot == "." || rot == "./", func() {

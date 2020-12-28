@@ -84,7 +84,7 @@ func (s *session) Handler() func(c *c.Context) {
 }
 
 //Session
-func Session(provider se.Provider, config *se.Config, listener *se.Listener) Middleware {
+func Session(provider se.Provider, config *se.Config, listener *se.Listener) *session {
 	//Start clean
 	provider.Clean(config, listener)
 	return &session{

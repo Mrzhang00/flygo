@@ -18,7 +18,7 @@ type redisAuth struct {
 }
 
 //RedisAuth
-func RedisAuth(options *redis.Options) Middleware {
+func RedisAuth(options *redis.Options) *redisAuth {
 	client := redis.NewClient(options)
 	ping := client.Ping()
 	r := &redisAuth{

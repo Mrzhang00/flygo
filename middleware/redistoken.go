@@ -25,7 +25,7 @@ type redisToken struct {
 }
 
 //Return new RedisToken
-func RedisToken(options *redis.Options) Middleware {
+func RedisToken(options *redis.Options) *redisToken {
 	client := redis.NewClient(options)
 	ping := client.Ping()
 	rt := &redisToken{
