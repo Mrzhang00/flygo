@@ -128,12 +128,12 @@ func (p *provider) Refresh(session se.Session, config *se.Config, listener *se.L
 
 //Clean
 func (p *provider) Clean(config *se.Config, listener *se.Listener) {
-	//go func() {
-	//	for {
-	//		p.cleanSession(listener)
-	//		time.Sleep(time.Second)
-	//	}
-	//}()
+	go func() {
+		for {
+			p.cleanSession(listener)
+			time.Sleep(time.Second)
+		}
+	}()
 }
 
 //cleanSession
