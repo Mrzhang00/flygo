@@ -1,8 +1,12 @@
 package flygo
 
 import (
-	"fmt"
-	"html/template"
+	. "github.com/billcoding/flygo/config"
+	. "github.com/billcoding/flygo/log"
+	. "github.com/billcoding/flygo/middleware"
+	. "github.com/billcoding/flygo/rest"
+	. "github.com/billcoding/flygo/router"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -11,196 +15,117 @@ import (
 
 //Define app struct
 type App struct {
-	Id                     string                  //app id
-	Name                   string                  //app name
-	ConfigFile             string                  //conf file
-	Config                 *YmlConfig              //yml config
-	Logger                 *log                    //App logger
-	staticCaches           staticCache             //static res cache
-	staticMimeCaches       staticMimeCache         //static res mime cache
-	viewCaches             viewCache               //view cache
-	routes                 []handlerRouteCache     //list routes
-	patternRoutes          patternRoute            //pattern route handlers
-	variableRoutes         variableRoute           //variable route handlers
-	filterRouteCaches      []filterRouteCache      //list filterRouteCaches
-	beforeFilters          aroundFilter            //before filters
-	afterFilters           aroundFilter            //after filters
-	interceptorRouteCaches []interceptorRouteCache //list interceptorRouteCaches
-	beforeInterceptors     aroundInterceptor       //before interceptors
-	afterInterceptors      aroundInterceptor       //after interceptors
-	FaviconIconHandler     StaticHandler           //default favicon ico handler
-	StaticHandler          StaticHandler           //default static handler
-	PreflightedHandler     Handler                 //preflighted handler
-
-	NotFoundHandler         Handler //not found handler
-	MethodNotAllowedHandler Handler //method not allowed  handler
-
-	Caches                 appCache   //Application LEVEL cache
-	middlewares            middleware //Middleware names
-	filterMiddlewares      middleware //Filter Middleware names
-	interceptorMiddlewares middleware //Interceptor Middleware names
-
-	TemplateFuncs template.FuncMap //Template funcs
-	SessionConfig *SessionConfig   //Session config
+	ServerConfig   *serverConfig   //Server Config
+	ConfigFile     string          //Config file
+	Config         *Config         //Yml config
+	Logger         Logger          //App logger
+	controllers    []Controller    //Rest controllers
+	groups         []*Group        //groups
+	routers        []*Router       //routers
+	parsedRouters  *ParsedRouter   //parsed routers
+	middlewares    []Middleware    //middlewares
+	defaultMWState *defaultMWState //defaultMWState
 }
 
-var defaultApp *App
-
-func init() {
-	id := "MASTER"
-	defaultApp = NewAppWithId(id)
-	if AppGroup.Listener().created != nil {
-		AppGroup.Listener().created(newAppInfo(id, defaultApp))
-	}
+//Define ServerConfig struct
+type serverConfig struct {
+	ReadTimeout       time.Duration
+	ReadHeaderTimeout time.Duration
+	WriteTimeout      time.Duration
+	IdleTimeout       time.Duration
+	MaxHeaderBytes    int
 }
 
-//Get default app
+var defaultApp = NewApp()
+
+//GetApp
 func GetApp() *App {
 	return defaultApp
 }
 
-//New app with named seq index
+//NewApp
 func NewApp() *App {
-	return NewAppWithId("")
-}
-
-//New app with named id
-func NewAppWithId(id string) *App {
-	if id == "" {
-		id = AppGroup.nextAppId()
-	}
-	app := createApp(id)
-	AppGroup.addWithId(id, app)
-	return app
-}
-
-func createApp(id string) *App {
-	if id == "" {
-		panic("[App]app is empty")
-	}
 	return &App{
-		Id:                      id,
-		Name:                    AppGroup.prefix + id,
-		ConfigFile:              fmt.Sprintf("flygo-%s.yml", id),
-		Config:                  defaultYmlConfig(),
-		staticCaches:            make(map[string][]byte),
-		staticMimeCaches:        make(map[string]string),
-		viewCaches:              make(map[string]string),
-		routes:                  make([]handlerRouteCache, 0),
-		patternRoutes:           make(map[string]map[string]patternHandlerRoute),
-		variableRoutes:          make(map[string]map[string]variableHandlerRoute),
-		filterRouteCaches:       make([]filterRouteCache, 0),
-		beforeFilters:           make(map[string]filterRouteChain),
-		afterFilters:            make(map[string]filterRouteChain),
-		interceptorRouteCaches:  make([]interceptorRouteCache, 0),
-		beforeInterceptors:      make(map[string]interceptorRouteChain),
-		afterInterceptors:       make(map[string]interceptorRouteChain),
-		FaviconIconHandler:      faviconIconHandler,
-		StaticHandler:           staticHandler,
-		PreflightedHandler:      preflightedHandler,
-		NotFoundHandler:         notFoundHandler,
-		MethodNotAllowedHandler: methodNotAllowedHandler,
-		Caches:                  make(map[string]interface{}),
-		middlewares:             make(map[string]int),
-		filterMiddlewares:       make(map[string]int),
-		interceptorMiddlewares:  make(map[string]int),
-		TemplateFuncs:           make(map[string]interface{}),
-		SessionConfig: &SessionConfig{
-			SessionListener: &SessionListener{},
-			Timeout:         time.Hour * 24 * 30, //1 month
+		ServerConfig: &serverConfig{
+			ReadTimeout:       time.Hour,
+			ReadHeaderTimeout: time.Hour,
+			WriteTimeout:      time.Hour,
+			IdleTimeout:       0,
+			MaxHeaderBytes:    http.DefaultMaxHeaderBytes,
+		},
+		ConfigFile:  "flygo.yml",
+		Config:      Default(),
+		Logger:      New("[FLYGO]"),
+		controllers: make([]Controller, 0),
+		groups:      make([]*Group, 0),
+		routers:     []*Router{NewRouter()},
+		parsedRouters: &ParsedRouter{
+			Simples:  make(map[string]*Simple),
+			Dynamics: make(map[string]map[string]*Dynamic),
+		},
+		middlewares: make([]Middleware, 6, 6),
+		defaultMWState: &defaultMWState{
+			header: true,
 		},
 	}
 }
 
-//Init
-func (a *App) inita() {
-	a.checkConfig()
-	a.setLoggers()
-}
-
-//Run the server
+//Run
 func (a *App) Run() {
 	a.parseYml()
-
-	//parse env
 	a.parseEnv()
-
-	//start route
-	a.startRoute()
-
-	//start filterRouteCache
-	a.startFilter()
-
-	//start interceptorRouteCache
-	a.startInterceptor()
-
-	//print banner
 	a.printBanner()
-
-	//parse bind address
-	a.parseAddr()
-
-	//print config
-	a.DebugTrace(a.printConfig)
-
-	//print middleware
-	a.DebugTrace(a.printMiddleware)
-
-	//print route
-	a.DebugTrace(a.printRoute)
-
-	//print filter
-	a.DebugTrace(a.printFilter)
-
-	//print interceptor
-	a.DebugTrace(a.printInterceptor)
-
-	//print session provider
-	a.DebugTrace(a.printSessionProvider)
-
-	//start server
+	a.routeRestControllers()
+	a.parseRouters()
+	a.useDefaultMWs()
+	a.parseConfig()
 	a.serve()
 }
 
-//Parse bind address
+//parseAddr
 func (a *App) parseAddr() {
-	host := a.Config.Flygo.Server.Host
-	port := a.Config.Flygo.Server.Port
+	host := a.Config.Server.Host
+	port := a.Config.Server.Port
 	if host == "" || host == "*" {
 		host = "0.0.0.0"
 	}
 	minPort := 0
 	maxPort := 65536
 	if port < minPort || port > maxPort {
-		a.Logger.Error("The port `%v` is invalid.[valid : %v - %v]", port, minPort, maxPort)
+		a.Logger.Error("[parseAddr]The port `%v` is invalid.[valid : %v - %v]", port, minPort, maxPort)
 		os.Exit(0)
 	}
 }
 
-//Start serve bind
+//serve
 func (a *App) serve() {
-	defer func() {
-		if re := recover(); re != nil {
-			a.Logger.Error("%v", re)
-		}
-	}()
-	host := a.Config.Flygo.Server.Host
-	port := a.Config.Flygo.Server.Port
-	tlsEnable := a.Config.Flygo.Server.Tls.Enable
+	host := a.Config.Server.Host
+	port := a.Config.Server.Port
+	tlsEnable := a.Config.Server.TLS.Enable
 	addr := host + ":" + strconv.Itoa(port)
-	a.Logger.Info("Bind on %s", addr)
-	a.Logger.Info("Server started")
+	a.Logger.Info("[serve]Bind on %s", addr)
+	a.Logger.Info("[serve]Server started")
 	var err error
+	server := &http.Server{
+		Addr:              addr,
+		Handler:           a.newDispatcher(),
+		ReadTimeout:       a.ServerConfig.ReadTimeout,
+		ReadHeaderTimeout: a.ServerConfig.ReadHeaderTimeout,
+		WriteTimeout:      a.ServerConfig.WriteTimeout,
+		IdleTimeout:       a.ServerConfig.IdleTimeout,
+		MaxHeaderBytes:    a.ServerConfig.MaxHeaderBytes,
+		ErrorLog:          log.New(os.Stderr, "[http]", log.LstdFlags),
+	}
 	if tlsEnable {
 		//tls support
-		certFile := a.Config.Flygo.Server.Tls.CertFile
-		keyFile := a.Config.Flygo.Server.Tls.KeyFile
-		err = http.ListenAndServeTLS(addr, certFile, keyFile, a.newDispatcher())
+		certFile := a.Config.Server.TLS.CertFile
+		keyFile := a.Config.Server.TLS.KeyFile
+		err = server.ListenAndServeTLS(certFile, keyFile)
 	} else {
 		//http
-		err = http.ListenAndServe(addr, a.newDispatcher())
+		err = server.ListenAndServe()
 	}
 	if err != nil {
-		a.Logger.Error(err.Error())
+		a.Logger.Error("[serve]%v", err.Error())
 	}
 }

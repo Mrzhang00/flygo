@@ -1,187 +1,166 @@
 package flygo
 
 import (
+	"fmt"
+	c "github.com/billcoding/flygo/context"
+	mw "github.com/billcoding/flygo/middleware"
+	se "github.com/billcoding/flygo/session"
+	"regexp"
 	"strings"
 )
 
-//Define Middleware interface
-type Middleware interface {
-	//Set Middleware name
-	Name() string
-	//Set Middleware method
-	Method() string
-	//Set Middleware pattern
-	Pattern() string
-	//Process Middleware
-	Process() Handler
-	//Set Middleware fields
-	Fields() []*Field
+//Define defaultMWState struct
+type defaultMWState struct {
+	header           bool
+	methodNotAllowed bool
+	recovery         bool
+	notFound         bool
+	stdLogger        bool
+
+	session  bool
+	provider se.Provider
+	config   *se.Config
+	listener *se.Listener
+
+	static      bool
+	staticCache bool
+	staticRoot  string
 }
 
-//Define MiddlewareConfig struct
-type MiddlewareConfig struct {
-	Name    string
-	Method  string
-	Pattern string
-	Fields  []*Field
-}
-
-//Define Filter Middleware interface
-type FilterMiddleware interface {
-	//Set FilterMiddleware name
-	Name() string
-	//Set FilterMiddleware type
-	Type() string
-	//Set FilterMiddleware pattern
-	Pattern() string
-	//Process FilterMiddleware
-	Process() FilterHandler
-}
-
-//Define FilterMiddlewareConfig struct
-type FilterMiddlewareConfig struct {
-	Name    string
-	Type    string
-	Pattern string
-}
-
-//Define Interceptor Middleware interface
-type InterceptorMiddleware interface {
-	//Set InterceptorMiddleware name
-	Name() string
-	//Set InterceptorMiddleware type
-	Type() string
-	//Set InterceptorMiddleware pattern
-	Pattern() string
-	//Process InterceptorMiddleware
-	Process() InterceptorHandler
-}
-
-//Define InterceptorMiddlewareConfig struct
-type InterceptorMiddlewareConfig struct {
-	Name    string
-	Type    string
-	Pattern string
-}
-
-//Using middlewares
-func (a *App) Use(middlewares ...Middleware) *App {
-	for _, middleware := range middlewares {
-		a.middlewares[middleware.Name()] = 0
-		a.route(strings.ToUpper(middleware.Method()), middleware.Pattern(), middleware.Process(), middleware.Fields()...)
-	}
+//Use
+func (a *App) Use(middlewares ...mw.Middleware) *App {
+	a.middlewares = append(a.middlewares, middlewares...)
 	return a
 }
 
-//Using middlewares with config
-func (a *App) UseWithConfig(mwConfig MiddlewareConfig, middleware Middleware) *App {
-	if mwConfig.Name == "" {
-		mwConfig.Name = middleware.Name()
-	}
-	if mwConfig.Method == "" {
-		mwConfig.Method = middleware.Method()
-	}
-	if mwConfig.Pattern == "" {
-		mwConfig.Pattern = middleware.Pattern()
-	}
-	if mwConfig.Fields == nil {
-		mwConfig.Fields = middleware.Fields()
-	}
-	a.middlewares[mwConfig.Name] = 0
-	a.route(strings.ToUpper(mwConfig.Method), mwConfig.Pattern, middleware.Process(), mwConfig.Fields...)
+//UseSession
+func (a *App) UseSession(provider se.Provider, config *se.Config, listener *se.Listener) *App {
+	a.defaultMWState.session = true
+	a.defaultMWState.provider = provider
+	a.defaultMWState.config = config
+	a.defaultMWState.listener = listener
 	return a
 }
 
-//Using filter middlewares
-func (a *App) UseFilter(filterMiddlewares ...FilterMiddleware) *App {
-	for _, middleware := range filterMiddlewares {
-		a.filterMiddlewares[middleware.Name()] = 0
-		if strings.ToUpper(middleware.Type()) == "BEFORE" {
-			a.BeforeFilter(middleware.Pattern(), middleware.Process())
-		} else if strings.ToUpper(middleware.Type()) == "AFTER" {
-			a.AfterFilter(middleware.Pattern(), middleware.Process())
+//UseHeader
+func (a *App) UseHeader() *App {
+	a.defaultMWState.header = true
+	return a
+}
+
+//UseMethodNotAllowed
+func (a *App) UseMethodNotAllowed() *App {
+	a.defaultMWState.methodNotAllowed = true
+	return a
+}
+
+//UseRecovery
+func (a *App) UseRecovery() *App {
+	a.defaultMWState.recovery = true
+	return a
+}
+
+//UseNotFound
+func (a *App) UseNotFound() *App {
+	a.defaultMWState.notFound = true
+	return a
+}
+
+//UseStdLogger
+func (a *App) UseStdLogger() *App {
+	a.defaultMWState.stdLogger = true
+	return a
+}
+
+//UseStatic
+func (a *App) UseStatic(cache bool, root string) *App {
+	a.defaultMWState.static = true
+	a.defaultMWState.staticCache = cache
+	a.defaultMWState.staticRoot = root
+	return a
+}
+
+//Use default
+func (a *App) useDefaultMWs() *App {
+
+	//use session middleware
+	if a.defaultMWState.session {
+		a.middlewares[0] = mw.Session(a.defaultMWState.provider, a.defaultMWState.config, a.defaultMWState.listener)
+	}
+
+	//use header middleware
+	if a.defaultMWState.header {
+		a.middlewares[1] = mw.Header()
+	}
+
+	//use method not allowed middleware
+	if a.defaultMWState.methodNotAllowed {
+		a.middlewares[2] = mw.MethodNotAllowed()
+	}
+
+	//use std logger middleware
+	if a.defaultMWState.stdLogger {
+		a.middlewares[3] = mw.StdLogger()
+	}
+
+	//use recovered middleware
+	if a.defaultMWState.recovery {
+		a.middlewares[4] = mw.Recovery()
+	}
+
+	//use not found middleware
+	if a.defaultMWState.notFound {
+		a.middlewares[5] = mw.NotFound()
+	}
+
+	//use static
+	if a.defaultMWState.static {
+		a.middlewares = append(a.middlewares, mw.Static(a.defaultMWState.staticCache, a.defaultMWState.staticRoot))
+	}
+
+	return a
+}
+
+//Middlewares
+func (a *App) Middlewares(c *c.Context, mtype *mw.Type) []mw.Middleware {
+	mws := make([]mw.Middleware, 0)
+	if len(a.middlewares) > 0 {
+		for _, middleware := range a.middlewares {
+			if middleware == nil {
+				continue
+			}
+			matched := false
+			if mtype == middleware.Type() {
+				if middleware.Method() == mw.MethodAny || string(middleware.Method()) == c.Request.Method {
+					if middleware.Pattern() == mw.PatternNoRoute {
+						matched = true
+					} else if middleware.Pattern() == mw.PatternAny {
+						matched = true
+					} else if string(middleware.Pattern()) == c.Request.URL.Path {
+						matched = true
+					} else {
+						reEp := trimPattern(string(middleware.Pattern()))
+						re := regexp.MustCompile(reEp)
+						matched = re.MatchString(c.Request.URL.Path)
+					}
+				}
+			}
+			if matched {
+				mws = append(mws, middleware)
+				if mtype == mw.TypeHandler {
+					break
+				}
+			}
 		}
 	}
-	return a
+	return mws
 }
 
-//Using filter middlewares with config
-func (a *App) UseFilterWithConfig(fmwConfig FilterMiddlewareConfig, filterMiddleware FilterMiddleware) *App {
-	if fmwConfig.Name == "" {
-		fmwConfig.Name = filterMiddleware.Name()
-	}
-	if fmwConfig.Type == "" {
-		fmwConfig.Type = filterMiddleware.Type()
-	}
-	if fmwConfig.Pattern == "" {
-		fmwConfig.Pattern = filterMiddleware.Pattern()
-	}
-	a.filterMiddlewares[fmwConfig.Name] = 0
-	if strings.ToUpper(fmwConfig.Type) == "BEFORE" {
-		a.BeforeFilter(fmwConfig.Pattern, filterMiddleware.Process())
-	} else if strings.ToUpper(fmwConfig.Type) == "AFTER" {
-		a.AfterFilter(fmwConfig.Pattern, filterMiddleware.Process())
-	}
-	return a
-}
-
-//Using interceptor middlewares
-func (a *App) UseInterceptor(interceptorMiddlewares ...InterceptorMiddleware) *App {
-	for _, middleware := range interceptorMiddlewares {
-		a.interceptorMiddlewares[middleware.Name()] = 0
-		if strings.ToUpper(middleware.Type()) == "BEFORE" {
-			a.BeforeInterceptor(middleware.Pattern(), middleware.Process())
-		} else if strings.ToUpper(middleware.Type()) == "AFTER" {
-			a.AfterInterceptor(middleware.Pattern(), middleware.Process())
-		}
-	}
-	return a
-}
-
-//Using interceptor middlewares with config
-func (a *App) UseInterceptorWithConfig(imwConfig InterceptorMiddlewareConfig, interceptorMiddleware InterceptorMiddleware) *App {
-	if imwConfig.Name == "" {
-		imwConfig.Name = interceptorMiddleware.Name()
-	}
-	if imwConfig.Type == "" {
-		imwConfig.Type = interceptorMiddleware.Type()
-	}
-	if imwConfig.Pattern == "" {
-		imwConfig.Pattern = interceptorMiddleware.Pattern()
-	}
-	a.filterMiddlewares[imwConfig.Name] = 0
-	if strings.ToUpper(imwConfig.Type) == "BEFORE" {
-		a.BeforeInterceptor(imwConfig.Pattern, interceptorMiddleware.Process())
-	} else if strings.ToUpper(imwConfig.Type) == "AFTER" {
-		a.AfterInterceptor(imwConfig.Pattern, interceptorMiddleware.Process())
-	}
-	return a
-}
-
-//Print middlewares
-func (a *App) printMiddleware() {
-	for name := range a.middlewares {
-		a.Logger.Info("Middleware detected [%s]", name)
-	}
-	for name := range a.filterMiddlewares {
-		a.Logger.Info("FilterMiddleware detected [%s]", name)
-	}
-	for name := range a.interceptorMiddlewares {
-		a.Logger.Info("InterceptorMiddleware detected [%s]", name)
-	}
-}
-
-//Init middleware c
-func (a *App) initMiddlewareCtx() map[string]map[string]interface{} {
-	middlewareCtx := make(map[string]map[string]interface{}, 0)
-	for name := range a.middlewares {
-		middlewareCtx[name] = make(map[string]interface{}, 0)
-	}
-	for name := range a.filterMiddlewares {
-		middlewareCtx[name] = make(map[string]interface{}, 0)
-	}
-	for name := range a.interceptorMiddlewares {
-		middlewareCtx[name] = make(map[string]interface{}, 0)
-	}
-	return middlewareCtx
+//trimPattern
+func trimPattern(pattern string) string {
+	re := regexp.MustCompile(`[^/\w-._*]`)
+	np := re.ReplaceAllString(pattern, "")
+	np = strings.ReplaceAll(np, "**", "*")
+	np = strings.ReplaceAll(np, "*", `[\w-._/]+`)
+	return fmt.Sprintf(`^%s$`, np)
 }

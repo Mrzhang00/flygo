@@ -1,0 +1,14 @@
+flygo:
+  server:
+    host: localhost
+    port: 80
+  banner:
+    enable: true
+    type: default
+    text: ''
+    file: ''
+  template:
+    enable: false
+    cache: true
+    root: ./
+    suffix: .html
