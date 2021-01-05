@@ -82,6 +82,16 @@ func (a *App) parseRouters() *App {
 		for _, dynamic := range dynamics {
 			pattern := fmt.Sprintf("^%s%s$", prefix, strings.ReplaceAll(dynamic.Pattern, "*", `([\w-]+)`))
 			dynamicsMap, have := a.parsedRouters.Dynamics[pattern]
+			//FIX Params Pos
+			if prefix != "" {
+				pslen := len(strings.Split(prefix, "/"))
+				if pslen > 1 {
+					for k, v := range dynamic.Pos {
+						delete(dynamic.Pos, k)
+						dynamic.Pos[k+pslen-1] = v
+					}
+				}
+			}
 			if have {
 				dynamicsMap[dynamic.Method] = dynamic
 			} else {
@@ -93,8 +103,12 @@ func (a *App) parseRouters() *App {
 	//start parse groups
 	for _, g := range a.groups {
 		for _, gr := range g.Routers() {
-			simpleParseFunc(g.Prefix(), gr.Simples)
-			dynamicParseFunc(g.Prefix(), gr.Dynamics)
+			if g.Prefix() == "" {
+				a.routers = append(a.routers, gr)
+			} else {
+				simpleParseFunc(g.Prefix(), gr.Simples)
+				dynamicParseFunc(g.Prefix(), gr.Dynamics)
+			}
 		}
 	}
 

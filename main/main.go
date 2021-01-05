@@ -6,6 +6,7 @@ import (
 	"github.com/billcoding/flygo"
 	. "github.com/billcoding/flygo/context"
 	mw "github.com/billcoding/flygo/middleware"
+	"github.com/billcoding/flygo/router"
 )
 
 type HelloController struct {
@@ -114,6 +115,13 @@ func main() {
 		c.SetData("ccc", "zzzz")
 		c.Template(`index`, nil)
 	})
+	app.AddRouterGroup(router.NewGroupWithPrefix("/hello").Add(router.NewRouter().GET("/xxx/{xxx}", func(c *Context) {
+		c.Text(c.Param("xxx"))
+	}).GET("/yyy/{yyy}", func(c *Context) {
+		c.Text(c.Param("yyy"))
+	}).GET("/a.html", func(c *Context) {
+		c.HTML(`<h1>	helloworld</h1>`)
+	})))
 	//app.Use(mw.Cors())
 	//app.HEAD("/*", func(c *Context) {
 	//	c.WriteCode(401)
