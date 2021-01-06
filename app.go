@@ -47,10 +47,10 @@ func GetApp() *App {
 func NewApp() *App {
 	return &App{
 		ServerConfig: &serverConfig{
-			ReadTimeout:       time.Hour,
-			ReadHeaderTimeout: time.Hour,
-			WriteTimeout:      time.Hour,
-			IdleTimeout:       0,
+			ReadTimeout:       time.Minute,
+			ReadHeaderTimeout: time.Minute,
+			WriteTimeout:      time.Minute,
+			IdleTimeout:       10,
 			MaxHeaderBytes:    http.DefaultMaxHeaderBytes,
 		},
 		ConfigFile:  "flygo.yml",
