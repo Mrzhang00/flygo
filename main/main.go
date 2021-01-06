@@ -6,7 +6,6 @@ import (
 	"github.com/billcoding/flygo"
 	. "github.com/billcoding/flygo/context"
 	mw "github.com/billcoding/flygo/middleware"
-	"github.com/billcoding/flygo/router"
 )
 
 type HelloController struct {
@@ -100,28 +99,28 @@ func handler(c *Context) {
 
 func main() {
 	app := flygo.GetApp()
-	app.UseStatic(false, `./abc`)
-	app.GET("/", func(c *Context) {
-		c.Text(fmt.Sprintf("%v", mw.GetSession(c).GetAll()))
-	})
-	app.GET("/1", func(c *Context) {
-		mw.GetSession(c).Set("xxx", "dsfdsfds")
-		mw.GetSession(c).Set("xxx2", "dsfdsfds")
-		mw.GetSession(c).Set("xxx222", "dsfdsfds")
-	})
-	app.GET("/2", func(c *Context) {
-		c.SetData("aaa", "zzzz")
-		c.SetData("bbb", "zzzz")
-		c.SetData("ccc", "zzzz")
-		c.Template(`index`, nil)
-	})
-	app.AddRouterGroup(router.NewGroupWithPrefix("/hello").Add(router.NewRouter().GET("/xxx/{xxx}", func(c *Context) {
-		c.Text(c.Param("xxx"))
-	}).GET("/yyy/{yyy}", func(c *Context) {
-		c.Text(c.Param("yyy"))
-	}).GET("/a.html", func(c *Context) {
-		c.HTML(`<h1>	helloworld</h1>`)
-	})))
+	//app.UseStatic(false, `./abc`)
+	//app.GET("/", func(c *Context) {
+	//	c.Text(fmt.Sprintf("%v", mw.GetSession(c).GetAll()))
+	//})
+	//app.GET("/1", func(c *Context) {
+	//	mw.GetSession(c).Set("xxx", "dsfdsfds")
+	//	mw.GetSession(c).Set("xxx2", "dsfdsfds")
+	//	mw.GetSession(c).Set("xxx222", "dsfdsfds")
+	//})
+	//app.GET("/2", func(c *Context) {
+	//	c.SetData("aaa", "zzzz")
+	//	c.SetData("bbb", "zzzz")
+	//	c.SetData("ccc", "zzzz")
+	//	c.Template(`index`, nil)
+	//})
+	//app.AddRouterGroup(router.NewGroupWithPrefix("/hello").Add(router.NewRouter().GET("/xxx/{xxx}", func(c *Context) {
+	//	c.Text(c.Param("xxx"))
+	//}).GET("/yyy/{yyy}", func(c *Context) {
+	//	c.Text(c.Param("yyy"))
+	//}).GET("/a.html", func(c *Context) {
+	//	c.HTML(`<h1>	helloworld</h1>`)
+	//})))
 	//app.Use(mw.Cors())
 	//app.HEAD("/*", func(c *Context) {
 	//	c.WriteCode(401)
