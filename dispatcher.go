@@ -12,7 +12,6 @@ import (
 //Define dispatcher struct
 type dispatcher struct {
 	mu   *sync.Mutex //mu
-	wmu  *sync.Mutex //wmu
 	app  *App        //app bundle
 	done chan bool   //done channel
 }
@@ -22,7 +21,6 @@ func (a *App) newDispatcher() *dispatcher {
 	return &dispatcher{
 		app:  a,
 		mu:   &sync.Mutex{},
-		wmu:  &sync.Mutex{},
 		done: make(chan bool, 1),
 	}
 }
@@ -38,17 +36,14 @@ func (d *dispatcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (d *dispatcher) dispatch(r *http.Request, w http.ResponseWriter) {
 	//Init context
 	ctx := c.New(r, d.app.Config.Template)
-
 	//Add chains into context
 	d.addChains(ctx,
 		d.app.Middlewares(ctx, mw.TypeBefore),
 		d.app.parsedRouters.Handlers(ctx),
 		d.app.Middlewares(ctx, mw.TypeHandler),
 		d.app.Middlewares(ctx, mw.TypeAfter))
-
 	//Start chain
 	ctx.Chain()
-
 	//Finish done
 	d.writeDone(ctx.Render(), w)
 }
@@ -88,9 +83,6 @@ func (d *dispatcher) addChains(c *c.Context,
 
 //writeDoned
 func (d *dispatcher) writeDone(r *c.Render, w http.ResponseWriter) {
-	d.wmu.Lock()
-	defer d.wmu.Unlock()
-
 	for k, v := range r.Header {
 		for _, vv := range v {
 			w.Header().Add(k, vv)
