@@ -12,19 +12,25 @@ A simple and lightweight web framework, pure native and no third dependencies.
 - Session supports
 - RESTful controllers
 
-## Middlewares
+## Embedded Middlewares
 
-- `not_found` Not Found resource handler 
-- `logger` Built in logger implemention
-- `recovery` Recover catch handler
-- `method_not_allowed` Method not allowed handler
-- `static` Static resource handler
-- `cors` Cors handler
-- `uploadfile` Upload files
-- `downfile` Download files
-- `redisauth` Redis simple authentication
-- `redistoken` Redis simple authorization
-- `session` Session implemention(providers of memory or redis)
+- [x] `not_found` Not Found resource handler
+- [x] `logger` Built in logger implemention
+- [x] `recovery` Recover catch handler
+- [x] `method_not_allowed` Method not allowed handler
+- [x] `static` Static resource handler
+- [x] `cors` Cors handler
+- [x] `uploadfile` Upload files
+- [x] `downfile` Download files
+- [x] `redisauth` Redis simple authentication
+- [x] `redistoken` Redis simple authorization
+- [x] `session` Session implemention(providers of memory or redis)
+
+## Implements Middlewares
+- [x] [Captcha middleware](https://github.com/flygotm/captcha)
+- [x] [GZIP compression](https://github.com/flygotm/gzip)
+- [x] [Deflate compression](https://github.com/flygotm/deflate)
+- [x] [Brotli compression](https://github.com/flygotm/brotli)
 
 ## Install
 
@@ -41,5 +47,11 @@ git clone https://github.com/billcoding/flygo.git flygo
 2. Go mod
 
 ```
-require github.com/billcoding/flygo TAG
+require github.com/billcoding/flygo latest
 ```
+
+## Docs
+[Wiki](https://flygotm.github.com/)
+
+
+
