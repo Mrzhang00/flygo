@@ -1,8 +1,6 @@
 package flygo
 
 import (
-	"github.com/billcoding/calls"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -36,34 +34,24 @@ func (a *App) parseYml() {
 	}
 }
 
-func (a *App) printConfig() {
-	bytes, err := yaml.Marshal(a.Config)
-
-	a.DebugTrace(func() {
-		if err != nil {
-			a.Logger.Warn("[printConfig]%v", err)
-		}
-	})
-
-	a.DebugTrace(func() {
-		if err != nil {
-			a.Logger.Info("[printConfig]%v", string(bytes))
-		}
-	})
-}
-
 //parseConfig
 func (a *App) parseConfig() *App {
+	execdir, _ := os.Executable()
+	execroot := filepath.Dir(execdir)
 	rot := a.Config.Template.Root
-	// "" "." "./" "./templates"
-	calls.True(rot == "" || rot == "." || rot == "./", func() {
-		execdir, _ := os.Executable()
-		rot = filepath.Dir(execdir)
-	})
-	calls.NEmpty(strings.TrimPrefix(rot, "./"), func() {
-		execdir, _ := os.Executable()
-		rot = filepath.Join(filepath.Dir(execdir), strings.TrimPrefix(rot, "./"))
-	})
+	// "" "." "./" "./templates" "templates/" "/templates" "/templates/"
+	if strings.HasPrefix(rot, "/") {
+		//Absolute path
+	} else {
+		switch rot {
+		case "", ".", "./":
+			rot = execroot
+		default:
+			//"./templates" "templates/"
+			rot = strings.TrimPrefix(rot, "./")
+			rot = filepath.Join(execroot, rot)
+		}
+	}
 	a.Config.Template.Root = rot
 	return a
 }
