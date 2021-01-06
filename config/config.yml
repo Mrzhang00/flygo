@@ -2,6 +2,10 @@ flygo:
   server:
     host: localhost
     port: 80
+    tls:
+      enable: false
+      certFile: ''
+      keyFile: ''
   banner:
     enable: true
     type: default
@@ -10,5 +14,5 @@ flygo:
   template:
     enable: false
     cache: true
-    root: ./
+    root: ./templates
     suffix: .html
