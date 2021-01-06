@@ -79,6 +79,7 @@ func (a *App) Run() {
 	a.parseRouters()
 	a.useDefaultMWs()
 	a.parseConfig()
+	a.debugTrace()
 	a.serve()
 }
 
@@ -103,8 +104,8 @@ func (a *App) serve() {
 	port := a.Config.Server.Port
 	tlsEnable := a.Config.Server.TLS.Enable
 	addr := host + ":" + strconv.Itoa(port)
-	a.Logger.Info("[serve]Bind on %s", addr)
-	a.Logger.Info("[serve]Server started")
+	a.Logger.Info("[Serve]Bind on %s", addr)
+	a.Logger.Info("[Serve]Server started")
 	var err error
 	server := &http.Server{
 		Addr:              addr,
@@ -126,6 +127,6 @@ func (a *App) serve() {
 		err = server.ListenAndServe()
 	}
 	if err != nil {
-		a.Logger.Error("[serve]%v", err.Error())
+		a.Logger.Error("[Serve]%v", err.Error())
 	}
 }
