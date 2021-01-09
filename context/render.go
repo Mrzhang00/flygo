@@ -270,7 +270,7 @@ func (c *Context) Binary(buffer []byte) {
 	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.BINARY).Build())
 }
 
-// Binary render file
+// File render file
 func (c *Context) File(file string) {
 	bytes, err := readFile(file)
 	if err != nil {
@@ -280,7 +280,7 @@ func (c *Context) File(file string) {
 	c.Binary(bytes)
 }
 
-// Binary render download
+// Download render download
 func (c *Context) Download(file, fileName string) {
 	bytes, err := readFile(file)
 	if err != nil {

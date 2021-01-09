@@ -20,7 +20,7 @@ func (c *Context) AddFunc(name string, tfunc interface{}) *Context {
 	return c
 }
 
-// AddFunc add funcMap
+// AddFuncMap add funcMap
 func (c *Context) AddFuncMap(funcMap template.FuncMap) *Context {
 	calls.True(funcMap != nil && len(funcMap) > 0, func() {
 		for k, v := range funcMap {

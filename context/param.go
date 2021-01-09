@@ -55,10 +55,10 @@ func (c *Context) Params(name string) []string {
 func (c *Context) ParamWith(name, defaultValue string) string {
 	vals := c.paramMap[name]
 	if vals != nil {
-		if len(vals) == 0 || (len(vals) > 0 && vals[0] == "") {
-			return defaultValue
-		} else {
+		if len(vals) != 0 && !(len(vals) > 0 && vals[0] == "") {
 			return strings.TrimSpace(vals[0])
+		} else {
+			return defaultValue
 		}
 	}
 	return defaultValue

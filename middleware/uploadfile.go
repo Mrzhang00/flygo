@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"errors"
 	"fmt"
 	c "github.com/billcoding/flygo/context"
 	"io/ioutil"
@@ -237,7 +236,7 @@ func verfiyFile(file *c.MultipartFile, uf *uploadFile) error {
 
 func verifySize(file *c.MultipartFile, uf *uploadFile) error {
 	if file.Size > int64(uf.size) {
-		return errors.New(fmt.Sprintf("the file size exceed limit[max:%d, current:%d]", uf.size, file.Size))
+		return fmt.Errorf("the file size exceed limit[max:%d, current:%d]", uf.size, file.Size)
 	}
 	return nil
 }
@@ -246,7 +245,7 @@ func verifyMime(file *c.MultipartFile, uf *uploadFile) error {
 	ms := strings.Join(uf.mimes, "|")
 	mimeAll := fmt.Sprintf("|%s|", ms)
 	if !strings.Contains(mimeAll, fmt.Sprintf("|%s|", file.ContentType)) {
-		return errors.New(fmt.Sprintf("the file mime type not supported[supports:%s, current:%s]", ms, file.ContentType))
+		return fmt.Errorf("the file mime type not supported[supports:%s, current:%s]", ms, file.ContentType)
 	}
 	return nil
 }
@@ -256,11 +255,11 @@ func verifyExt(file *c.MultipartFile, uf *uploadFile) error {
 	extAll := fmt.Sprintf("|%s|", es)
 	extIndex := strings.LastIndexByte(file.Filename, '.')
 	if extIndex == -1 {
-		return errors.New(fmt.Sprintf("the file ext not supported[supports:%s, current:%s]", es, ""))
+		return fmt.Errorf("the file ext not supported[supports:%s, current:%s]", es, "")
 	}
 	ext := file.Filename[extIndex:]
 	if !strings.Contains(extAll, fmt.Sprintf("|%s|", ext)) {
-		return errors.New(fmt.Sprintf("the file ext not supported[supports:%s, current:%s]", es, ext))
+		return fmt.Errorf("the file ext not supported[supports:%s, current:%s]", es, ext)
 	}
 	return nil
 }
