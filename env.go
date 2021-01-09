@@ -4,32 +4,82 @@ import (
 	"github.com/billcoding/calls"
 	"os"
 	"strconv"
+	"time"
 )
 
 const (
-	flygoConfig = "FLYGO_CONFIG" //env config file
-
-	flygoDevDebug = "FLYGO_DEV_DEBUG" //env dev debug
-
-	flygoServerHost = "FLYGO_SERVER_HOST" //env server host
-	flygoServerPort = "FLYGO_SERVER_PORT" //env server port
-
-	flygoBannerEnable = "FLYGO_BANNER_ENABLE" //env banner enable
-	flygoBannerType   = "FLYGO_BANNER_TYPE"   //env banner type
-	flygoBannerText   = "FLYGO_BANNER_TEXT"   //env banner text
-	flygoBannerFile   = "FLYGO_BANNER_FILE"   //env banner file
-
-	flygoServerTlsEnable   = "FLYGO_SERVER_TLS_ENABLE"    //env server tls enable
-	flygoServerTlsCertFile = "FLYGO_SERVER_TLS_CERT_FILE" //env server tls cert file
-	flygoServerTlsKeyFile  = "FLYGO_SERVER_TLS_KEY_FILE"  //env server tls key file
-
-	flygoTemplateEnable = "FLYGO_TEMPLATE_ENABLE" //env template enable
-	flygoTemplateCache  = "FLYGO_TEMPLATE_CACHE"  //env template cache
-	flygoTemplateRoot   = "FLYGO_TEMPLATE_ROOT"   //env template root
-	flygoTemplateSuffix = "FLYGO_TEMPLATE_SUFFIX" //env template suffix
+	serverMaxHeaderSize     = "SERVER_MAX_HEADER_SIZE"
+	serverReadTimeout       = "SERVER_READ_TIMEOUT"
+	serverReadHeaderTimeout = "SERVER_READ_HEADER_TIMEOUT"
+	serverWriteTimeout      = "SERVER_WRITE_TIMEOUT"
+	serverIdleTimeout       = "SERVER_IDLE_TIMEOUT"
+	flygoConfig             = "FLYGO_CONFIG"
+	flygoDevDebug           = "FLYGO_DEV_DEBUG"
+	flygoServerHost         = "FLYGO_SERVER_HOST"
+	flygoServerPort         = "FLYGO_SERVER_PORT"
+	flygoServerTLSEnable    = "FLYGO_SERVER_TLS_ENABLE"
+	flygoServerTLSCertFile  = "FLYGO_SERVER_TLS_CERT_FILE"
+	flygoServerTLSKeyFile   = "FLYGO_SERVER_TLS_KEY_FILE"
+	flygoBannerEnable       = "FLYGO_BANNER_ENABLE"
+	flygoBannerType         = "FLYGO_BANNER_TYPE"
+	flygoBannerText         = "FLYGO_BANNER_TEXT"
+	flygoBannerFile         = "FLYGO_BANNER_FILE"
+	flygoTemplateEnable     = "FLYGO_TEMPLATE_ENABLE"
+	flygoTemplateCache      = "FLYGO_TEMPLATE_CACHE"
+	flygoTemplateRoot       = "FLYGO_TEMPLATE_ROOT"
+	flygoTemplateSuffix     = "FLYGO_TEMPLATE_SUFFIX"
 )
 
-//set config
+func (a *App) setServerMaxHeaderSize() {
+	maxHeaderSize, err := intEnv(serverMaxHeaderSize)
+	calls.Nil(err, func() {
+		a.Config.Server.MaxHeaderSize = maxHeaderSize
+		a.DebugTrace(func() {
+			a.Logger.Info("[Env]Set [%v] = [%v]", serverMaxHeaderSize, maxHeaderSize)
+		})
+	})
+}
+
+func (a *App) setServerReadTimeout() {
+	readTimeout, err := durationEnv(serverReadTimeout)
+	calls.Nil(err, func() {
+		a.Config.Server.Timeout.Read = readTimeout
+		a.DebugTrace(func() {
+			a.Logger.Info("[Env]Set [%v] = [%v]", serverReadTimeout, readTimeout)
+		})
+	})
+}
+
+func (a *App) setServerReadHeaderTimeout() {
+	readHeaderTimeout, err := durationEnv(serverReadHeaderTimeout)
+	calls.Nil(err, func() {
+		a.Config.Server.Timeout.ReadHeader = readHeaderTimeout
+		a.DebugTrace(func() {
+			a.Logger.Info("[Env]Set [%v] = [%v]", serverReadHeaderTimeout, readHeaderTimeout)
+		})
+	})
+}
+
+func (a *App) setServerWriteTimeout() {
+	writeTimeout, err := durationEnv(serverWriteTimeout)
+	calls.Nil(err, func() {
+		a.Config.Server.Timeout.Write = writeTimeout
+		a.DebugTrace(func() {
+			a.Logger.Info("[Env]Set [%v] = [%v]", serverWriteTimeout, writeTimeout)
+		})
+	})
+}
+
+func (a *App) setServerIdleTimeout() {
+	idleTimeout, err := durationEnv(serverIdleTimeout)
+	calls.Nil(err, func() {
+		a.Config.Server.Timeout.Idle = idleTimeout
+		a.DebugTrace(func() {
+			a.Logger.Info("[Env]Set [%v] = [%v]", serverIdleTimeout, idleTimeout)
+		})
+	})
+}
+
 func (a *App) setConfig() {
 	config := stringEnv(flygoConfig)
 	calls.NEmpty(config, func() {
@@ -40,214 +90,171 @@ func (a *App) setConfig() {
 	})
 }
 
-//set dev debug
 func (a *App) setDevDebug() {
 	calls.NEmpty(stringEnv(flygoDevDebug), func() {
-		a.Config.Dev.Debug = boolEnv(flygoDevDebug)
+		a.Config.Flygo.Dev.Debug = boolEnv(flygoDevDebug)
 		a.DebugTrace(func() {
-			a.Logger.Info("[Env]Set [%v] = [%v]", flygoDevDebug, a.Config.Dev.Debug)
+			a.Logger.Info("[Env]Set [%v] = [%v]", flygoDevDebug, a.Config.Flygo.Dev.Debug)
 		})
 	})
 }
 
-//set server host
 func (a *App) setServerHost() {
 	host := stringEnv(flygoServerHost)
 	calls.NEmpty(host, func() {
-		a.Config.Server.Host = host
+		a.Config.Flygo.Server.Host = host
 		a.DebugTrace(func() {
 			a.Logger.Info("[Env]Set [%v] = [%v]", flygoServerHost, host)
 		})
 	})
 }
 
-//set server port
 func (a *App) setServerPort() {
 	port, err := intEnv(flygoServerPort)
 	if err == nil {
-		a.Config.Server.Port = port
+		a.Config.Flygo.Server.Port = port
 		a.DebugTrace(func() {
-			a.Logger.Info("[Env]Set [%v] = [%v]", flygoServerPort, a.Config.Server.Port)
+			a.Logger.Info("[Env]Set [%v] = [%v]", flygoServerPort, a.Config.Flygo.Server.Port)
 		})
 	}
 }
 
-//set banner enable
 func (a *App) setBannerEnable() {
 	calls.NEmpty(stringEnv(flygoBannerEnable), func() {
-		a.Config.Banner.Enable = boolEnv(flygoBannerEnable)
+		a.Config.Flygo.Banner.Enable = boolEnv(flygoBannerEnable)
 		a.DebugTrace(func() {
-			a.Logger.Info("[Env]Set [%v] = [%v]", flygoBannerEnable, a.Config.Banner.Enable)
+			a.Logger.Info("[Env]Set [%v] = [%v]", flygoBannerEnable, a.Config.Flygo.Banner.Enable)
 		})
 	})
 }
 
-//set banner type
 func (a *App) setBannerType() {
 	bannerType := stringEnv(flygoBannerType)
 	if bannerType != "" {
-		a.Config.Banner.Type = bannerType
+		a.Config.Flygo.Banner.Type = bannerType
 		a.DebugTrace(func() {
 			a.Logger.Info("[Env]Set [%v] = [%v]", flygoBannerType, bannerType)
 		})
 	}
 }
 
-//set banner text
 func (a *App) setBannerText() {
 	bannerText := stringEnv(flygoBannerText)
 	if bannerText != "" {
-		a.Config.Banner.Text = bannerText
+		a.Config.Flygo.Banner.Text = bannerText
 		a.DebugTrace(func() {
 			a.Logger.Info("[Env]Set [%v] = [%v]", flygoBannerText, bannerText)
 		})
 	}
 }
 
-//set banner file
 func (a *App) setBannerFile() {
 	bannerFile := stringEnv(flygoBannerFile)
 	if bannerFile != "" {
-		a.Config.Banner.File = bannerFile
+		a.Config.Flygo.Banner.File = bannerFile
 		a.DebugTrace(func() {
 			a.Logger.Info("[Env]Set [%v] = [%v]", flygoBannerFile, bannerFile)
 		})
 	}
 }
 
-//set server tls enable
-func (a *App) setServerTlsEnable() {
-	calls.NEmpty(stringEnv(flygoServerTlsEnable), func() {
-		a.Config.Server.TLS.Enable = boolEnv(flygoServerTlsEnable)
+func (a *App) setServerTLSEnable() {
+	calls.NEmpty(stringEnv(flygoServerTLSEnable), func() {
+		a.Config.Flygo.Server.TLS.Enable = boolEnv(flygoServerTLSEnable)
 		a.DebugTrace(func() {
-			a.Logger.Info("[Env]Set [%v] = [%v]", flygoServerTlsEnable, a.Config.Server.TLS.Enable)
+			a.Logger.Info("[Env]Set [%v] = [%v]", flygoServerTLSEnable, a.Config.Flygo.Server.TLS.Enable)
 		})
 	})
 }
 
-//set server tls cert file
-func (a *App) setServerTlsCertFile() {
-	serverTlsCertFile := stringEnv(flygoServerTlsCertFile)
-	if serverTlsCertFile != "" {
-		a.Config.Server.TLS.CertFile = serverTlsCertFile
+func (a *App) setServerTLSCertFile() {
+	serverTLSCertFile := stringEnv(flygoServerTLSCertFile)
+	if serverTLSCertFile != "" {
+		a.Config.Flygo.Server.TLS.CertFile = serverTLSCertFile
 		a.DebugTrace(func() {
-			a.Logger.Info("[Env]Set [%v] = [%v]", flygoServerTlsCertFile, serverTlsCertFile)
+			a.Logger.Info("[Env]Set [%v] = [%v]", flygoServerTLSCertFile, serverTLSCertFile)
 		})
 	}
 }
 
-//set server tls key file
-func (a *App) setServerTlsKeyFile() {
-	serverTlsKeyFile := stringEnv(flygoServerTlsKeyFile)
-	if serverTlsKeyFile != "" {
-		a.Config.Server.TLS.KeyFile = serverTlsKeyFile
+func (a *App) setServerTLSKeyFile() {
+	serverTLSKeyFile := stringEnv(flygoServerTLSKeyFile)
+	if serverTLSKeyFile != "" {
+		a.Config.Flygo.Server.TLS.KeyFile = serverTLSKeyFile
 		a.DebugTrace(func() {
-			a.Logger.Info("[Env]Set [%v] = [%v]", flygoServerTlsKeyFile, serverTlsKeyFile)
+			a.Logger.Info("[Env]Set [%v] = [%v]", flygoServerTLSKeyFile, serverTLSKeyFile)
 		})
 	}
 }
 
-//set template enable
 func (a *App) setTemplateEnable() {
 	calls.NEmpty(stringEnv(flygoTemplateEnable), func() {
-		a.Config.Template.Enable = boolEnv(flygoTemplateEnable)
+		a.Config.Flygo.Template.Enable = boolEnv(flygoTemplateEnable)
 		a.DebugTrace(func() {
-			a.Logger.Info("[Env]Set [%v] = [%v]", flygoTemplateEnable, a.Config.Template.Enable)
+			a.Logger.Info("[Env]Set [%v] = [%v]", flygoTemplateEnable, a.Config.Flygo.Template.Enable)
 		})
 	})
 }
 
-//set template cache
 func (a *App) setTemplateCache() {
 	calls.NEmpty(stringEnv(flygoTemplateCache), func() {
-		a.Config.Template.Cache = boolEnv(flygoTemplateCache)
+		a.Config.Flygo.Template.Cache = boolEnv(flygoTemplateCache)
 		a.DebugTrace(func() {
-			a.Logger.Info("[Env]Set [%v] = [%v]", flygoTemplateCache, a.Config.Template.Cache)
+			a.Logger.Info("[Env]Set [%v] = [%v]", flygoTemplateCache, a.Config.Flygo.Template.Cache)
 		})
 	})
 }
 
-//set template root
 func (a *App) setTemplateRoot() {
 	templateRoot := stringEnv(flygoTemplateRoot)
 	calls.NEmpty(templateRoot, func() {
-		a.Config.Template.Root = templateRoot
+		a.Config.Flygo.Template.Root = templateRoot
 		a.DebugTrace(func() {
 			a.Logger.Info("[Env]Set [%v] = [%v]", flygoTemplateRoot, templateRoot)
 		})
 	})
 }
 
-//set template suffix
 func (a *App) setTemplateSuffix() {
 	templateSuffix := stringEnv(flygoTemplateSuffix)
 	calls.NEmpty(templateSuffix, func() {
-		a.Config.Template.Suffix = templateSuffix
+		a.Config.Flygo.Template.Suffix = templateSuffix
 		a.DebugTrace(func() {
 			a.Logger.Info("[Env]Set [%v] = [%v]", flygoTemplateSuffix, templateSuffix)
 		})
 	})
 }
 
-//parseEnv
 func (a *App) parseEnv() {
-	//set config
 	a.setConfig()
-
 	if a.ConfigFile != "" {
-		//parse yml config
 		a.parseYml()
 	}
-
-	//set dev debug
 	a.setDevDebug()
-
-	//set server host
+	a.setServerMaxHeaderSize()
+	a.setServerReadTimeout()
+	a.setServerReadHeaderTimeout()
+	a.setServerWriteTimeout()
+	a.setServerIdleTimeout()
 	a.setServerHost()
-
-	//set server port
 	a.setServerPort()
-
-	//set server tls enable
-	a.setServerTlsEnable()
-
-	//set server tls cert file
-	a.setServerTlsCertFile()
-
-	//set server tls key file
-	a.setServerTlsKeyFile()
-
-	//set banner enable
+	a.setServerTLSEnable()
+	a.setServerTLSCertFile()
+	a.setServerTLSKeyFile()
 	a.setBannerEnable()
-
-	//set banner type
 	a.setBannerType()
-
-	//set banner type
 	a.setBannerText()
-
-	//set banner file
 	a.setBannerFile()
-
-	//set template enable
 	a.setTemplateEnable()
-
-	//set template cache
 	a.setTemplateCache()
-
-	//set template root
 	a.setTemplateRoot()
-
-	//set template suffix
 	a.setTemplateSuffix()
 }
 
-//stringEnv
 func stringEnv(key string) string {
 	return os.Getenv(key)
 }
 
-//boolEnv
 func boolEnv(key string) bool {
 	be := os.Getenv(key)
 	//	case "1", "t", "T", "true", "TRUE", "True":
@@ -256,8 +263,12 @@ func boolEnv(key string) bool {
 	return err == nil && b
 }
 
-//intEnv
 func intEnv(key string) (int, error) {
-	be := os.Getenv(key)
-	return strconv.Atoi(be)
+	ie := os.Getenv(key)
+	return strconv.Atoi(ie)
+}
+
+func durationEnv(key string) (time.Duration, error) {
+	de := os.Getenv(key)
+	return time.ParseDuration(de)
 }
