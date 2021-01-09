@@ -1,24 +1,20 @@
 package context
 
-//Define Listener interface
 type Listener interface {
-	Created(c *Context)                                       //Created Listener
-	PreparedAdd(c *Context, handlers ...func(c *Context))     //PreparedAdd Listener
-	Added(c *Context, handlers ...func(c *Context))           //Added Listener
-	PreparedAddOnce(c *Context, handlers ...func(c *Context)) //PreparedAddOnce Listener
-	AddedOnce(c *Context, handlers ...func(c *Context))       //AddedOnce Listener
-	Destoryed(c *Context)                                     //Destoryed Listener
+	Created(c *Context)
+	PreparedAdd(c *Context, handlers ...func(c *Context))
+	Added(c *Context, handlers ...func(c *Context))
+	PreparedAddOnce(c *Context, handlers ...func(c *Context))
+	AddedOnce(c *Context, handlers ...func(c *Context))
+	Destroyed(c *Context)
 }
 
-//listeners
 var listeners = make([]Listener, 0)
 
-//AddListener
 func AddListeners(ls ...Listener) {
 	listeners = append(listeners, ls...)
 }
 
-//onCreated
 func (c *Context) onCreated() {
 	if len(listeners) > 0 {
 		for _, listener := range listeners {
@@ -29,18 +25,16 @@ func (c *Context) onCreated() {
 	}
 }
 
-//onDestoryed
-func (c *Context) onDestoryed() {
+func (c *Context) onDestroyed() {
 	if len(listeners) > 0 {
 		for _, listener := range listeners {
-			if listener.Destoryed != nil {
-				listener.Destoryed(c)
+			if listener.Destroyed != nil {
+				listener.Destroyed(c)
 			}
 		}
 	}
 }
 
-//OnPreparedAdd
 func (c *Context) onPreparedAdd(handlers ...func(c *Context)) {
 	if len(listeners) > 0 {
 		for _, listener := range listeners {
@@ -51,7 +45,6 @@ func (c *Context) onPreparedAdd(handlers ...func(c *Context)) {
 	}
 }
 
-//onAdded
 func (c *Context) onAdded(handlers ...func(c *Context)) {
 	if len(listeners) > 0 {
 		for _, listener := range listeners {
@@ -62,7 +55,6 @@ func (c *Context) onAdded(handlers ...func(c *Context)) {
 	}
 }
 
-//onPreparedAddOnce
 func (c *Context) onPreparedAddOnce(handlers ...func(c *Context)) {
 	if len(listeners) > 0 {
 		if len(c.handlers) <= 0 {
@@ -75,7 +67,6 @@ func (c *Context) onPreparedAddOnce(handlers ...func(c *Context)) {
 	}
 }
 
-//onAddedOnce
 func (c *Context) onAddedOnce(handlers ...func(c *Context)) {
 	if len(listeners) > 0 {
 		if len(c.handlers) <= 0 {

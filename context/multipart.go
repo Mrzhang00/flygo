@@ -9,7 +9,6 @@ import (
 	"os"
 )
 
-//Define MultipartFile struct
 type MultipartFile struct {
 	Logger      log.Logger
 	Filename    string
@@ -19,7 +18,6 @@ type MultipartFile struct {
 	Headers     http.Header
 }
 
-//Copy
 func (file *MultipartFile) Copy(distName string) error {
 	var f multipart.File
 	var dist *os.File
@@ -46,7 +44,6 @@ func (file *MultipartFile) Copy(distName string) error {
 	return nil
 }
 
-//ParseMultipart
 func (c *Context) ParseMultipart(maxMemory int64) error {
 	var err error
 	err = c.Request.ParseMultipartForm(maxMemory)
@@ -80,7 +77,6 @@ func (c *Context) ParseMultipart(maxMemory int64) error {
 	return nil
 }
 
-//MultipartFile
 func (c *Context) MultipartFile(name string) *MultipartFile {
 	files := c.MultipartFiles(name)
 	if files != nil && len(files) > 0 {
@@ -89,7 +85,6 @@ func (c *Context) MultipartFile(name string) *MultipartFile {
 	return nil
 }
 
-//MultipartFiles
 func (c *Context) MultipartFiles(name string) []*MultipartFile {
 	files, have := c.MultipartMap[name]
 	if have {

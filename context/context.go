@@ -8,15 +8,14 @@ import (
 	"net/http"
 )
 
-//Define Context struct
 type Context struct {
-	logger       log.Logger             //logger
-	Request      *http.Request          //Request
-	render       *Render                //Render
-	pos          int                    //Handler pos index
-	handlers     []func(c *Context)     //All handlers chain
-	MWData       map[string]interface{} //MWData
-	paramMap     map[string][]string    //The ParamMap
+	logger       log.Logger
+	Request      *http.Request
+	render       *Render
+	pos          int
+	handlers     []func(c *Context)
+	MWData       map[string]interface{}
+	paramMap     map[string][]string
 	MultipartMap map[string][]*MultipartFile
 
 	dataMap        map[string]interface{}
@@ -24,7 +23,6 @@ type Context struct {
 	templateConfig *config.YmlConfigTemplate
 }
 
-//New
 func New(r *http.Request, templateConfig *config.YmlConfigTemplate) *Context {
 	funcMap := make(map[string]interface{}, 0)
 	calls.NNil(templateConfig.FuncMap, func() {
@@ -49,7 +47,6 @@ func New(r *http.Request, templateConfig *config.YmlConfigTemplate) *Context {
 	return c
 }
 
-//Add
 func (c *Context) Add(handlers ...func(c *Context)) *Context {
 	if len(handlers) <= 0 {
 		return c
@@ -62,36 +59,31 @@ func (c *Context) Add(handlers ...func(c *Context)) *Context {
 	return c
 }
 
-//Chain
 func (c *Context) Chain() {
 	if len(c.handlers) <= 0 {
 		return
 	}
 	c.pos++
 	if c.pos > len(c.handlers)-1 {
-		//out of range
-		c.onDestoryed()
+
+		c.onDestroyed()
 		return
 	}
 	c.handlers[c.pos](c)
 }
 
-//Write
 func (c *Context) Write(buffer []byte) {
 	c.render.Buffer = buffer
 }
 
-//WriteCode
 func (c *Context) WriteCode(code int) {
 	c.render.Code = code
 }
 
-//Header
 func (c *Context) Header() http.Header {
 	return c.render.Header
 }
 
-//AddCookie
 func (c *Context) AddCookie(cookies ...*http.Cookie) *Context {
 	c.render.Cookies = append(c.render.Cookies, cookies...)
 	return c
