@@ -1,3 +1,10 @@
+server:
+  maxHeaderSize: 102400
+  timeout:
+    read: 1m
+    readHeader: 1m1s
+    write: 2m
+    idle: 1s
 flygo:
   server:
     host: localhost

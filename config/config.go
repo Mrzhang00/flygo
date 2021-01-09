@@ -3,19 +3,31 @@ package config
 import (
 	"gopkg.in/yaml.v2"
 	"html/template"
+	"net/http"
+	"time"
 )
 
-//Define Config struct
 type Config struct {
-	*YmlConfig `yaml:"flygo"`
+	Server *YmlServerConfig `yaml:"server"`
+	Flygo  *YmlConfig       `yaml:"flygo"`
 }
 
-//Unmarshal
 func (yc *Config) Unmarshal(bytes []byte) error {
 	return yaml.Unmarshal(bytes, yc)
 }
 
-//Define YmlConfig struct
+type YmlServerConfig struct {
+	MaxHeaderSize int                     `yaml:"maxHeaderSize"`
+	Timeout       *YmlServerConfigTimeout `yaml:"timeout"`
+}
+
+type YmlServerConfigTimeout struct {
+	Read       time.Duration `yaml:"read"`
+	ReadHeader time.Duration `yaml:"readHeader"`
+	Write      time.Duration `yaml:"write"`
+	Idle       time.Duration `yaml:"idle"`
+}
+
 type YmlConfig struct {
 	Dev      *YmlConfigDev      `yaml:"dev"`
 	Banner   *YmlConfigBanner   `yaml:"banner"`
@@ -23,12 +35,10 @@ type YmlConfig struct {
 	Template *YmlConfigTemplate `yaml:"template"`
 }
 
-//Define YmlConfigDev struct
 type YmlConfigDev struct {
 	Debug bool `yaml:"debug"`
 }
 
-//Define YmlConfigBanner struct
 type YmlConfigBanner struct {
 	Enable bool   `yaml:"enable"`
 	Type   string `yaml:"type"`
@@ -36,14 +46,12 @@ type YmlConfigBanner struct {
 	Text   string `yaml:"text"`
 }
 
-//Define YmlConfigServer struct
 type YmlConfigServer struct {
 	Host string              `yaml:"host"`
 	Port int                 `yaml:"port"`
 	TLS  *YmlConfigServerTls `yaml:"tls"`
 }
 
-//Define YmlConfigTemplate struct
 type YmlConfigTemplate struct {
 	Enable  bool   `yaml:"enable"`
 	Cache   bool   `yaml:"cache"`
@@ -52,7 +60,6 @@ type YmlConfigTemplate struct {
 	FuncMap template.FuncMap
 }
 
-//Define YmlConfigServerTls struct
 type YmlConfigServerTls struct {
 	Enable   bool   `yaml:"enable"`
 	CertFile string `yaml:"certFile"`
@@ -60,28 +67,38 @@ type YmlConfigServerTls struct {
 }
 
 func Default() *Config {
-	return &Config{&YmlConfig{
-		&YmlConfigDev{
-			Debug: false,
-		}, &YmlConfigBanner{
-			Enable: true,
-			Type:   "default",
-			File:   "banner.txt",
-			Text:   "FLYGO",
-		}, &YmlConfigServer{
-			Host: "",
-			Port: 80,
-			TLS: &YmlConfigServerTls{
-				Enable:   false,
-				CertFile: "",
-				KeyFile:  "",
+	return &Config{
+		Server: &YmlServerConfig{
+			MaxHeaderSize: http.DefaultMaxHeaderBytes,
+			Timeout: &YmlServerConfigTimeout{
+				Read:       time.Minute,
+				ReadHeader: time.Minute,
+				Write:      time.Minute,
+				Idle:       time.Second,
 			},
 		},
-		&YmlConfigTemplate{
-			Enable: true,
-			Cache:  true,
-			Root:   "./templates",
-			Suffix: ".html",
-		},
-	}}
+		Flygo: &YmlConfig{
+			Dev: &YmlConfigDev{
+				Debug: false,
+			}, Banner: &YmlConfigBanner{
+				Enable: true,
+				Type:   "default",
+				File:   "banner.txt",
+				Text:   "FLYGO",
+			}, Server: &YmlConfigServer{
+				Host: "0.0.0.0",
+				Port: 80,
+				TLS: &YmlConfigServerTls{
+					Enable:   false,
+					CertFile: "",
+					KeyFile:  "",
+				},
+			},
+			Template: &YmlConfigTemplate{
+				Enable: true,
+				Cache:  true,
+				Root:   "./templates",
+				Suffix: ".html",
+			},
+		}}
 }
