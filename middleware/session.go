@@ -7,26 +7,30 @@ import (
 	"net/http"
 )
 
+const sessionMWName = "Session"
+
 type session struct {
 	listener *se.Listener
 	config   *se.Config
 	provider se.Provider
 }
 
+// Type implements
 func (s *session) Type() *Type {
 	return TypeBefore
 }
 
-const sessionMWName = "Session"
-
+// Name implements
 func (s *session) Name() string {
 	return sessionMWName
 }
 
+// Method implements
 func (s *session) Method() Method {
 	return MethodAny
 }
 
+// Pattern implements
 func (s *session) Pattern() Pattern {
 	return PatternAny
 }
@@ -35,6 +39,7 @@ func (s *session) setSession(c *c.Context, session se.Session) {
 	c.MWData[s.Name()] = session
 }
 
+// GetSession get current session
 func GetSession(c *c.Context) se.Session {
 	sess, have := c.MWData[sessionMWName]
 	if have {
@@ -43,6 +48,7 @@ func GetSession(c *c.Context) se.Session {
 	return nil
 }
 
+// Handler implements
 func (s *session) Handler() func(c *c.Context) {
 	return func(c *c.Context) {
 		sessionId := s.provider.GetId(c.Request)
@@ -51,19 +57,12 @@ func (s *session) Handler() func(c *c.Context) {
 			have = s.provider.Exists(sessionId)
 		}
 		if have {
-
 			session := s.provider.Get(sessionId)
-
-			s.setSession(c, session)
-
 			s.provider.Refresh(session, s.config, s.listener)
 			c.SetData("session", session.GetAll())
 		} else {
-
 			session := s.provider.New(s.config, s.listener)
-
 			s.setSession(c, session)
-
 			c.Header().Add(headers.SetCookie, (&http.Cookie{
 				Name:  s.provider.CookieName(),
 				Value: session.Id(),
@@ -75,8 +74,8 @@ func (s *session) Handler() func(c *c.Context) {
 	}
 }
 
+// Session return new session
 func Session(provider se.Provider, config *se.Config, listener *se.Listener) *session {
-
 	provider.Clean(config, listener)
 	return &session{
 		provider: provider,

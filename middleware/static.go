@@ -19,9 +19,9 @@ type static struct {
 	logger log.Logger
 }
 
+// Static new static
 func Static(cache bool, root string) *static {
 	rot := root
-
 	calls.True(rot == "" || rot == "." || rot == "./", func() {
 		execdir, _ := os.Executable()
 		rot = filepath.Dir(execdir)
@@ -74,22 +74,27 @@ func defaultMimes() map[string]string {
 	}
 }
 
+// Type implements
 func (s *static) Type() *Type {
 	return TypeBefore
 }
 
+// Name implements
 func (s *static) Name() string {
 	return "Static"
 }
 
+// Method implements
 func (s *static) Method() Method {
 	return MethodGet
 }
 
+// Pattern implements
 func (s *static) Pattern() Pattern {
 	return "/static/*"
 }
 
+// Type implements
 func (s *static) Handler() func(c *c.Context) {
 	return func(ctx *c.Context) {
 		if strings.HasSuffix(ctx.Request.URL.Path, "/") {
@@ -136,11 +141,13 @@ func (s *static) Handler() func(c *c.Context) {
 	}
 }
 
+// Add mime
 func (s *static) Add(ext, mime string) *static {
 	s.mimes[ext] = mime
 	return s
 }
 
+// Adds mimes
 func (s *static) Adds(m map[string]string) *static {
 	calls.NNil(m, func() {
 		for k, v := range m {

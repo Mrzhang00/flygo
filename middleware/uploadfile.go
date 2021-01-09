@@ -24,6 +24,7 @@ type uploadFile struct {
 	dateDir bool
 }
 
+// UploadFile return new uploadFile
 func UploadFile() *uploadFile {
 	return &uploadFile{
 		logger:  log.New(os.Stdout, "[uploadFile]", log.LstdFlags),
@@ -37,21 +38,29 @@ func UploadFile() *uploadFile {
 	}
 }
 
+// Type implements
 func (uf *uploadFile) Type() *Type {
 	return TypeHandler
 }
 
+// Name implements
+func (*uploadFile) Name() string {
+	return "UploadFile"
+}
+
+// Method implements
 func (uf *uploadFile) Method() Method {
 	return MethodPost
 }
 
+// Pattern implements
 func (uf *uploadFile) Pattern() Pattern {
 	return "/upload/uploadFile"
 }
 
+// Handler implements
 func (uf *uploadFile) Handler() func(c *c.Context) {
 	return func(c *c.Context) {
-
 		defer removeTmpFiles(c)
 		type jd struct {
 			Msg  string `json:"msg"`
@@ -146,55 +155,61 @@ func (uf *uploadFile) Handler() func(c *c.Context) {
 	}
 }
 
+// Root set
 func (uf *uploadFile) Root(root string) *uploadFile {
 	uf.root = root
 	return uf
 }
 
+// Size set
 func (uf *uploadFile) Size(size int) *uploadFile {
 	uf.size = size
 	return uf
 }
 
+// Exts set
 func (uf *uploadFile) Exts(exts []string) *uploadFile {
 	uf.exts = exts
 	return uf
 }
 
+// AddExt add exts
 func (uf *uploadFile) AddExt(exts ...string) *uploadFile {
 	uf.exts = append(uf.exts, exts...)
 	return uf
 }
 
+// Mimes set
 func (uf *uploadFile) Mimes(mimes []string) *uploadFile {
 	uf.mimes = mimes
 	return uf
 }
 
+// AddMime add mimes
 func (uf *uploadFile) AddMime(mimes ...string) *uploadFile {
 	uf.mimes = append(uf.mimes, mimes...)
 	return uf
 }
 
+// Domain set
 func (uf *uploadFile) Domain(domain string) *uploadFile {
 	uf.domain = domain
 	return uf
 }
 
+// Prefix set
 func (uf *uploadFile) Prefix(prefix string) *uploadFile {
 	uf.prefix = prefix
 	return uf
 }
 
+// DateDir set
 func (uf *uploadFile) DateDir(dateDir bool) *uploadFile {
 	uf.dateDir = dateDir
 	return uf
 }
 
-func (*uploadFile) Name() string {
-	return "UploadFile"
-}
-
+// UFile struct
 type UFile struct {
 	File string `json:"file"`
 	Url  string `json:"url"`

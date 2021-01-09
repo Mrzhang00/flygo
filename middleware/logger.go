@@ -10,22 +10,27 @@ type logger struct {
 	handler func(c *c.Context)
 }
 
+// Type implements
 func (l *logger) Type() *Type {
 	return TypeBefore
 }
 
+// Name implements
 func (l *logger) Name() string {
 	return "StdLogger"
 }
 
+// Method implements
 func (l *logger) Method() Method {
 	return MethodAny
 }
 
+// Pattern implements
 func (l *logger) Pattern() Pattern {
 	return PatternNoRoute
 }
 
+// Handler implements
 func (l *logger) Handler() func(c *c.Context) {
 	return func(c *c.Context) {
 		c.Chain()
@@ -33,6 +38,7 @@ func (l *logger) Handler() func(c *c.Context) {
 	}
 }
 
+// StdLogger return logger
 func StdLogger() Middleware {
 	return &logger{
 		logger: l.New("[StdLogger]"),

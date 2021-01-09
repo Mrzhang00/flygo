@@ -15,6 +15,7 @@ type cors struct {
 	header       http.Header
 }
 
+// Cors return new cors
 func Cors() *cors {
 	return &cors{
 		origin:       "*",
@@ -24,22 +25,27 @@ func Cors() *cors {
 	}
 }
 
+// Name implements
 func (cs *cors) Name() string {
 	return "Cors"
 }
 
+// Type implements
 func (cs *cors) Type() *Type {
 	return TypeBefore
 }
 
+// Method implements
 func (cs *cors) Method() Method {
 	return MethodAny
 }
 
+// Pattern implements
 func (cs *cors) Pattern() Pattern {
 	return PatternAny
 }
 
+// Handler implements
 func (cs *cors) Handler() func(c *c.Context) {
 	return func(c *c.Context) {
 		cs.header.Set(headers.Allow, strings.Join(cs.methods, ","))
@@ -58,16 +64,19 @@ func (cs *cors) Handler() func(c *c.Context) {
 	}
 }
 
+// Origin cors
 func (cs *cors) Origin(origin string) *cors {
 	cs.origin = origin
 	return cs
 }
 
+// Methods cors
 func (cs *cors) Methods(methods ...string) *cors {
 	cs.methods = methods
 	return cs
 }
 
+// AllowHeaders cors
 func (cs *cors) AllowHeaders(headers ...string) *cors {
 	cs.allowHeaders = headers
 	return cs

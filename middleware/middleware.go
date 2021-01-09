@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// Middleware interface
 type Middleware interface {
 	Type() *Type
 	Name() string
@@ -14,36 +15,48 @@ type Middleware interface {
 }
 
 type (
-	Type struct {
-		t string
-	}
-
+	// Type type
+	Type struct{ t string }
+	// Method type
 	Method string
-
+	// Pattern type
 	Pattern string
 )
 
 var (
-	TypeBefore  = &Type{t: "BEFORE"}
+	// TypeBefore type
+	TypeBefore = &Type{t: "BEFORE"}
+	// TypeHandler type
 	TypeHandler = &Type{t: "HANDLER"}
-	TypeAfter   = &Type{t: "AFTER"}
+	// TypeAfter type
+	TypeAfter = &Type{t: "AFTER"}
 )
 
 const (
+	// PatternNoRoute pattern
 	PatternNoRoute = Pattern("")
-	PatternAny     = Pattern("/*")
-	MethodAny      = Method("*")
-	MethodGet      = Method(http.MethodGet)
-	MethodPost     = Method(http.MethodPost)
-	MethodPut      = Method(http.MethodPut)
-	MethodDelete   = Method(http.MethodDelete)
-	MethodPatch    = Method(http.MethodPatch)
+	// PatternAny pattern
+	PatternAny = Pattern("/*")
+	// MethodAny method
+	MethodAny = Method("*")
+	// MethodGet method
+	MethodGet = Method(http.MethodGet)
+	// MethodPost method
+	MethodPost = Method(http.MethodPost)
+	// MethodPut method
+	MethodPut = Method(http.MethodPut)
+	// MethodDelete method
+	MethodDelete = Method(http.MethodDelete)
+	// MethodPatch method
+	MethodPatch = Method(http.MethodPatch)
 )
 
+// SetMWData set middleware data
 func SetMWData(c *c.Context, name string, mwData map[string]interface{}) {
 	c.MWData[name] = mwData
 }
 
+// GetMWData get middleware data
 func GetMWData(c *c.Context, name string) map[string]interface{} {
 	val, have := c.MWData[name]
 	if have {

@@ -23,6 +23,7 @@ type redisToken struct {
 	client  *redis.Client
 }
 
+// RedisToken return new redisToken
 func RedisToken(options *redis.Options) *redisToken {
 	client := redis.NewClient(options)
 	ping := client.Ping()
@@ -43,22 +44,27 @@ func RedisToken(options *redis.Options) *redisToken {
 	return rt
 }
 
+// Name implements
 func (*redisToken) Name() string {
 	return "RedisToken"
 }
 
+// Type implements
 func (r *redisToken) Type() *Type {
 	return TypeHandler
 }
 
+// Method implements
 func (r *redisToken) Method() Method {
 	return MethodGet
 }
 
+// Pattern implements
 func (r *redisToken) Pattern() Pattern {
 	return "/authorization/authorize"
 }
 
+// Handler implements
 func (r *redisToken) Handler() func(c *c.Context) {
 	type jd struct {
 		Msg  string `json:"msg"`
@@ -98,46 +104,50 @@ func (r *redisToken) Handler() func(c *c.Context) {
 				c.JSON(getJson(r.msg, r.code))
 				return
 			}
-
 			token := newToken(r.length)
-
 			r.client.Set(r.key+":"+token, getAppJson(m.AppKey, m.AppSecret), r.expires)
-
 			c.JSON(getJsonToken(token))
 		})
 	}
 }
 
+// Key set
 func (r *redisToken) Key(key string) *redisToken {
 	r.key = key
 	return r
 }
 
+// AppKey set
 func (r *redisToken) AppKey(appKey string) *redisToken {
 	r.appKey = appKey
 	return r
 }
 
+// Expires set
 func (r *redisToken) Expires(expires time.Duration) *redisToken {
 	r.expires = expires
 	return r
 }
 
+// Length set
 func (r *redisToken) Length(length int) *redisToken {
 	r.length = length
 	return r
 }
 
+// Msg set
 func (r *redisToken) Msg(msg string) *redisToken {
 	r.msg = msg
 	return r
 }
 
+// Code set
 func (r *redisToken) Code(code int) *redisToken {
 	r.code = code
 	return r
 }
 
+// Options set
 func (r *redisToken) Options(options *redis.Options) *redisToken {
 	r.options = options
 	return r

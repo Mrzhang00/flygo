@@ -18,6 +18,7 @@ type downFile struct {
 	dateDir bool
 }
 
+// DownFile return new downFile
 func DownFile() *downFile {
 	return &downFile{
 		logger:  log.New(os.Stdout, "[downFile]", log.LstdFlags),
@@ -26,22 +27,27 @@ func DownFile() *downFile {
 	}
 }
 
+// Name implements
 func (df *downFile) Name() string {
 	return "DownFile"
 }
 
+// Type implements
 func (df *downFile) Type() *Type {
 	return TypeHandler
 }
 
+// Method implements
 func (df *downFile) Method() Method {
 	return MethodGet
 }
 
+// Pattern implements
 func (df *downFile) Pattern() Pattern {
 	return "/download/downfile"
 }
 
+// Handler implements
 func (df *downFile) Handler() func(c *c.Context) {
 	return func(ctx *c.Context) {
 		type req struct {
@@ -68,11 +74,13 @@ func (df *downFile) Handler() func(c *c.Context) {
 	}
 }
 
+// Root path
 func (df *downFile) Root(root string) *downFile {
 	df.root = root
 	return df
 }
 
+// DateDir enable
 func (df *downFile) DateDir(dateDir bool) *downFile {
 	df.dateDir = dateDir
 	return df
