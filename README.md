@@ -457,36 +457,6 @@ func main() {
 }
 ```
 
-```go
-package main
-
-import (
-	"github.com/billcoding/flygo"
-	. "github.com/billcoding/flygo/context"
-	. "github.com/billcoding/flygo/router"
-)
-
-func main() {
-	handler := func(c *Context) {
-		c.Text("Group Routed")
-	}
-
-	rg := NewGroupWithPrefix("/r")
-
-	r := NewRouter()
-	r.GET("/route", handler)
-	r.POST("/route", handler)
-	r.PUT("/route", handler)
-	r.DELETE("/route", handler)
-	r.PATCH("/route", handler)
-	r.OPTIONS("/route", handler)
-
-	rg.Add(r)
-
-	flygo.GetApp().AddRouterGroup(rg).Run()
-}
-```
-
 ### Router Group Route
 
 ```go
