@@ -18,7 +18,6 @@ import (
 
 const defaultPrefixKey = "session:"
 
-//Define provider struct
 type provider struct {
 	logger    log.Logger
 	keyPrefix string
@@ -27,12 +26,10 @@ type provider struct {
 	sessions  *sync.Map
 }
 
-//Get new SessionProvider
 func Provider(options *redis.Options) se.Provider {
 	return NewWithPrefixKey(options, defaultPrefixKey)
 }
 
-//Get new SessionProvider with prefix key
 func NewWithPrefixKey(options *redis.Options, prefixKey string) se.Provider {
 	client := redis.NewClient(options)
 	ping := client.Ping()
@@ -46,17 +43,15 @@ func NewWithPrefixKey(options *redis.Options, prefixKey string) se.Provider {
 	calls.NNil(ping.Err(), func() {
 		p.logger.Warn("%v", ping.Err())
 	})
-	//First sync session from redis
+
 	p.syncSession()
 	return p
 }
 
-//CookieName
 func (p *provider) CookieName() string {
 	return "GSESSIONID"
 }
 
-//GetId
 func (p *provider) GetId(r *http.Request) string {
 	cookie, err := r.Cookie(p.CookieName())
 	if err == nil && cookie != nil {
@@ -65,18 +60,15 @@ func (p *provider) GetId(r *http.Request) string {
 	return ""
 }
 
-//getRedisKey
 func (p *provider) getRedisKey(id string) string {
 	return fmt.Sprintf("%s%s", p.keyPrefix, id)
 }
 
-//Exists
 func (p *provider) Exists(id string) bool {
 	get := p.Get(id)
 	return get != nil && !get.Invalidated()
 }
 
-//Get
 func (p *provider) Get(id string) se.Session {
 	sess, have := p.sessions.Load(id)
 	if !have {
@@ -85,7 +77,6 @@ func (p *provider) Get(id string) se.Session {
 	return sess.(se.Session)
 }
 
-//Del
 func (p *provider) Del(id string) {
 	delCmd := p.client.Del(p.getRedisKey(id))
 	if delCmd.Err() != nil {
@@ -93,7 +84,6 @@ func (p *provider) Del(id string) {
 	}
 }
 
-//GetAll
 func (p *provider) GetAll() map[string]se.Session {
 	keysCmd := p.client.Keys(p.keyPrefix)
 	if keysCmd.Err() != nil {
@@ -112,7 +102,6 @@ func (p *provider) GetAll() map[string]se.Session {
 	return sessionMap
 }
 
-//Clear
 func (p *provider) Clear() {
 	keysCmd := p.client.Keys(p.keyPrefix)
 	if keysCmd.Err() != nil {
@@ -128,14 +117,12 @@ func (p *provider) Clear() {
 	}
 }
 
-//tmd5
 func tmd5(text string) string {
 	hashMd5 := md5.New()
 	io.WriteString(hashMd5, text)
 	return fmt.Sprintf("%x", hashMd5.Sum(nil))
 }
 
-//newSID
 func newSID() string {
 	nano := time.Now().UnixNano()
 	rand.Seed(nano)
@@ -143,8 +130,7 @@ func newSID() string {
 	return strings.ToUpper(tmd5(tmd5(strconv.FormatInt(nano, 10)) + tmd5(strconv.FormatInt(rndNum, 10))))
 }
 
-//New
-func (p *provider) New(config *se.Config, listener *se.Listener) se.Session {
+func (p *provider) New(config *se.Config, _ *se.Listener) se.Session {
 	sessionId := newSID()
 	session := newSession(p.client, sessionId, p.getRedisKey(sessionId))
 	hsetCmd := p.client.HSet(p.getRedisKey(sessionId), sessionIdName, sessionId)
@@ -152,7 +138,7 @@ func (p *provider) New(config *se.Config, listener *se.Listener) se.Session {
 		p.logger.Error("[New]%v", hsetCmd.Err())
 		return nil
 	}
-	expireCmd := p.client.Expire(p.getRedisKey(sessionId), config.Timeout)
+	expireCmd := p.client.Expire(p.getRedisKey(sessionId), se.GetTimeout(config.Timeout))
 	if expireCmd.Err() != nil {
 		p.logger.Error("[New]%v", expireCmd.Err())
 		return nil
@@ -161,9 +147,8 @@ func (p *provider) New(config *se.Config, listener *se.Listener) se.Session {
 	return session
 }
 
-//Refresh
 func (p *provider) Refresh(session se.Session, config *se.Config, listener *se.Listener) {
-	expireCmd := p.client.Expire(p.getRedisKey(session.Id()), config.Timeout)
+	expireCmd := p.client.Expire(p.getRedisKey(session.Id()), se.GetTimeout(config.Timeout))
 	if expireCmd.Err() != nil {
 		p.logger.Error("[Refresh]%v", expireCmd.Err())
 	} else {
@@ -175,12 +160,10 @@ func (p *provider) Refresh(session se.Session, config *se.Config, listener *se.L
 	}
 }
 
-//Clean
-func (p *provider) Clean(config *se.Config, listener *se.Listener) {
+func (p *provider) Clean(_ *se.Config, listener *se.Listener) {
 	go p.cleanSession(listener)
 }
 
-//syncSession
 func (p *provider) syncSession() {
 	wait := make(chan bool, 1)
 	go func() {
@@ -207,7 +190,6 @@ func (p *provider) syncSession() {
 	wait <- true
 }
 
-//cleanSession
 func (p *provider) cleanSession(listener *se.Listener) {
 	for {
 		p.sessions.Range(func(k, v interface{}) bool {
@@ -230,13 +212,13 @@ func (p *provider) cleanSession(listener *se.Listener) {
 			if sess.Invalidated() {
 				p.sessions.Delete(sessionId)
 				go func() {
-					if listener != nil && listener.Destoryed != nil {
-						listener.Destoryed(sess)
+					if listener != nil && listener.Destroyed != nil {
+						listener.Destroyed(sess)
 					}
 				}()
 			}
 			return true
 		})
-		time.Sleep(time.Second)
+		time.Sleep(time.Minute)
 	}
 }

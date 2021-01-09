@@ -5,25 +5,21 @@ import (
 	"net/http"
 )
 
-//Define Middleware interface
 type Middleware interface {
-	Type() *Type                 //The type for middleware
-	Name() string                //The name for middleware
-	Method() Method              //The method for middleware
-	Pattern() Pattern            //The pattern for middleware
-	Handler() func(c *c.Context) //The handler for middleware
+	Type() *Type
+	Name() string
+	Method() Method
+	Pattern() Pattern
+	Handler() func(c *c.Context)
 }
 
 type (
-	//Define Type struct
 	Type struct {
 		t string
 	}
 
-	//Define Method type
 	Method string
 
-	//Define Pattern type
 	Pattern string
 )
 
@@ -44,12 +40,10 @@ const (
 	MethodPatch    = Method(http.MethodPatch)
 )
 
-//SetMWData
 func SetMWData(c *c.Context, name string, mwData map[string]interface{}) {
 	c.MWData[name] = mwData
 }
 
-//GetMWData
 func GetMWData(c *c.Context, name string) map[string]interface{} {
 	val, have := c.MWData[name]
 	if have {

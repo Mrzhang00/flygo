@@ -7,7 +7,6 @@ import (
 	"strings"
 )
 
-//parseYml
 func (a *App) parseYml() {
 	file := a.ConfigFile
 	if file != "" {
@@ -34,24 +33,23 @@ func (a *App) parseYml() {
 	}
 }
 
-//parseConfig
 func (a *App) parseConfig() *App {
 	execdir, _ := os.Executable()
 	execroot := filepath.Dir(execdir)
-	rot := a.Config.Template.Root
-	// "" "." "./" "./templates" "templates/" "/templates" "/templates/"
+	rot := a.Config.Flygo.Template.Root
+
 	if strings.HasPrefix(rot, "/") {
-		//Absolute path
+
 	} else {
 		switch rot {
 		case "", ".", "./":
 			rot = execroot
 		default:
-			//"./templates" "templates/"
+
 			rot = strings.TrimPrefix(rot, "./")
 			rot = filepath.Join(execroot, rot)
 		}
 	}
-	a.Config.Template.Root = rot
+	a.Config.Flygo.Template.Root = rot
 	return a
 }

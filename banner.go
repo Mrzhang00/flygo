@@ -17,20 +17,19 @@ func init() {
 	banners = append(banners, `|__|     |_______|    |__|     \______|  \______/`)
 }
 
-//printBanner
 func (a *App) printBanner() {
-	if !a.Config.Banner.Enable {
+	if !a.Config.Flygo.Banner.Enable {
 		return
 	}
-	switch a.Config.Banner.Type {
+	switch a.Config.Flygo.Banner.Type {
 	case "default":
 		fmt.Println(strings.Join(banners, "\n"))
 		break
 	case "text":
-		fmt.Println(a.Config.Banner.Text)
+		fmt.Println(a.Config.Flygo.Banner.Text)
 		break
 	case "file":
-		bytes, err := ioutil.ReadFile(a.Config.Banner.File)
+		bytes, err := ioutil.ReadFile(a.Config.Flygo.Banner.File)
 		if err != nil {
 			a.Logger.Error("[printBanner]%v", err)
 			return

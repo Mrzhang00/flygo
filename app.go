@@ -1,76 +1,58 @@
 package flygo
 
 import (
-	. "github.com/billcoding/flygo/config"
-	. "github.com/billcoding/flygo/log"
-	. "github.com/billcoding/flygo/middleware"
-	. "github.com/billcoding/flygo/rest"
-	. "github.com/billcoding/flygo/router"
+	cfg "github.com/billcoding/flygo/config"
+	l "github.com/billcoding/flygo/log"
+	mw "github.com/billcoding/flygo/middleware"
+	rt "github.com/billcoding/flygo/rest"
+	rr "github.com/billcoding/flygo/router"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 )
 
-//Define app struct
+// App struct
 type App struct {
-	ServerConfig   *serverConfig   //Server Config
-	ConfigFile     string          //Config file
-	Config         *Config         //Yml config
-	Logger         Logger          //App logger
-	controllers    []Controller    //Rest controllers
-	groups         []*Group        //groups
-	routers        []*Router       //routers
-	parsedRouters  *ParsedRouter   //parsed routers
-	middlewares    []Middleware    //middlewares
-	defaultMWState *defaultMWState //defaultMWState
-}
-
-//Define ServerConfig struct
-type serverConfig struct {
-	ReadTimeout       time.Duration
-	ReadHeaderTimeout time.Duration
-	WriteTimeout      time.Duration
-	IdleTimeout       time.Duration
-	MaxHeaderBytes    int
+	ConfigFile     string
+	Config         *cfg.Config
+	Logger         l.Logger
+	controllers    []rt.Controller
+	groups         []*rr.Group
+	routers        []*rr.Router
+	parsedRouters  *rr.ParsedRouter
+	middlewares    []mw.Middleware
+	defaultMWState *defaultMWState
 }
 
 var defaultApp = NewApp()
 
-//GetApp
+// GetApp return default App
 func GetApp() *App {
 	return defaultApp
 }
 
-//NewApp
+// NewApp return new App
 func NewApp() *App {
 	return &App{
-		ServerConfig: &serverConfig{
-			ReadTimeout:       time.Minute,
-			ReadHeaderTimeout: time.Minute,
-			WriteTimeout:      time.Minute,
-			IdleTimeout:       10,
-			MaxHeaderBytes:    http.DefaultMaxHeaderBytes,
-		},
 		ConfigFile:  "flygo.yml",
-		Config:      Default(),
-		Logger:      New("[FLYGO]"),
-		controllers: make([]Controller, 0),
-		groups:      make([]*Group, 0),
-		routers:     []*Router{NewRouter()},
-		parsedRouters: &ParsedRouter{
-			Simples:  make(map[string]*Simple),
-			Dynamics: make(map[string]map[string]*Dynamic),
+		Config:      cfg.Default(),
+		Logger:      l.New("[FLYGO]"),
+		controllers: make([]rt.Controller, 0),
+		groups:      make([]*rr.Group, 0),
+		routers:     []*rr.Router{rr.NewRouter()},
+		parsedRouters: &rr.ParsedRouter{
+			Simples:  make(map[string]*rr.Simple),
+			Dynamics: make(map[string]map[string]*rr.Dynamic),
 		},
-		middlewares: make([]Middleware, 6, 6),
+		middlewares: make([]mw.Middleware, 6, 6),
 		defaultMWState: &defaultMWState{
 			header: true,
 		},
 	}
 }
 
-//Run
+// Run App
 func (a *App) Run() {
 	a.parseYml()
 	a.parseEnv()
@@ -83,13 +65,8 @@ func (a *App) Run() {
 	a.serve()
 }
 
-//parseAddr
 func (a *App) parseAddr() {
-	host := a.Config.Server.Host
-	port := a.Config.Server.Port
-	if host == "" || host == "*" {
-		host = "0.0.0.0"
-	}
+	port := a.Config.Flygo.Server.Port
 	minPort := 0
 	maxPort := 65536
 	if port < minPort || port > maxPort {
@@ -98,11 +75,10 @@ func (a *App) parseAddr() {
 	}
 }
 
-//serve
 func (a *App) serve() {
-	host := a.Config.Server.Host
-	port := a.Config.Server.Port
-	tlsEnable := a.Config.Server.TLS.Enable
+	host := a.Config.Flygo.Server.Host
+	port := a.Config.Flygo.Server.Port
+	tlsEnable := a.Config.Flygo.Server.TLS.Enable
 	addr := host + ":" + strconv.Itoa(port)
 	a.Logger.Info("[Serve]Bind on %s", addr)
 	a.Logger.Info("[Serve]Server started")
@@ -110,20 +86,20 @@ func (a *App) serve() {
 	server := &http.Server{
 		Addr:              addr,
 		Handler:           a.newDispatcher(),
-		ReadTimeout:       a.ServerConfig.ReadTimeout,
-		ReadHeaderTimeout: a.ServerConfig.ReadHeaderTimeout,
-		WriteTimeout:      a.ServerConfig.WriteTimeout,
-		IdleTimeout:       a.ServerConfig.IdleTimeout,
-		MaxHeaderBytes:    a.ServerConfig.MaxHeaderBytes,
+		MaxHeaderBytes:    a.Config.Server.MaxHeaderSize,
+		ReadTimeout:       a.Config.Server.Timeout.Read,
+		ReadHeaderTimeout: a.Config.Server.Timeout.ReadHeader,
+		WriteTimeout:      a.Config.Server.Timeout.Write,
+		IdleTimeout:       a.Config.Server.Timeout.Idle,
 		ErrorLog:          log.New(os.Stderr, "[http]", log.LstdFlags),
 	}
 	if tlsEnable {
-		//tls support
-		certFile := a.Config.Server.TLS.CertFile
-		keyFile := a.Config.Server.TLS.KeyFile
+
+		certFile := a.Config.Flygo.Server.TLS.CertFile
+		keyFile := a.Config.Flygo.Server.TLS.KeyFile
 		err = server.ListenAndServeTLS(certFile, keyFile)
 	} else {
-		//http
+
 		err = server.ListenAndServe()
 	}
 	if err != nil {

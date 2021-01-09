@@ -8,7 +8,6 @@ import (
 	"strings"
 )
 
-//Define cors struct
 type cors struct {
 	origin       string
 	methods      []string
@@ -16,7 +15,6 @@ type cors struct {
 	header       http.Header
 }
 
-//Cors
 func Cors() *cors {
 	return &cors{
 		origin:       "*",
@@ -26,27 +24,22 @@ func Cors() *cors {
 	}
 }
 
-//Name
 func (cs *cors) Name() string {
 	return "Cors"
 }
 
-//Type
 func (cs *cors) Type() *Type {
 	return TypeBefore
 }
 
-//Method
 func (cs *cors) Method() Method {
 	return MethodAny
 }
 
-//Pattern
 func (cs *cors) Pattern() Pattern {
 	return PatternAny
 }
 
-//Handler
 func (cs *cors) Handler() func(c *c.Context) {
 	return func(c *c.Context) {
 		cs.header.Set(headers.Allow, strings.Join(cs.methods, ","))
@@ -59,25 +52,22 @@ func (cs *cors) Handler() func(c *c.Context) {
 			}
 		}
 		calls.True(c.Request.Method != http.MethodHead && c.Request.Method != http.MethodOptions, func() {
-			//not preflighted request
+
 			c.Chain()
 		})
 	}
 }
 
-//Origin
 func (cs *cors) Origin(origin string) *cors {
 	cs.origin = origin
 	return cs
 }
 
-//Methods
 func (cs *cors) Methods(methods ...string) *cors {
 	cs.methods = methods
 	return cs
 }
 
-//AllowHeaders
 func (cs *cors) AllowHeaders(headers ...string) *cors {
 	cs.allowHeaders = headers
 	return cs

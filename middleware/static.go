@@ -11,7 +11,6 @@ import (
 	"strings"
 )
 
-//Define static struct
 type static struct {
 	cache  bool
 	caches map[string][]byte
@@ -20,10 +19,9 @@ type static struct {
 	logger log.Logger
 }
 
-//Static
 func Static(cache bool, root string) *static {
 	rot := root
-	// "" "." "./" "./static"
+
 	calls.True(rot == "" || rot == "." || rot == "./", func() {
 		execdir, _ := os.Executable()
 		rot = filepath.Dir(execdir)
@@ -41,10 +39,9 @@ func Static(cache bool, root string) *static {
 	}
 }
 
-//defaultMimes
 func defaultMimes() map[string]string {
 	return map[string]string{
-		//image mimes
+
 		"jpg":  mime.JPG,
 		"jpeg": mime.JPG,
 		"png":  mime.PNG,
@@ -52,7 +49,6 @@ func defaultMimes() map[string]string {
 		"bmp":  mime.BMP,
 		"ico":  mime.ICO,
 
-		//text mimes
 		"txt":  mime.TEXT,
 		"css":  mime.CSS,
 		"js":   mime.JS,
@@ -60,7 +56,6 @@ func defaultMimes() map[string]string {
 		"xml":  mime.XML,
 		"html": mime.HTML,
 
-		//archive
 		"zip": mime.ZIP,
 		"7z":  mime.ZIP7,
 		"tar": mime.TAR,
@@ -68,7 +63,6 @@ func defaultMimes() map[string]string {
 		"tgz": mime.TGZ,
 		"rar": mime.RAR,
 
-		//office
 		"xls":  mime.XLS,
 		"xlsx": mime.XLSX,
 		"doc":  mime.DOC,
@@ -76,32 +70,26 @@ func defaultMimes() map[string]string {
 		"ppt":  mime.PPT,
 		"pptx": mime.PPTX,
 
-		//default
 		"": mime.BINARY,
 	}
 }
 
-//Type
 func (s *static) Type() *Type {
 	return TypeBefore
 }
 
-//Name
 func (s *static) Name() string {
 	return "Static"
 }
 
-//Method
 func (s *static) Method() Method {
 	return MethodGet
 }
 
-//Pattern
 func (s *static) Pattern() Pattern {
 	return "/static/*"
 }
 
-//Handler
 func (s *static) Handler() func(c *c.Context) {
 	return func(ctx *c.Context) {
 		if strings.HasSuffix(ctx.Request.URL.Path, "/") {
@@ -148,13 +136,11 @@ func (s *static) Handler() func(c *c.Context) {
 	}
 }
 
-//Add
 func (s *static) Add(ext, mime string) *static {
 	s.mimes[ext] = mime
 	return s
 }
 
-//Adds
 func (s *static) Adds(m map[string]string) *static {
 	calls.NNil(m, func() {
 		for k, v := range m {

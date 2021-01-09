@@ -6,15 +6,14 @@ import (
 	"reflect"
 )
 
-//DebugTrace
+// DebugTrace call
 func (a *App) DebugTrace(call func()) *App {
-	if a.Config.Dev.Debug {
+	if a.Config.Flygo.Dev.Debug {
 		call()
 	}
 	return a
 }
 
-//debugTrace
 func (a *App) debugTrace() {
 	a.DebugTrace(func() {
 		a.printConfigs()
@@ -24,7 +23,6 @@ func (a *App) debugTrace() {
 	})
 }
 
-//printConfigs
 func (a *App) printConfigs() {
 	bytes, err := yaml.Marshal(a.Config)
 	calls.NNil(err, func() {
@@ -35,14 +33,12 @@ func (a *App) printConfigs() {
 	})
 }
 
-//printRestControllers
 func (a *App) printRestControllers() {
 	for _, c := range a.controllers {
 		a.Logger.Info("[REST]controller registered [%v]", reflect.TypeOf(c))
 	}
 }
 
-//printRouters
 func (a *App) printRouters() {
 	for k := range a.parsedRouters.Simples {
 		a.Logger.Info("[Router]simple routed [%v]", k)
@@ -54,7 +50,6 @@ func (a *App) printRouters() {
 	}
 }
 
-//printMiddlewares
 func (a *App) printMiddlewares() {
 	for _, v := range a.middlewares {
 		calls.NNil(v, func() {

@@ -11,7 +11,6 @@ import (
 	"time"
 )
 
-//Define RedisToken struct
 type redisToken struct {
 	logger  log.Logger
 	key     string
@@ -24,7 +23,6 @@ type redisToken struct {
 	client  *redis.Client
 }
 
-//Return new RedisToken
 func RedisToken(options *redis.Options) *redisToken {
 	client := redis.NewClient(options)
 	ping := client.Ping()
@@ -32,7 +30,7 @@ func RedisToken(options *redis.Options) *redisToken {
 		logger:  log.New("[RedisToken]"),
 		key:     "auth:authorization",
 		appKey:  "auth:apps",
-		expires: 24 * time.Hour, //default 24H
+		expires: 24 * time.Hour,
 		length:  64,
 		msg:     "Error credentials",
 		code:    400,
@@ -45,27 +43,22 @@ func RedisToken(options *redis.Options) *redisToken {
 	return rt
 }
 
-//Name
 func (*redisToken) Name() string {
 	return "RedisToken"
 }
 
-//Type
 func (r *redisToken) Type() *Type {
 	return TypeHandler
 }
 
-//Method
 func (r *redisToken) Method() Method {
 	return MethodGet
 }
 
-//Pattern
 func (r *redisToken) Pattern() Pattern {
 	return "/authorization/authorize"
 }
 
-//Set middleware process
 func (r *redisToken) Handler() func(c *c.Context) {
 	type jd struct {
 		Msg  string `json:"msg"`
@@ -105,53 +98,46 @@ func (r *redisToken) Handler() func(c *c.Context) {
 				c.JSON(getJson(r.msg, r.code))
 				return
 			}
-			//New token
+
 			token := newToken(r.length)
-			//Set token into redis
+
 			r.client.Set(r.key+":"+token, getAppJson(m.AppKey, m.AppSecret), r.expires)
-			//Return token
+
 			c.JSON(getJsonToken(token))
 		})
 	}
 }
 
-//Set key prefix for redis
 func (r *redisToken) Key(key string) *redisToken {
 	r.key = key
 	return r
 }
 
-//Set app key prefix for redis
 func (r *redisToken) AppKey(appKey string) *redisToken {
 	r.appKey = appKey
 	return r
 }
 
-//Set expires
 func (r *redisToken) Expires(expires time.Duration) *redisToken {
 	r.expires = expires
 	return r
 }
 
-//Set length
 func (r *redisToken) Length(length int) *redisToken {
 	r.length = length
 	return r
 }
 
-//Set return msg when unauthorized
 func (r *redisToken) Msg(msg string) *redisToken {
 	r.msg = msg
 	return r
 }
 
-//Set return code when unauthorized
 func (r *redisToken) Code(code int) *redisToken {
 	r.code = code
 	return r
 }
 
-//Set redis options
 func (r *redisToken) Options(options *redis.Options) *redisToken {
 	r.options = options
 	return r

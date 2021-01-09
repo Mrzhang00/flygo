@@ -1,7 +1,6 @@
 package mime
 
 const (
-	//text
 	TEXT = "text/plain;charset=utf-8"
 	HTML = "text/html;charset=utf-8"
 	JS   = "text/javascript;charset=utf-8"
@@ -9,14 +8,12 @@ const (
 	JSON = "application/json;charset=utf-8"
 	XML  = "application/xml;charset=utf-8"
 
-	//image
 	BMP = "image/bmp"
 	JPG = "image/jpg"
 	PNG = "image/png"
 	GIF = "image/gif"
 	ICO = "image/ico"
 
-	//archive
 	ZIP  = "application/zip"
 	TAR  = "application/x-tar"
 	GZIP = "application/x-gzip"
@@ -24,7 +21,6 @@ const (
 	RAR  = "application/x-rar-compressed"
 	ZIP7 = "application/x-7z-compressed"
 
-	//office
 	XLS  = "application/vnd.ms-excel"
 	XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 	DOC  = "application/msword"
@@ -32,6 +28,5 @@ const (
 	PPT  = "application/vnd.ms-powerpoint"
 	PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
 
-	//bin
 	BINARY = "application/octet-stream"
 )

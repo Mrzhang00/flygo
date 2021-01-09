@@ -7,16 +7,14 @@ import (
 	"time"
 )
 
-//Define RedisSession Struct
 type session struct {
-	logger      log.Logger    //logger
-	id          string        //session id
-	key         string        //redis key
-	invalidated bool          //invalidated
-	client      *redis.Client //redis client
+	logger      log.Logger
+	id          string
+	key         string
+	invalidated bool
+	client      *redis.Client
 }
 
-//newSession
 func newSession(client *redis.Client, id, key string) se.Session {
 	return &session{
 		logger:      log.New("[Session]"),
@@ -29,27 +27,22 @@ func newSession(client *redis.Client, id, key string) se.Session {
 
 const sessionIdName = "sessionId"
 
-//Id
 func (s *session) Id() string {
 	return s.id
 }
 
-//Renew
 func (s *session) Renew(lifeTime time.Duration) {
 	s.client.Expire(s.key, lifeTime)
 }
 
-//Invalidated
 func (s *session) Invalidated() bool {
 	return s.invalidated
 }
 
-//Invalidate
 func (s *session) Invalidate() {
 	s.invalidated = true
 }
 
-//Get
 func (s *session) Get(name string) interface{} {
 	getCmd := s.client.HGet(s.key, name)
 	val := ""
@@ -60,7 +53,6 @@ func (s *session) Get(name string) interface{} {
 	return val
 }
 
-//GetAll
 func (s *session) GetAll() map[string]interface{} {
 	getAllCmd := s.client.HGetAll(s.key)
 	vals := getAllCmd.Val()
@@ -71,14 +63,12 @@ func (s *session) GetAll() map[string]interface{} {
 	return nvals
 }
 
-//Set
 func (s *session) Set(name string, val interface{}) {
 	s.supportedHandle(name, func() {
 		s.client.HSet(s.key, name, val)
 	})
 }
 
-//SetAll
 func (s *session) SetAll(data map[string]interface{}, flush bool) {
 	if flush {
 		s.Clear()
@@ -90,16 +80,14 @@ func (s *session) SetAll(data map[string]interface{}, flush bool) {
 	s.client.HMSet(s.key, data)
 }
 
-//Del data
 func (s *session) Del(name string) {
 	s.supportedHandle(name, func() {
 		s.client.HDel(s.key, name)
 	})
 }
 
-//Clear all data
 func (s *session) Clear() {
-	//flush old datas
+
 	all := s.GetAll()
 	ks := make([]string, 0)
 	for k := range all {
@@ -110,7 +98,6 @@ func (s *session) Clear() {
 	s.client.HDel(s.key, ks...)
 }
 
-//supportedHandle
 func (s *session) supportedHandle(name string, fn func()) {
 	if name != sessionIdName {
 		fn()

@@ -6,13 +6,12 @@ import (
 	"net/http"
 )
 
-//REST
+// REST Route RESTful Controller
 func (a *App) REST(c ...rf.Controller) *App {
 	a.controllers = append(a.controllers, c...)
 	return a
 }
 
-//routeRestControllers
 func (a *App) routeRestControllers() *App {
 	for _, c := range a.controllers {
 		prefix := c.Prefix()
@@ -23,18 +22,15 @@ func (a *App) routeRestControllers() *App {
 		}
 
 		if c.GETS() != nil {
-			getsPattern := fmt.Sprintf("%s", prefix)
-			a.Route(http.MethodGet, getsPattern, c.GETS())
+			a.Route(http.MethodGet, prefix, c.GETS())
 		}
 
 		if c.POST() != nil {
-			postPattern := fmt.Sprintf("%s", prefix)
-			a.Route(http.MethodPost, postPattern, c.POST())
+			a.Route(http.MethodPost, prefix, c.POST())
 		}
 
 		if c.PUT() != nil {
-			putPattern := fmt.Sprintf("%s", prefix)
-			a.Route(http.MethodPut, putPattern, c.PUT())
+			a.Route(http.MethodPut, prefix, c.PUT())
 		}
 
 		if c.DELETE() != nil {

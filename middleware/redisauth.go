@@ -7,17 +7,15 @@ import (
 	"github.com/go-redis/redis"
 )
 
-//Define redisAuth struct
 type redisAuth struct {
 	logger  log.Logger
-	key     string         //Redis key
-	msg     string         //The msg
-	code    int            //The code
-	options *redis.Options //Redis options
-	client  *redis.Client  //Redis client
+	key     string
+	msg     string
+	code    int
+	options *redis.Options
+	client  *redis.Client
 }
 
-//RedisAuth
 func RedisAuth(options *redis.Options) *redisAuth {
 	client := redis.NewClient(options)
 	ping := client.Ping()
@@ -35,27 +33,22 @@ func RedisAuth(options *redis.Options) *redisAuth {
 	return r
 }
 
-//Name
 func (*redisAuth) Name() string {
 	return "RedisAuth"
 }
 
-//Type
 func (r *redisAuth) Type() *Type {
 	return TypeBefore
 }
 
-//Method
 func (r *redisAuth) Method() Method {
 	return MethodAny
 }
 
-//Pattern
 func (r *redisAuth) Pattern() Pattern {
 	return PatternAny
 }
 
-//Handler
 func (r *redisAuth) Handler() func(c *c.Context) {
 	return func(c *c.Context) {
 		type jd struct {
@@ -69,7 +62,9 @@ func (r *redisAuth) Handler() func(c *c.Context) {
 			}
 		}
 		client := redis.NewClient(r.options)
-		defer client.Close()
+		defer func() {
+			_ = client.Close()
+		}()
 		authorization := c.Request.Header.Get("Authorization")
 		if authorization == "" {
 			c.JSON(getJd(r))
@@ -93,13 +88,11 @@ func GetRedisAuthData(c *c.Context) interface{} {
 	return c.GetData("RedisAuth")
 }
 
-//Set return msg when unauthorized
 func (r *redisAuth) Msg(msg string) *redisAuth {
 	r.msg = msg
 	return r
 }
 
-//Set return code when unauthorized
 func (r *redisAuth) Code(code int) *redisAuth {
 	r.code = code
 	return r

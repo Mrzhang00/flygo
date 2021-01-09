@@ -1,19 +1,29 @@
 package session
 
 import (
+	"fmt"
 	"time"
 )
 
-//Define Session interface
+var defaultTimeout = 60 * 24 // one Day
+
+func GetTimeout(minute int) time.Duration {
+	if minute <= 0 {
+		minute = defaultTimeout
+	}
+	du, _ := time.ParseDuration(fmt.Sprintf("%dm", minute))
+	return du
+}
+
 type Session interface {
-	Id() string                                     //Get session Id
-	Renew(lifeTime time.Duration)                   //Renew session
-	Invalidate()                                    //Invalidate session
-	Invalidated() bool                              //Invalidated
-	Get(name string) interface{}                    //Get data
-	GetAll() map[string]interface{}                 //Get all data
-	Set(name string, val interface{})               //Set data
-	SetAll(data map[string]interface{}, flush bool) //Set all data
-	Del(name string)                                //Del by name
-	Clear()                                         //Clear all data
+	Id() string
+	Renew(lifeTime time.Duration)
+	Invalidate()
+	Invalidated() bool
+	Get(name string) interface{}
+	GetAll() map[string]interface{}
+	Set(name string, val interface{})
+	SetAll(data map[string]interface{}, flush bool)
+	Del(name string)
+	Clear()
 }

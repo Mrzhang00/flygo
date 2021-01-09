@@ -3,86 +3,83 @@ package flygo
 import (
 	"fmt"
 	c "github.com/billcoding/flygo/context"
-	. "github.com/billcoding/flygo/router"
+	rr "github.com/billcoding/flygo/router"
 	"net/http"
 	"strings"
 )
 
-type Handler func(c *c.Context)
-
-//Route Handler for all method
-func (a *App) REQUEST(pattern string, handler Handler) *App {
+// REQUEST Route all Methods
+func (a *App) REQUEST(pattern string, handler func(c *c.Context)) *App {
 	return a.Route("*", pattern, handler)
 }
 
-//Route Handler for GET method
-func (a *App) GET(pattern string, handler Handler) *App {
+// GET Route Get Method
+func (a *App) GET(pattern string, handler func(c *c.Context)) *App {
 	return a.Route(http.MethodGet, pattern, handler)
 }
 
-//Route Handler for POST method
-func (a *App) POST(pattern string, handler Handler) *App {
+// POST Route POST Method
+func (a *App) POST(pattern string, handler func(c *c.Context)) *App {
 	return a.Route(http.MethodPost, pattern, handler)
 }
 
-//Route Handler for PUT method
-func (a *App) PUT(pattern string, handler Handler) *App {
+// PUT Route PUT Method
+func (a *App) PUT(pattern string, handler func(c *c.Context)) *App {
 	return a.Route(http.MethodPut, pattern, handler)
 }
 
-//Route Handler for DELETE method
-func (a *App) DELETE(pattern string, handler Handler) *App {
+// DELETE Route DELETE Method
+func (a *App) DELETE(pattern string, handler func(c *c.Context)) *App {
 	return a.Route(http.MethodDelete, pattern, handler)
 }
 
-//Route Handler for PATCH method
-func (a *App) PATCH(pattern string, handler Handler) *App {
+// PATCH Route PATCH Method
+func (a *App) PATCH(pattern string, handler func(c *c.Context)) *App {
 	return a.Route(http.MethodPatch, pattern, handler)
 }
 
-//Route Handler for HEAD method
-func (a *App) HEAD(pattern string, handler Handler) *App {
+// HEAD Route HEAD Method
+func (a *App) HEAD(pattern string, handler func(c *c.Context)) *App {
 	return a.Route(http.MethodHead, pattern, handler)
 }
 
-//Route Handler for OPTIONS method
-func (a *App) OPTIONS(pattern string, handler Handler) *App {
+// OPTIONS Route OPTIONS Method
+func (a *App) OPTIONS(pattern string, handler func(c *c.Context)) *App {
 	return a.Route(http.MethodOptions, pattern, handler)
 }
 
-//Route Handler for PATCH method
-func (a *App) Route(method, pattern string, handler Handler) *App {
+// Route Route DIY Method
+func (a *App) Route(method, pattern string, handler func(c *c.Context)) *App {
 	a.routers[0].Route(method, pattern, handler)
 	return a
 }
 
-//Add router
-func (a *App) AddRouter(r ...*Router) *App {
+// AddRouter Add Routers
+func (a *App) AddRouter(r ...*rr.Router) *App {
 	a.routers = append(a.routers, r...)
 	return a
 }
 
-//Add router group
-func (a *App) AddRouterGroup(g ...*Group) *App {
+// AddRouterGroup Add Group Routers
+func (a *App) AddRouterGroup(g ...*rr.Group) *App {
 	a.groups = append(a.groups, g...)
 	return a
 }
 
-//parseRouters
 func (a *App) parseRouters() *App {
 
-	simpleParseFunc := func(prefix string, simples []*Simple) {
+	simpleParseFunc := func(prefix string, simples []*rr.Simple) {
 		for _, simple := range simples {
 			routeKey := fmt.Sprintf("%s:%s%s", simple.Method, prefix, simple.Pattern)
 			a.parsedRouters.Simples[routeKey] = simple
 		}
 	}
 
-	dynamicParseFunc := func(prefix string, dynamics []*Dynamic) {
+	dynamicParseFunc := func(prefix string, dynamics []*rr.Dynamic) {
 		for _, dynamic := range dynamics {
 			pattern := fmt.Sprintf("^%s%s$", prefix, strings.ReplaceAll(dynamic.Pattern, "*", `([\w-]+)`))
 			dynamicsMap, have := a.parsedRouters.Dynamics[pattern]
-			//FIX Params Pos
+
 			if prefix != "" {
 				pslen := len(strings.Split(prefix, "/"))
 				if pslen > 1 {
@@ -95,12 +92,11 @@ func (a *App) parseRouters() *App {
 			if have {
 				dynamicsMap[dynamic.Method] = dynamic
 			} else {
-				a.parsedRouters.Dynamics[pattern] = map[string]*Dynamic{dynamic.Method: dynamic}
+				a.parsedRouters.Dynamics[pattern] = map[string]*rr.Dynamic{dynamic.Method: dynamic}
 			}
 		}
 	}
 
-	//start parse groups
 	for _, g := range a.groups {
 		for _, gr := range g.Routers() {
 			if g.Prefix() == "" {
@@ -112,7 +108,6 @@ func (a *App) parseRouters() *App {
 		}
 	}
 
-	//start parse routers
 	for _, r := range a.routers {
 		simpleParseFunc("", r.Simples)
 		dynamicParseFunc("", r.Dynamics)

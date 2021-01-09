@@ -7,15 +7,12 @@ import (
 	"strings"
 )
 
-//Define ParsedRouter struct
 type ParsedRouter struct {
-	//K<routeKey> V<Simple>
 	Simples map[string]*Simple
-	//K<regex> V< K<method> V<Dynamic> >
+
 	Dynamics map[string]map[string]*Dynamic
 }
 
-//Handlers
 func (pr *ParsedRouter) Handlers(ctx *c.Context) func(c *c.Context) {
 	simple := pr.simple(ctx)
 	if simple != nil {
@@ -24,7 +21,6 @@ func (pr *ParsedRouter) Handlers(ctx *c.Context) func(c *c.Context) {
 	return pr.dynamic(ctx)
 }
 
-//simple
 func (pr *ParsedRouter) simple(ctx *c.Context) func(c *c.Context) {
 	if len(pr.Simples) <= 0 {
 		return nil
@@ -40,7 +36,6 @@ func (pr *ParsedRouter) simple(ctx *c.Context) func(c *c.Context) {
 	return nil
 }
 
-//dynamic
 func (pr *ParsedRouter) dynamic(ctx *c.Context) func(c *c.Context) {
 	if len(pr.Dynamics) <= 0 {
 		return nil
@@ -53,24 +48,20 @@ func (pr *ParsedRouter) dynamic(ctx *c.Context) func(c *c.Context) {
 			if routed {
 				return func(c *c.Context) {
 
-					//Add params into context
 					paramMap := make(map[string][]string, 0)
 					paths := strings.Split(c.Request.URL.Path, "/")
 					for i, paramVal := range paths {
 						paramName, have := dy.Pos[i]
 						if have {
-							//found match variable
+
 							paramMap[paramName] = []string{paramVal}
 						}
 					}
 
-					//Set paramMap
 					c.SetParamMap(paramMap)
 
-					//Add handler
 					dy.Handler(c)
 
-					//Next Chain
 					c.Chain()
 				}
 			}

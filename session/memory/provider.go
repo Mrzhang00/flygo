@@ -14,12 +14,10 @@ import (
 	"time"
 )
 
-//Define provider struct
 type provider struct {
-	sessions *sync.Map //map[string]se.Session
+	sessions *sync.Map
 }
 
-//Provider
 func Provider() se.Provider {
 	p := &provider{
 		sessions: &sync.Map{},
@@ -27,12 +25,10 @@ func Provider() se.Provider {
 	return p
 }
 
-//CookieName
 func (p *provider) CookieName() string {
 	return "GSESSIONID"
 }
 
-//GetId
 func (p *provider) GetId(r *http.Request) string {
 	cookie, err := r.Cookie(p.CookieName())
 	if err == nil && cookie != nil {
@@ -41,13 +37,11 @@ func (p *provider) GetId(r *http.Request) string {
 	return ""
 }
 
-//Exists
 func (p *provider) Exists(id string) bool {
 	_, have := p.sessions.Load(id)
 	return have
 }
 
-//Get
 func (p *provider) Get(id string) se.Session {
 	value, have := p.sessions.Load(id)
 	if !have {
@@ -56,12 +50,10 @@ func (p *provider) Get(id string) se.Session {
 	return value.(se.Session)
 }
 
-//Del
 func (p *provider) Del(id string) {
 	p.sessions.Delete(id)
 }
 
-//GetAll
 func (p *provider) GetAll() map[string]se.Session {
 	m := make(map[string]se.Session, 0)
 	p.sessions.Range(func(k, v interface{}) bool {
@@ -71,9 +63,8 @@ func (p *provider) GetAll() map[string]se.Session {
 	return m
 }
 
-//Clear
 func (p *provider) Clear() {
-	copy := p.sessions
+	copyx := p.sessions
 	p.sessions = &sync.Map{}
 	go func(copy *sync.Map) {
 		keys := make([]string, 0)
@@ -85,17 +76,15 @@ func (p *provider) Clear() {
 			copy.Delete(key)
 		}
 		runtime.GC()
-	}(copy)
+	}(copyx)
 }
 
-//tmd5
 func tmd5(text string) string {
 	hashMd5 := md5.New()
-	io.WriteString(hashMd5, text)
+	_, _ = io.WriteString(hashMd5, text)
 	return fmt.Sprintf("%x", hashMd5.Sum(nil))
 }
 
-//newSID
 func newSID() string {
 	nano := time.Now().UnixNano()
 	rand.Seed(nano)
@@ -103,7 +92,6 @@ func newSID() string {
 	return strings.ToUpper(tmd5(tmd5(strconv.FormatInt(nano, 10)) + tmd5(strconv.FormatInt(rndNum, 10))))
 }
 
-//New
 func (p *provider) New(config *se.Config, listener *se.Listener) se.Session {
 	sessionId := newSID()
 	sess := newSession(sessionId, config.Timeout)
@@ -116,9 +104,8 @@ func (p *provider) New(config *se.Config, listener *se.Listener) se.Session {
 	return sess
 }
 
-//Refresh
 func (p *provider) Refresh(session se.Session, config *se.Config, listener *se.Listener) {
-	session.Renew(config.Timeout)
+	session.Renew(se.GetTimeout(config.Timeout))
 	go func() {
 		if listener != nil && listener.Refreshed != nil {
 			listener.Refreshed(session)
@@ -126,17 +113,15 @@ func (p *provider) Refresh(session se.Session, config *se.Config, listener *se.L
 	}()
 }
 
-//Clean
-func (p *provider) Clean(config *se.Config, listener *se.Listener) {
+func (p *provider) Clean(_ *se.Config, listener *se.Listener) {
 	go func() {
 		for {
 			p.cleanSession(listener)
-			time.Sleep(time.Second)
+			time.Sleep(time.Minute)
 		}
 	}()
 }
 
-//cleanSession
 func (p *provider) cleanSession(listener *se.Listener) {
 	if len(p.GetAll()) <= 0 {
 		return
@@ -161,8 +146,8 @@ func (p *provider) cleanSession(listener *se.Listener) {
 		if sess.Invalidated() {
 			p.Del(sess.Id())
 			go func() {
-				if listener != nil && listener.Destoryed != nil {
-					listener.Destoryed(sess)
+				if listener != nil && listener.Destroyed != nil {
+					listener.Destroyed(sess)
 				}
 			}()
 		}

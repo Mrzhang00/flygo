@@ -6,12 +6,14 @@ import (
 	"os"
 )
 
-//Define Logger interface
 type Logger interface {
-	Info(msg string, args ...interface{})  //Info level
-	Debug(msg string, args ...interface{}) //Debug level
-	Warn(msg string, args ...interface{})  //Warn level
-	Error(msg string, args ...interface{}) //Error level
+	Info(msg string, args ...interface{})
+
+	Debug(msg string, args ...interface{})
+
+	Warn(msg string, args ...interface{})
+
+	Error(msg string, args ...interface{})
 }
 
 var DefaultLogger Logger = New("[Logger]")
