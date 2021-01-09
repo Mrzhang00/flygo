@@ -8,11 +8,13 @@ import (
 	"strings"
 )
 
+// Router struct
 type Router struct {
 	Simples  []*Simple
 	Dynamics []*Dynamic
 }
 
+// NewRouter return new router
 func NewRouter() *Router {
 	return &Router{
 		Simples:  make([]*Simple, 0),
@@ -20,38 +22,47 @@ func NewRouter() *Router {
 	}
 }
 
+// REQUEST Route all Methods
 func (r *Router) REQUEST(pattern string, handler func(c *c.Context)) *Router {
 	return r.Route("*", pattern, handler)
 }
 
+// GET Route Get Method
 func (r *Router) GET(pattern string, handler func(c *c.Context)) *Router {
 	return r.Route(http.MethodGet, pattern, handler)
 }
 
+// POST Route POST Method
 func (r *Router) POST(pattern string, handler func(c *c.Context)) *Router {
 	return r.Route(http.MethodPost, pattern, handler)
 }
 
+// PUT Route PUT Method
 func (r *Router) PUT(pattern string, handler func(c *c.Context)) *Router {
 	return r.Route(http.MethodPut, pattern, handler)
 }
 
+// DELETE Route DELETE Method
 func (r *Router) DELETE(pattern string, handler func(c *c.Context)) *Router {
 	return r.Route(http.MethodDelete, pattern, handler)
 }
 
+// PATCH Route PATCH Method
 func (r *Router) PATCH(pattern string, handler func(c *c.Context)) *Router {
 	return r.Route(http.MethodPatch, pattern, handler)
 }
 
+// HEAD Route HEAD Method
 func (r *Router) HEAD(pattern string, handler func(c *c.Context)) *Router {
 	return r.Route(http.MethodHead, pattern, handler)
 }
 
+// OPTIONS Route OPTIONS Method
 func (r *Router) OPTIONS(pattern string, handler func(c *c.Context)) *Router {
 	return r.Route(http.MethodOptions, pattern, handler)
 }
 
+// Route Route DIY Method
 func (r *Router) Route(method, pattern string, handler func(c *c.Context)) *Router {
 
 	if !util.RouteSupport(method) {

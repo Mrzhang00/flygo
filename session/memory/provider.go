@@ -18,6 +18,7 @@ type provider struct {
 	sessions *sync.Map
 }
 
+// Provider return session provider
 func Provider() se.Provider {
 	p := &provider{
 		sessions: &sync.Map{},
@@ -25,10 +26,12 @@ func Provider() se.Provider {
 	return p
 }
 
+// CookieName return cookie name
 func (p *provider) CookieName() string {
 	return "GSESSIONID"
 }
 
+// GetId get session id
 func (p *provider) GetId(r *http.Request) string {
 	cookie, err := r.Cookie(p.CookieName())
 	if err == nil && cookie != nil {
@@ -37,11 +40,13 @@ func (p *provider) GetId(r *http.Request) string {
 	return ""
 }
 
+// Exists session
 func (p *provider) Exists(id string) bool {
 	_, have := p.sessions.Load(id)
 	return have
 }
 
+// Get session
 func (p *provider) Get(id string) se.Session {
 	value, have := p.sessions.Load(id)
 	if !have {
@@ -50,10 +55,12 @@ func (p *provider) Get(id string) se.Session {
 	return value.(se.Session)
 }
 
+// Del session
 func (p *provider) Del(id string) {
 	p.sessions.Delete(id)
 }
 
+// GetAll sessions
 func (p *provider) GetAll() map[string]se.Session {
 	m := make(map[string]se.Session, 0)
 	p.sessions.Range(func(k, v interface{}) bool {
@@ -63,6 +70,7 @@ func (p *provider) GetAll() map[string]se.Session {
 	return m
 }
 
+// Clear session's vals
 func (p *provider) Clear() {
 	copyx := p.sessions
 	p.sessions = &sync.Map{}
@@ -92,6 +100,7 @@ func newSID() string {
 	return strings.ToUpper(tmd5(tmd5(strconv.FormatInt(nano, 10)) + tmd5(strconv.FormatInt(rndNum, 10))))
 }
 
+// New return new session
 func (p *provider) New(config *se.Config, listener *se.Listener) se.Session {
 	sessionId := newSID()
 	sess := newSession(sessionId, config.Timeout)
@@ -104,6 +113,7 @@ func (p *provider) New(config *se.Config, listener *se.Listener) se.Session {
 	return sess
 }
 
+// Refresh session
 func (p *provider) Refresh(session se.Session, config *se.Config, listener *se.Listener) {
 	session.Renew(se.GetTimeout(config.Timeout))
 	go func() {
@@ -113,6 +123,7 @@ func (p *provider) Refresh(session se.Session, config *se.Config, listener *se.L
 	}()
 }
 
+// Clean session
 func (p *provider) Clean(_ *se.Config, listener *se.Listener) {
 	go func() {
 		for {

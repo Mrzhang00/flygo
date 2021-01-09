@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// TestBannerText test
 func TestBannerText(t *testing.T) {
 	go func() {
 		app := flygo.GetApp()
@@ -19,6 +20,7 @@ func TestBannerText(t *testing.T) {
 	<-time.After(time.Second)
 }
 
+// TestBannerFile test
 func TestBannerFile(t *testing.T) {
 	go func() {
 		_ = ioutil.WriteFile("banner.txt", []byte(`THIS IS FLYGO BANNER FROM FILE!!!!`), 0760)

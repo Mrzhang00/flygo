@@ -12,6 +12,7 @@ import (
 var templateCaches = make(map[string]string, 0)
 var camu = &sync.Mutex{}
 
+// AddFunc add func
 func (c *Context) AddFunc(name string, tfunc interface{}) *Context {
 	calls.True(name != "" && tfunc != nil, func() {
 		c.funcMap[name] = tfunc
@@ -19,6 +20,7 @@ func (c *Context) AddFunc(name string, tfunc interface{}) *Context {
 	return c
 }
 
+// AddFunc add funcMap
 func (c *Context) AddFuncMap(funcMap template.FuncMap) *Context {
 	calls.True(funcMap != nil && len(funcMap) > 0, func() {
 		for k, v := range funcMap {
@@ -28,6 +30,7 @@ func (c *Context) AddFuncMap(funcMap template.FuncMap) *Context {
 	return c
 }
 
+// Template render template
 func (c *Context) Template(prefix string, data map[string]interface{}) {
 	calls.False(c.templateConfig.Enable, func() {
 		c.logger.Warn("[Template]disabled")

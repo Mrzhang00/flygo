@@ -1,16 +1,24 @@
 package context
 
+// Listener interface
 type Listener interface {
+	// Created Listener
 	Created(c *Context)
+	// PreparedAdd Listener
 	PreparedAdd(c *Context, handlers ...func(c *Context))
+	// Added Listener
 	Added(c *Context, handlers ...func(c *Context))
+	// PreparedAddOnce Listener
 	PreparedAddOnce(c *Context, handlers ...func(c *Context))
+	// AddedOnce Listener
 	AddedOnce(c *Context, handlers ...func(c *Context))
+	// Destroyed Listener
 	Destroyed(c *Context)
 }
 
 var listeners = make([]Listener, 0)
 
+// AddListeners add listeners
 func AddListeners(ls ...Listener) {
 	listeners = append(listeners, ls...)
 }

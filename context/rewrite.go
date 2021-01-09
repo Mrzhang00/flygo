@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// Redirect url
 func (c *Context) Redirect(url string) {
 	c.render = RenderBuilder().Header(http.Header{
 		headers.Location: []string{url},

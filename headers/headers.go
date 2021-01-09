@@ -1,14 +1,24 @@
 package headers
 
 const (
-	MIME                      = "Content-Type"
-	Server                    = "Server"
-	XServer                   = "X-Server"
-	SetCookie                 = "Set-Cookie"
-	ContentDisposition        = "Content-Disposition"
-	Location                  = "Location"
-	Allow                     = "Allow"
-	AccessControlAllowOrigin  = "Access-Control-Allow-Origin"
+	// MIME header
+	MIME = "Content-Type"
+	// Server header
+	Server = "Server"
+	// XServer header
+	XServer = "X-Server"
+	// SetCookie header
+	SetCookie = "Set-Cookie"
+	// ContentDisposition header
+	ContentDisposition = "Content-Disposition"
+	// Location header
+	Location = "Location"
+	// Allow header
+	Allow = "Allow"
+	// AccessControlAllowOrigin header
+	AccessControlAllowOrigin = "Access-Control-Allow-Origin"
+	// AccessControlAllowHeaders header
 	AccessControlAllowHeaders = "Access-Control-Allow-Headers"
+	// AccessControlAllowMethods header
 	AccessControlAllowMethods = "Access-Control-Allow-Methods"
 )

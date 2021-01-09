@@ -2,9 +2,14 @@ package session
 
 type sessionListener func(session Session)
 
+// Listener struct
 type Listener struct {
-	Created     sessionListener
-	Destroyed   sessionListener
+	// Created Listener
+	Created sessionListener
+	// Destroyed Listener
+	Destroyed sessionListener
+	// Invalidated Listener
 	Invalidated sessionListener
-	Refreshed   sessionListener
+	// Refreshed Listener
+	Refreshed sessionListener
 }

@@ -7,20 +7,24 @@ import (
 	"time"
 )
 
+// Config struct
 type Config struct {
 	Server *YmlServerConfig `yaml:"server"`
 	Flygo  *YmlConfig       `yaml:"flygo"`
 }
 
+// Unmarshal yaml
 func (yc *Config) Unmarshal(bytes []byte) error {
 	return yaml.Unmarshal(bytes, yc)
 }
 
+// YmlServerConfig struct
 type YmlServerConfig struct {
 	MaxHeaderSize int                     `yaml:"maxHeaderSize"`
 	Timeout       *YmlServerConfigTimeout `yaml:"timeout"`
 }
 
+// YmlServerConfigTimeout struct
 type YmlServerConfigTimeout struct {
 	Read       time.Duration `yaml:"read"`
 	ReadHeader time.Duration `yaml:"readHeader"`
@@ -28,6 +32,7 @@ type YmlServerConfigTimeout struct {
 	Idle       time.Duration `yaml:"idle"`
 }
 
+// YmlConfig struct
 type YmlConfig struct {
 	Dev      *YmlConfigDev      `yaml:"dev"`
 	Banner   *YmlConfigBanner   `yaml:"banner"`
@@ -35,10 +40,12 @@ type YmlConfig struct {
 	Template *YmlConfigTemplate `yaml:"template"`
 }
 
+// YmlConfigDev struct
 type YmlConfigDev struct {
 	Debug bool `yaml:"debug"`
 }
 
+// YmlConfigBanner struct
 type YmlConfigBanner struct {
 	Enable bool   `yaml:"enable"`
 	Type   string `yaml:"type"`
@@ -46,12 +53,14 @@ type YmlConfigBanner struct {
 	Text   string `yaml:"text"`
 }
 
+// YmlConfigServer struct
 type YmlConfigServer struct {
 	Host string              `yaml:"host"`
 	Port int                 `yaml:"port"`
 	TLS  *YmlConfigServerTls `yaml:"tls"`
 }
 
+// YmlConfigTemplate struct
 type YmlConfigTemplate struct {
 	Enable  bool   `yaml:"enable"`
 	Cache   bool   `yaml:"cache"`
@@ -60,12 +69,14 @@ type YmlConfigTemplate struct {
 	FuncMap template.FuncMap
 }
 
+// YmlConfigServerTls struct
 type YmlConfigServerTls struct {
 	Enable   bool   `yaml:"enable"`
 	CertFile string `yaml:"certFile"`
 	KeyFile  string `yaml:"keyFile"`
 }
 
+// Default Config
 func Default() *Config {
 	return &Config{
 		Server: &YmlServerConfig{

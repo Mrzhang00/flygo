@@ -26,10 +26,12 @@ type provider struct {
 	sessions  *sync.Map
 }
 
+// Provider return new provider
 func Provider(options *redis.Options) se.Provider {
 	return NewWithPrefixKey(options, defaultPrefixKey)
 }
 
+// NewWithPrefixKey return new provider
 func NewWithPrefixKey(options *redis.Options, prefixKey string) se.Provider {
 	client := redis.NewClient(options)
 	ping := client.Ping()
@@ -48,10 +50,12 @@ func NewWithPrefixKey(options *redis.Options, prefixKey string) se.Provider {
 	return p
 }
 
+// CookieName return cookie name
 func (p *provider) CookieName() string {
 	return "GSESSIONID"
 }
 
+// GetId get session id
 func (p *provider) GetId(r *http.Request) string {
 	cookie, err := r.Cookie(p.CookieName())
 	if err == nil && cookie != nil {
@@ -64,11 +68,13 @@ func (p *provider) getRedisKey(id string) string {
 	return fmt.Sprintf("%s%s", p.keyPrefix, id)
 }
 
+// Exists session
 func (p *provider) Exists(id string) bool {
 	get := p.Get(id)
 	return get != nil && !get.Invalidated()
 }
 
+// Get session
 func (p *provider) Get(id string) se.Session {
 	sess, have := p.sessions.Load(id)
 	if !have {
@@ -77,6 +83,7 @@ func (p *provider) Get(id string) se.Session {
 	return sess.(se.Session)
 }
 
+// Del session
 func (p *provider) Del(id string) {
 	delCmd := p.client.Del(p.getRedisKey(id))
 	if delCmd.Err() != nil {
@@ -84,6 +91,7 @@ func (p *provider) Del(id string) {
 	}
 }
 
+// GetAll session's vals
 func (p *provider) GetAll() map[string]se.Session {
 	keysCmd := p.client.Keys(p.keyPrefix)
 	if keysCmd.Err() != nil {
@@ -102,6 +110,7 @@ func (p *provider) GetAll() map[string]se.Session {
 	return sessionMap
 }
 
+// Clear session's vals
 func (p *provider) Clear() {
 	keysCmd := p.client.Keys(p.keyPrefix)
 	if keysCmd.Err() != nil {
@@ -119,7 +128,7 @@ func (p *provider) Clear() {
 
 func tmd5(text string) string {
 	hashMd5 := md5.New()
-	io.WriteString(hashMd5, text)
+	_, _ = io.WriteString(hashMd5, text)
 	return fmt.Sprintf("%x", hashMd5.Sum(nil))
 }
 
@@ -130,6 +139,7 @@ func newSID() string {
 	return strings.ToUpper(tmd5(tmd5(strconv.FormatInt(nano, 10)) + tmd5(strconv.FormatInt(rndNum, 10))))
 }
 
+// New return new session
 func (p *provider) New(config *se.Config, _ *se.Listener) se.Session {
 	sessionId := newSID()
 	session := newSession(p.client, sessionId, p.getRedisKey(sessionId))
@@ -147,6 +157,7 @@ func (p *provider) New(config *se.Config, _ *se.Listener) se.Session {
 	return session
 }
 
+// Refresh session
 func (p *provider) Refresh(session se.Session, config *se.Config, listener *se.Listener) {
 	expireCmd := p.client.Expire(p.getRedisKey(session.Id()), se.GetTimeout(config.Timeout))
 	if expireCmd.Err() != nil {
@@ -160,6 +171,7 @@ func (p *provider) Refresh(session se.Session, config *se.Config, listener *se.L
 	}
 }
 
+// Clean session
 func (p *provider) Clean(_ *se.Config, listener *se.Listener) {
 	go p.cleanSession(listener)
 }

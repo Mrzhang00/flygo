@@ -7,12 +7,15 @@ import (
 	"strings"
 )
 
+// ParsedRouter struct
 type ParsedRouter struct {
+	// Simples routers
 	Simples map[string]*Simple
-
+	// Dynamics routers
 	Dynamics map[string]map[string]*Dynamic
 }
 
+// Handlers found simple or dynamic handler
 func (pr *ParsedRouter) Handlers(ctx *c.Context) func(c *c.Context) {
 	simple := pr.simple(ctx)
 	if simple != nil {

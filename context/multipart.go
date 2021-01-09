@@ -9,15 +9,23 @@ import (
 	"os"
 )
 
+// MultipartFile struct
 type MultipartFile struct {
-	Logger      log.Logger
-	Filename    string
+	// Logger MultipartFile logger
+	Logger log.Logger
+	// Filename file name
+	Filename string
+	// ContentType Content type
 	ContentType string
-	Size        int64
-	FileHeader  *multipart.FileHeader
-	Headers     http.Header
+	// Size file's total size
+	Size int64
+	// FileHeader file headers
+	FileHeader *multipart.FileHeader
+	// Headers for Request
+	Headers http.Header
 }
 
+// Copy source file in multiple
 func (file *MultipartFile) Copy(distName string) error {
 	var f multipart.File
 	var dist *os.File
@@ -44,6 +52,7 @@ func (file *MultipartFile) Copy(distName string) error {
 	return nil
 }
 
+// ParseMultipart parse multiple Request
 func (c *Context) ParseMultipart(maxMemory int64) error {
 	var err error
 	err = c.Request.ParseMultipartForm(maxMemory)
@@ -77,6 +86,7 @@ func (c *Context) ParseMultipart(maxMemory int64) error {
 	return nil
 }
 
+// MultipartFile get multiple file
 func (c *Context) MultipartFile(name string) *MultipartFile {
 	files := c.MultipartFiles(name)
 	if files != nil && len(files) > 0 {
@@ -85,6 +95,7 @@ func (c *Context) MultipartFile(name string) *MultipartFile {
 	return nil
 }
 
+// MultipartFiles get multiple files
 func (c *Context) MultipartFiles(name string) []*MultipartFile {
 	files, have := c.MultipartMap[name]
 	if have {

@@ -35,16 +35,19 @@ var requestMethods = map[string]int{
 	http.MethodTrace:   0,
 }
 
+// RouteSupport supports
 func RouteSupport(method string) bool {
 	_, have := routeMethods[method]
 	return have
 }
 
+// RequestSupport supports
 func RequestSupport(method string) bool {
 	_, have := requestMethods[method]
 	return have
 }
 
+// AllMethods methods
 func AllMethods() []string {
 	return allMethods
 }

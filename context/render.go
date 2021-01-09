@@ -11,6 +11,7 @@ import (
 	"net/url"
 )
 
+// Render struct
 type Render struct {
 	rended      bool
 	Buffer      []byte
@@ -20,14 +21,17 @@ type Render struct {
 	ContentType string
 }
 
+// Render return the render
 func (c *Context) Render() *Render {
 	return c.render
 }
 
+// Rended return rended
 func (r *Render) Rended() bool {
 	return r.rended
 }
 
+// Rende from r
 func (c *Context) Rende(r *Render) {
 	c.render.rended = true
 	if r.Buffer != nil {
@@ -51,10 +55,12 @@ func (c *Context) Rende(r *Render) {
 	}
 }
 
+// Text render text
 func (c *Context) Text(text string) {
 	c.Rende(RenderBuilder().Buffer([]byte(text)).ContentType(mime.TEXT).Build())
 }
 
+// TextFile render text file
 func (c *Context) TextFile(textFile string) {
 	bytes, err := readFile(textFile)
 	if err != nil {
@@ -64,6 +70,7 @@ func (c *Context) TextFile(textFile string) {
 	c.Rende(RenderBuilder().Buffer([]byte(string(bytes))).ContentType(mime.TEXT).Build())
 }
 
+// JSON render JSON
 func (c *Context) JSON(data interface{}) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
@@ -73,10 +80,12 @@ func (c *Context) JSON(data interface{}) {
 	c.Rende(RenderBuilder().Buffer(jsonData).ContentType(mime.JSON).Build())
 }
 
+// JSONText render JSON text
 func (c *Context) JSONText(json string) {
 	c.Rende(RenderBuilder().Buffer([]byte(json)).ContentType(mime.JSON).Build())
 }
 
+// JSONFile render JSON file
 func (c *Context) JSONFile(jsonFile string) {
 	bytes, err := readFile(jsonFile)
 	if err != nil {
@@ -86,6 +95,7 @@ func (c *Context) JSONFile(jsonFile string) {
 	c.Rende(RenderBuilder().Buffer(bytes).ContentType(mime.JSON).Build())
 }
 
+// XML render XML
 func (c *Context) XML(data interface{}) {
 	xmlData, err := xml.Marshal(data)
 	if err != nil {
@@ -95,10 +105,12 @@ func (c *Context) XML(data interface{}) {
 	c.Rende(RenderBuilder().Buffer(xmlData).ContentType(mime.XML).Build())
 }
 
+// XMLText render XML text
 func (c *Context) XMLText(xml string) {
 	c.Rende(RenderBuilder().Buffer([]byte(xml)).ContentType(mime.XML).Build())
 }
 
+// XMLFile render XML file
 func (c *Context) XMLFile(xmlFile string) {
 	bytes, err := readFile(xmlFile)
 	if err != nil {
@@ -108,10 +120,12 @@ func (c *Context) XMLFile(xmlFile string) {
 	c.Rende(RenderBuilder().Buffer(bytes).ContentType(mime.XML).Build())
 }
 
+// Image render image
 func (c *Context) Image(buffer []byte) {
 	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.JPG).Build())
 }
 
+// ImageFile render image file
 func (c *Context) ImageFile(imageFile string) {
 	bytes, err := readFile(imageFile)
 	if err != nil {
@@ -121,10 +135,12 @@ func (c *Context) ImageFile(imageFile string) {
 	c.Image(bytes)
 }
 
+// ICO render ico
 func (c *Context) ICO(buffer []byte) {
 	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.ICO).Build())
 }
 
+// ICOFile render ico file
 func (c *Context) ICOFile(icoFile string) {
 	bytes, err := readFile(icoFile)
 	if err != nil {
@@ -134,10 +150,12 @@ func (c *Context) ICOFile(icoFile string) {
 	c.ICO(bytes)
 }
 
+// BMP render bmp
 func (c *Context) BMP(buffer []byte) {
 	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.BMP).Build())
 }
 
+// BMPFile render bmp file
 func (c *Context) BMPFile(bmpFile string) {
 	bytes, err := readFile(bmpFile)
 	if err != nil {
@@ -147,10 +165,12 @@ func (c *Context) BMPFile(bmpFile string) {
 	c.BMP(bytes)
 }
 
+// JPG render jpg
 func (c *Context) JPG(buffer []byte) {
 	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.JPG).Build())
 }
 
+// JPGFile render jpg file
 func (c *Context) JPGFile(jpgFile string) {
 	bytes, err := readFile(jpgFile)
 	if err != nil {
@@ -160,18 +180,22 @@ func (c *Context) JPGFile(jpgFile string) {
 	c.JPG(bytes)
 }
 
+// JPEG render jpeg
 func (c *Context) JPEG(buffer []byte) {
 	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.JPG).Build())
 }
 
+// JPEGFile render jpeg file
 func (c *Context) JPEGFile(jpegFile string) {
 	c.JPGFile(jpegFile)
 }
 
+// PNG render png
 func (c *Context) PNG(buffer []byte) {
 	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.PNG).Build())
 }
 
+// PNGFile render png file
 func (c *Context) PNGFile(pngFile string) {
 	bytes, err := readFile(pngFile)
 	if err != nil {
@@ -181,10 +205,12 @@ func (c *Context) PNGFile(pngFile string) {
 	c.PNG(bytes)
 }
 
+// GIF render gif
 func (c *Context) GIF(buffer []byte) {
 	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.GIF).Build())
 }
 
+// GIFFile render gif file
 func (c *Context) GIFFile(gifFile string) {
 	bytes, err := readFile(gifFile)
 	if err != nil {
@@ -194,10 +220,12 @@ func (c *Context) GIFFile(gifFile string) {
 	c.GIF(bytes)
 }
 
+// HTML render html
 func (c *Context) HTML(html string) {
 	c.Rende(RenderBuilder().Buffer([]byte(html)).ContentType(mime.HTML).Build())
 }
 
+// HTMLFile render html file
 func (c *Context) HTMLFile(htmlFile string) {
 	bytes, err := readFile(htmlFile)
 	if err != nil {
@@ -207,10 +235,12 @@ func (c *Context) HTMLFile(htmlFile string) {
 	c.Rende(RenderBuilder().Buffer(bytes).ContentType(mime.HTML).Build())
 }
 
+// CSS render css
 func (c *Context) CSS(css string) {
 	c.Rende(RenderBuilder().Buffer([]byte(css)).ContentType(mime.CSS).Build())
 }
 
+// CSSFile render css file
 func (c *Context) CSSFile(cssFile string) {
 	bytes, err := readFile(cssFile)
 	if err != nil {
@@ -220,10 +250,12 @@ func (c *Context) CSSFile(cssFile string) {
 	c.Rende(RenderBuilder().Buffer(bytes).ContentType(mime.CSS).Build())
 }
 
+// JS render js
 func (c *Context) JS(js string) {
 	c.Rende(RenderBuilder().Buffer([]byte(js)).ContentType(mime.JS).Build())
 }
 
+// JSFile render js file
 func (c *Context) JSFile(jsFile string) {
 	bytes, err := readFile(jsFile)
 	if err != nil {
@@ -233,10 +265,12 @@ func (c *Context) JSFile(jsFile string) {
 	c.Rende(RenderBuilder().Buffer(bytes).ContentType(mime.JS).Build())
 }
 
+// Binary render bin
 func (c *Context) Binary(buffer []byte) {
 	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.BINARY).Build())
 }
 
+// Binary render file
 func (c *Context) File(file string) {
 	bytes, err := readFile(file)
 	if err != nil {
@@ -246,6 +280,7 @@ func (c *Context) File(file string) {
 	c.Binary(bytes)
 }
 
+// Binary render download
 func (c *Context) Download(file, fileName string) {
 	bytes, err := readFile(file)
 	if err != nil {
