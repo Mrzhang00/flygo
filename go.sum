@@ -1,11 +1,9 @@
-github.com/billcoding/binding v0.0.0-20210108103519-f60c67ffcb1d h1:mz4CKOIGoPd1X3Ftsf8KHYduS9iU3of+fIXNRGeEDLs=
-github.com/billcoding/binding v0.0.0-20210108103519-f60c67ffcb1d/go.mod h1:19LOPkvympTwyQXTphzsnixiXReNs40yJLfqASlAi+M=
 github.com/billcoding/calls v0.0.0-20201221013021-2a8a0fd0a632 h1:wgetY46Oh3Jq6iZ0CXRI52RSw9JPvGr80/SbdbyJMBE=
 github.com/billcoding/calls v0.0.0-20201221013021-2a8a0fd0a632/go.mod h1:6ValEbx4tcCN9gkmvPyOHdCz1Cs8uju/RFkb/Sxbg9o=
-github.com/billcoding/reflectx v0.0.0-20201222040200-28873e79f434 h1:ZohTV9OTS6MhyD3OYVdWpaTFq6/0E8ukRE+reSGHZR4=
-github.com/billcoding/reflectx v0.0.0-20201222040200-28873e79f434/go.mod h1:Okk8SwEN5BDTmaorb1vLDjYD5G8kKlJ+el0Snd0RQgk=
-github.com/billcoding/validator v0.0.0-20210108101900-b3a37285b162 h1:LaQzHxfA33f0KzdncKCR6gKji+ffgsWrHVPI2adYqkg=
-github.com/billcoding/validator v0.0.0-20210108101900-b3a37285b162/go.mod h1:ZEX4Wkf24tyksL+g0ofAETr1N92yjPDff9HGkTTlbOQ=
+github.com/billcoding/tagparse v0.0.0-20210123031055-de0378380167 h1:o2G+V1dHHRVKkZpBYP6VWl9SWhCDM0dYlG55Jt6BaZg=
+github.com/billcoding/tagparse v0.0.0-20210123031055-de0378380167/go.mod h1:1sC6gaeSl3GR7cbQ7JbwJlm5bmL87OO/c6zp2oGapjE=
+github.com/billcoding/validator v0.0.0-20210123032557-3769fc73f900 h1:WnkQi47+n2nP5a0UIVtsEu5Tcn9S1lCOgr2CbjEIviw=
+github.com/billcoding/validator v0.0.0-20210123032557-3769fc73f900/go.mod h1:vq+K/qb74JzDp34wrnIuV/jZn726/+TPAsWdYs+O+VE=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/fsnotify/fsnotify v1.4.9 h1:hsms1Qyu0jgnwNXIxa+/V/PDsU6CfLf6CNO8H7IWoS4=
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=

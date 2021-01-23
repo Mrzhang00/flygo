@@ -1,27 +1,31 @@
 package context
 
 import (
-	bind "github.com/billcoding/binding"
+	"encoding/json"
 	"github.com/billcoding/calls"
 	vali "github.com/billcoding/validator"
+	"io/ioutil"
 )
 
-// Bind struct
+// Bind struct ptr
 func (c *Context) Bind(structPtr interface{}) {
-	bind.New(structPtr).BindReq(c.Request)
+	readAll, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		c.logger.Error("%v", err)
+	} else {
+		jerr := json.Unmarshal(readAll, structPtr)
+		if jerr != nil {
+			c.logger.Error("%v", err)
+		}
+	}
 }
 
-// BindWithType struct
-func (c *Context) BindWithType(structPtr interface{}, typ *bind.Type) {
-	bind.NewWithType(structPtr, typ).BindReq(c.Request)
-}
-
-// Validate struct
+// Validate struct ptr
 func (c *Context) Validate(structPtr interface{}, call func()) {
 	c.ValidateWithParams(structPtr, "Parameters is invalid", 500, call)
 }
 
-// ValidateWithParams struct
+// ValidateWithParams struct ptr
 func (c *Context) ValidateWithParams(structPtr interface{}, message string, code int, call func()) {
 	result := vali.New(structPtr).Validate()
 	calls.True(result.Passed, call)
@@ -34,20 +38,14 @@ func (c *Context) ValidateWithParams(structPtr interface{}, message string, code
 	})
 }
 
-// BindAndValidate struct
+// BindAndValidate struct ptr
 func (c *Context) BindAndValidate(structPtr interface{}, call func()) {
-	bind.New(structPtr).BindReq(c.Request)
+	c.Bind(structPtr)
 	c.Validate(structPtr, call)
 }
 
-// BindWithParamsAndValidate struct
-func (c *Context) BindWithParamsAndValidate(structPtr interface{}, typ *bind.Type, call func()) {
-	bind.NewWithType(structPtr, typ).BindReq(c.Request)
-	c.Validate(structPtr, call)
-}
-
-// BindWithParamsAndValidateWithParams struct
-func (c *Context) BindWithParamsAndValidateWithParams(structPtr interface{}, typ *bind.Type, message string, code int, call func()) {
-	bind.NewWithType(structPtr, typ).BindReq(c.Request)
+// BindAndValidateWithParams struct ptr
+func (c *Context) BindAndValidateWithParams(structPtr interface{}, message string, code int, call func()) {
+	c.Bind(structPtr)
 	c.ValidateWithParams(structPtr, message, code, call)
 }
