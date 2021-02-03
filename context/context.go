@@ -48,6 +48,16 @@ func New(r *http.Request, templateConfig *config.YmlConfigTemplate) *Context {
 		templateConfig: templateConfig,
 	}
 	c.onCreated()
+
+	// try parse form
+	_ = c.Request.ParseForm()
+
+	if c.Request.Form != nil {
+		for k := range c.Request.Form {
+			c.paramMap[k] = c.Request.Form[k]
+		}
+	}
+
 	return c
 }
 
