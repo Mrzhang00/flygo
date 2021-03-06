@@ -79,7 +79,6 @@ func (a *App) parseRouters() *App {
 		for _, dynamic := range dynamics {
 			pattern := fmt.Sprintf("^%s%s$", prefix, strings.ReplaceAll(dynamic.Pattern, "*", `([\w-]+)`))
 			dynamicsMap, have := a.parsedRouters.Dynamics[pattern]
-
 			if prefix != "" {
 				pslen := len(strings.Split(prefix, "/"))
 				if pslen > 1 {
