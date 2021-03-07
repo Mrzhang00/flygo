@@ -2,7 +2,6 @@ package context
 
 import (
 	"bytes"
-	"github.com/billcoding/calls"
 	"html/template"
 	"io/ioutil"
 	"path/filepath"
@@ -10,68 +9,62 @@ import (
 )
 
 var templateCaches = make(map[string]string, 0)
-var camu = &sync.Mutex{}
+var mutex = &sync.Mutex{}
 
 // AddFunc add func
 func (c *Context) AddFunc(name string, tfunc interface{}) *Context {
-	calls.True(name != "" && tfunc != nil, func() {
+	if name != "" && tfunc != nil {
 		c.funcMap[name] = tfunc
-	})
+	}
 	return c
 }
 
 // AddFuncMap add funcMap
 func (c *Context) AddFuncMap(funcMap template.FuncMap) *Context {
-	calls.True(funcMap != nil && len(funcMap) > 0, func() {
+	if funcMap != nil && len(funcMap) > 0 {
 		for k, v := range funcMap {
 			c.AddFunc(k, v)
 		}
-	})
+	}
 	return c
 }
 
 // Template render template
 func (c *Context) Template(prefix string, data map[string]interface{}) {
-	calls.False(c.templateConfig.Enable, func() {
+	if !c.templateConfig.Enable {
 		c.logger.Warn("[Template]disabled")
-	})
-	calls.True(c.templateConfig.Enable, func() {
-		camu.Lock()
-		defer camu.Unlock()
+	} else {
+		mutex.Lock()
+		defer mutex.Unlock()
 		fileName := prefix + c.templateConfig.Suffix
 		realPath := filepath.Join(c.templateConfig.Root, fileName)
 		tpl, have := templateCaches[fileName]
 		if !have {
 			bytes2, err := ioutil.ReadFile(realPath)
-			calls.NNil(err, func() {
+			if err != nil {
 				c.logger.Error("[Template]%v", err)
-			})
-			calls.Nil(err, func() {
+			} else {
 				tpl = string(bytes2)
-				calls.True(c.templateConfig.Cache, func() {
+				if c.templateConfig.Cache {
 					templateCaches[fileName] = tpl
-				})
-			})
+				}
+			}
 		}
-
-		calls.NNil(data, func() {
+		if data != nil {
 			c.SetDataMap(data)
-		})
-
+		}
 		t, err := template.New("HTML").Parse(tpl)
-		calls.NNil(err, func() {
+		if err != nil {
 			c.logger.Error("[Template]%v", err)
-		})
-		calls.Nil(err, func() {
+		} else {
 			t.Funcs(c.funcMap)
 			var w bytes.Buffer
 			err := t.Execute(&w, c.dataMap)
-			calls.NNil(err, func() {
+			if err != nil {
 				c.logger.Error("[Template]%v", err)
-			})
-			calls.Nil(err, func() {
+			} else {
 				c.HTML(w.String())
-			})
-		})
-	})
+			}
+		}
+	}
 }

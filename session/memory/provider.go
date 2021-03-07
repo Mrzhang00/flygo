@@ -28,7 +28,7 @@ func Provider() se.Provider {
 
 // CookieName return cookie name
 func (p *provider) CookieName() string {
-	return "GSESSIONID"
+	return "GO_SESSION_ID"
 }
 
 // GetId get session id

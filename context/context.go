@@ -1,7 +1,6 @@
 package context
 
 import (
-	"github.com/billcoding/calls"
 	"github.com/billcoding/flygo/config"
 	"github.com/billcoding/flygo/log"
 	"html/template"
@@ -29,11 +28,11 @@ type Context struct {
 // New context
 func New(r *http.Request, templateConfig *config.YmlConfigTemplate) *Context {
 	funcMap := make(map[string]interface{}, 0)
-	calls.NNil(templateConfig.FuncMap, func() {
+	if templateConfig.FuncMap != nil {
 		for k, v := range templateConfig.FuncMap {
 			funcMap[k] = v
 		}
-	})
+	}
 	c := &Context{
 		logger:         log.New("[Context]"),
 		Request:        r,
@@ -66,11 +65,7 @@ func (c *Context) Add(handlers ...func(c *Context)) *Context {
 	if len(handlers) <= 0 {
 		return c
 	}
-	c.onPreparedAddOnce(handlers...)
-	c.onPreparedAdd(handlers...)
 	c.handlers = append(c.handlers, handlers...)
-	c.onAddedOnce(handlers...)
-	c.onAdded(handlers...)
 	return c
 }
 

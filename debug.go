@@ -1,7 +1,6 @@
 package flygo
 
 import (
-	"github.com/billcoding/calls"
 	"gopkg.in/yaml.v2"
 	"reflect"
 )
@@ -25,12 +24,11 @@ func (a *App) debugTrace() {
 
 func (a *App) printConfigs() {
 	bytes, err := yaml.Marshal(a.Config)
-	calls.NNil(err, func() {
+	if err != nil {
 		a.Logger.Warn("[Config]%v", err)
-	})
-	calls.Nil(err, func() {
+	} else {
 		a.Logger.Info("[Config]\n%v", string(bytes))
-	})
+	}
 }
 
 func (a *App) printRestControllers() {
@@ -52,8 +50,8 @@ func (a *App) printRouters() {
 
 func (a *App) printMiddlewares() {
 	for _, v := range a.middlewares {
-		calls.NNil(v, func() {
+		if v != nil {
 			a.Logger.Info("[Middleware]used [%v]", v.Name())
-		})
+		}
 	}
 }

@@ -3,7 +3,6 @@ package redis
 import (
 	"crypto/md5"
 	"fmt"
-	"github.com/billcoding/calls"
 	"github.com/billcoding/flygo/log"
 	se "github.com/billcoding/flygo/session"
 	"github.com/go-redis/redis"
@@ -42,17 +41,16 @@ func NewWithPrefixKey(options *redis.Options, prefixKey string) se.Provider {
 		client:    client,
 		sessions:  &sync.Map{},
 	}
-	calls.NNil(ping.Err(), func() {
+	if ping.Err() != nil {
 		p.logger.Warn("%v", ping.Err())
-	})
-
+	}
 	p.syncSession()
 	return p
 }
 
 // CookieName return cookie name
 func (p *provider) CookieName() string {
-	return "GSESSIONID"
+	return "GO_SESSION_ID"
 }
 
 // GetId get session id
@@ -110,7 +108,7 @@ func (p *provider) GetAll() map[string]se.Session {
 	return sessionMap
 }
 
-// Clear session's vals
+// Clear session's values
 func (p *provider) Clear() {
 	keysCmd := p.client.Keys(p.keyPrefix)
 	if keysCmd.Err() != nil {
@@ -143,9 +141,9 @@ func newSID() string {
 func (p *provider) New(config *se.Config, _ *se.Listener) se.Session {
 	sessionId := newSID()
 	session := newSession(p.client, sessionId, p.getRedisKey(sessionId))
-	hsetCmd := p.client.HSet(p.getRedisKey(sessionId), sessionIdName, sessionId)
-	if hsetCmd.Err() != nil {
-		p.logger.Error("[New]%v", hsetCmd.Err())
+	hashSetCmd := p.client.HSet(p.getRedisKey(sessionId), sessionIdName, sessionId)
+	if hashSetCmd.Err() != nil {
+		p.logger.Error("[New]%v", hashSetCmd.Err())
 		return nil
 	}
 	expireCmd := p.client.Expire(p.getRedisKey(sessionId), se.GetTimeout(config.Timeout))
@@ -187,12 +185,12 @@ func (p *provider) syncSession() {
 		keys := keysCmd.Val()
 		sessionMap := make(map[string]se.Session, 0)
 		for _, key := range keys {
-			hgetAllCmd := p.client.HGetAll(key)
-			if hgetAllCmd.Err() != nil {
-				p.logger.Error("[syncSession]%v", hgetAllCmd.Err())
+			hashGetAllCmd := p.client.HGetAll(key)
+			if hashGetAllCmd.Err() != nil {
+				p.logger.Error("[syncSession]%v", hashGetAllCmd.Err())
 				continue
 			}
-			vals := hgetAllCmd.Val()
+			vals := hashGetAllCmd.Val()
 			sessionId := vals[sessionIdName]
 			rs := newSession(p.client, sessionId, key)
 			sessionMap[sessionId] = rs

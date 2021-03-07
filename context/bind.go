@@ -2,8 +2,7 @@ package context
 
 import (
 	"encoding/json"
-	"github.com/billcoding/calls"
-	vali "github.com/billcoding/validator"
+	v "github.com/billcoding/validator"
 	"io/ioutil"
 )
 
@@ -27,15 +26,16 @@ func (c *Context) Validate(structPtr interface{}, call func()) {
 
 // ValidateWithParams struct ptr
 func (c *Context) ValidateWithParams(structPtr interface{}, message string, code int, call func()) {
-	result := vali.New(structPtr).Validate()
-	calls.True(result.Passed, call)
-	calls.False(result.Passed, func() {
+	result := v.New(structPtr).Validate()
+	if result.Passed {
+		call()
+	} else {
 		msg := result.Messages()
 		if msg == "" {
 			msg = message
 		}
 		c.JSON(map[string]interface{}{"message": msg, "code": code})
-	})
+	}
 }
 
 // BindAndValidate struct ptr

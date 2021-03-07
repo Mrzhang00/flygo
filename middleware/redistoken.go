@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/billcoding/calls"
 	c "github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/log"
 	"github.com/go-redis/redis"
@@ -38,9 +37,9 @@ func RedisToken(options *redis.Options) *redisToken {
 		options: options,
 		client:  client,
 	}
-	calls.NNil(ping.Err(), func() {
+	if ping.Err() != nil {
 		rt.logger.Warn("%v", ping.Err())
-	})
+	}
 	return rt
 }
 

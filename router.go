@@ -80,11 +80,11 @@ func (a *App) parseRouters() *App {
 			pattern := fmt.Sprintf("^%s%s$", prefix, strings.ReplaceAll(dynamic.Pattern, "*", `([\w-]+)`))
 			dynamicsMap, have := a.parsedRouters.Dynamics[pattern]
 			if prefix != "" {
-				pslen := len(strings.Split(prefix, "/"))
-				if pslen > 1 {
+				psLen := len(strings.Split(prefix, "/"))
+				if psLen > 1 {
 					for k, v := range dynamic.Pos {
 						delete(dynamic.Pos, k)
-						dynamic.Pos[k+pslen-1] = v
+						dynamic.Pos[k+psLen-1] = v
 					}
 				}
 			}

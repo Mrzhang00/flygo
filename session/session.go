@@ -17,15 +17,15 @@ type Session interface {
 	Invalidated() bool
 	// Get named val
 	Get(name string) interface{}
-	// GetAll session's vals
+	// GetAll session's values
 	GetAll() map[string]interface{}
 	// Set named val
 	Set(name string, val interface{})
-	// SetAll vals
+	// SetAll values
 	SetAll(data map[string]interface{}, flush bool)
 	// Del named val
 	Del(name string)
-	// Clear sessoin's val
+	// Clear session's val
 	Clear()
 }
 

@@ -17,8 +17,13 @@ func (c *Context) Param(name string) string {
 }
 
 // ParamInt return named param of int
-func (c *Context) ParamInt(name string) int {
-	return c.ParamIntWith(name, 0)
+func (c *Context) ParamInt(name string) int64 {
+	val := c.Param(name)
+	iv, err := strconv.ParseInt(val, 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	return iv
 }
 
 // ParamIntWith return named param of int
@@ -26,14 +31,19 @@ func (c *Context) ParamIntWith(name string, defaultVal int) int {
 	val := c.ParamWith(name, fmt.Sprintf("%d", defaultVal))
 	iv, err := strconv.Atoi(val)
 	if err != nil {
-		c.logger.Error("[Param]%v", err)
+		panic(err)
 	}
 	return iv
 }
 
 // ParamFloat return named param of float
 func (c *Context) ParamFloat(name string) float64 {
-	return c.ParamFloatWith(name, 0)
+	val := c.Param(name)
+	iv, err := strconv.ParseFloat(val, 64)
+	if err != nil {
+		panic(err)
+	}
+	return iv
 }
 
 // ParamFloatWith return named param of float
@@ -41,7 +51,7 @@ func (c *Context) ParamFloatWith(name string, defaultVal float64) float64 {
 	fval := c.ParamWith(name, fmt.Sprintf("%f", defaultVal))
 	fv, err := strconv.ParseFloat(fval, 64)
 	if err != nil {
-		c.logger.Error("[Param]%v", err)
+		panic(err)
 	}
 	return fv
 }
@@ -107,7 +117,21 @@ func (c *Context) SetParamMap(paramMap map[string][]string) *Context {
 	return c
 }
 
-// RestId return RESTful ID
-func (c *Context) RestId() string {
+// RESTID return RESTful ID
+func (c *Context) RESTID() string {
+	return c.Param("RESTFUL_ID")
+}
+
+// RESTIntID return int RESTful ID
+func (c *Context) RESTIntID() int64 {
+	intID, err := strconv.ParseInt(c.RESTID(), 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	return intID
+}
+
+// RESTStringID return RESTful ID
+func (c *Context) RESTStringID() string {
 	return c.Param("RESTFUL_ID")
 }

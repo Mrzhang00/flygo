@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"github.com/billcoding/calls"
 	c "github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/headers"
 	"net/http"
@@ -57,10 +56,9 @@ func (cs *cors) Handler() func(c *c.Context) {
 				c.Header().Add(k, vv)
 			}
 		}
-		calls.True(c.Request.Method != http.MethodHead && c.Request.Method != http.MethodOptions, func() {
-
+		if c.Request.Method != http.MethodHead && c.Request.Method != http.MethodOptions {
 			c.Chain()
-		})
+		}
 	}
 }
 

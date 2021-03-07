@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// REST Route RESTful Controller
+// REST Route REST ful Controller
 func (a *App) REST(c ...rf.Controller) *App {
 	a.controllers = append(a.controllers, c...)
 	return a

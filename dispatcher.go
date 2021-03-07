@@ -1,7 +1,6 @@
 package flygo
 
 import (
-	"github.com/billcoding/calls"
 	c "github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/headers"
 	mw "github.com/billcoding/flygo/middleware"
@@ -57,10 +56,8 @@ func (d *dispatcher) addChains(c *c.Context,
 	}
 
 	if handler != nil {
-
 		c.Add(handler)
 	} else {
-
 		for _, hmw := range handlerMWs {
 			c.Add(hmw.Handler())
 			break
@@ -81,9 +78,9 @@ func (d *dispatcher) writeDone(r *c.Render, w http.ResponseWriter) {
 		}
 	}
 
-	calls.NEmpty(r.ContentType, func() {
+	if r.ContentType != "" {
 		w.Header().Set(headers.MIME, r.ContentType)
-	})
+	}
 
 	for _, cookie := range r.Cookies {
 		w.Header().Add(headers.SetCookie, cookie.String())

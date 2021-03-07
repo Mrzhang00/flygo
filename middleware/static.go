@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"github.com/billcoding/calls"
 	c "github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/log"
 	"github.com/billcoding/flygo/mime"
@@ -22,14 +21,14 @@ type static struct {
 // Static new static
 func Static(cache bool, root string) *static {
 	rot := root
-	calls.True(rot == "" || rot == "." || rot == "./", func() {
-		execdir, _ := os.Executable()
-		rot = filepath.Dir(execdir)
-	})
-	calls.NEmpty(strings.TrimPrefix(rot, "./"), func() {
-		execdir, _ := os.Executable()
-		rot = filepath.Join(filepath.Dir(execdir), strings.TrimPrefix(rot, "./"))
-	})
+	if rot == "" || rot == "." || rot == "./" {
+		executeDir, _ := os.Executable()
+		rot = filepath.Dir(executeDir)
+	}
+	if strings.TrimPrefix(rot, "./") != "" {
+		executeDir, _ := os.Executable()
+		rot = filepath.Join(filepath.Dir(executeDir), strings.TrimPrefix(rot, "./"))
+	}
 	return &static{
 		cache:  cache,
 		caches: make(map[string][]byte, 0),
@@ -101,43 +100,37 @@ func (s *static) Handler() func(c *c.Context) {
 			ctx.Chain()
 			return
 		}
-
-		vpath := strings.TrimPrefix(ctx.Request.URL.Path, "/static")
-		rpath := filepath.Join(s.root, vpath)
+		urlPath := strings.TrimPrefix(ctx.Request.URL.Path, "/static")
+		realPath := filepath.Join(s.root, urlPath)
 		ext := ""
-		extPos := strings.LastIndexByte(vpath, '.')
-
-		calls.True(extPos != -1, func() {
-			ext = vpath[extPos+1:]
-		})
-
-		buffer, have := s.caches[vpath]
-		calls.False(have, func() {
-			bytes, err := ioutil.ReadFile(rpath)
-			calls.NNil(err, func() {
+		extPos := strings.LastIndexByte(urlPath, '.')
+		if extPos != -1 {
+			ext = urlPath[extPos+1:]
+		}
+		buffer, have := s.caches[urlPath]
+		if !have {
+			mm, extHave := s.mimes[ext]
+			if !extHave {
+				mm = mime.BINARY
+			}
+			ctx.Rende(c.RenderBuilder().Buffer(buffer).ContentType(mm).Build())
+		} else {
+			bytes, err := ioutil.ReadFile(realPath)
+			if err != nil {
 				s.logger.Warn("[Handler]%v", err)
 				ctx.Chain()
-			})
-			calls.Nil(err, func() {
+			} else {
 				buffer = bytes
-				calls.True(s.cache, func() {
-					s.caches[vpath] = buffer
-				})
-				mm, have := s.mimes[ext]
-				calls.False(have, func() {
+				if s.cache {
+					s.caches[urlPath] = buffer
+				}
+				mm, extHave := s.mimes[ext]
+				if !extHave {
 					mm = mime.BINARY
-				})
+				}
 				ctx.Rende(c.RenderBuilder().Buffer(buffer).ContentType(mm).Build())
-			})
-		})
-
-		calls.True(have, func() {
-			mm, have := s.mimes[ext]
-			calls.False(have, func() {
-				mm = mime.BINARY
-			})
-			ctx.Rende(c.RenderBuilder().Buffer(buffer).ContentType(mm).Build())
-		})
+			}
+		}
 	}
 }
 
@@ -149,10 +142,10 @@ func (s *static) Add(ext, mime string) *static {
 
 // Adds mimes
 func (s *static) Adds(m map[string]string) *static {
-	calls.NNil(m, func() {
+	if m != nil {
 		for k, v := range m {
 			s.Add(k, v)
 		}
-	})
+	}
 	return s
 }

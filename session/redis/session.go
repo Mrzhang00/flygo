@@ -58,7 +58,7 @@ func (s *session) Get(name string) interface{} {
 	return val
 }
 
-// GetAll session's vals
+// GetAll session's values
 func (s *session) GetAll() map[string]interface{} {
 	getAllCmd := s.client.HGetAll(s.key)
 	vals := getAllCmd.Val()
@@ -76,7 +76,7 @@ func (s *session) Set(name string, val interface{}) {
 	})
 }
 
-// SetAll vals into session
+// SetAll values into session
 func (s *session) SetAll(data map[string]interface{}, flush bool) {
 	if flush {
 		s.Clear()
@@ -95,7 +95,7 @@ func (s *session) Del(name string) {
 	})
 }
 
-// Clear session's vals
+// Clear session's values
 func (s *session) Clear() {
 	all := s.GetAll()
 	ks := make([]string, 0)

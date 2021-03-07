@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"github.com/billcoding/calls"
 	c "github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/log"
 	"github.com/go-redis/redis"
@@ -28,9 +27,9 @@ func RedisAuth(options *redis.Options) *redisAuth {
 		options: options,
 		client:  client,
 	}
-	calls.NNil(ping.Err(), func() {
+	if ping.Err() != nil {
 		r.logger.Warn("%v", ping.Err())
-	})
+	}
 	return r
 }
 

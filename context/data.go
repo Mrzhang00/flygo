@@ -1,7 +1,5 @@
 package context
 
-import "github.com/billcoding/calls"
-
 // SetData Set data into context
 func (c *Context) SetData(name string, value interface{}) *Context {
 	c.dataMap[name] = value
@@ -10,11 +8,11 @@ func (c *Context) SetData(name string, value interface{}) *Context {
 
 // SetDataMap Set data map into context
 func (c *Context) SetDataMap(dmap map[string]interface{}) *Context {
-	calls.NNil(dmap, func() {
+	if dmap != nil {
 		for k, v := range dmap {
 			c.SetData(k, v)
 		}
-	})
+	}
 	return c
 }
 

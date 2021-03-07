@@ -13,27 +13,27 @@ import (
 )
 
 type uploadFile struct {
-	logger  *log.Logger
-	root    string
-	size    int
-	mimes   []string
-	exts    []string
-	domain  string
-	prefix  string
-	dateDir bool
+	logger     *log.Logger
+	root       string
+	size       int
+	mimes      []string
+	extensions []string
+	domain     string
+	prefix     string
+	dateDir    bool
 }
 
 // UploadFile return new uploadFile
 func UploadFile() *uploadFile {
 	return &uploadFile{
-		logger:  log.New(os.Stdout, "[uploadFile]", log.LstdFlags),
-		root:    os.TempDir(),
-		size:    100 * 1024 * 1024,
-		mimes:   []string{"text/plain", "image/jpeg", "image/jpg", "image/png", "image/gif", "application/octet-stream"},
-		exts:    []string{".txt", ".jpg", ".png", ".gif", ".xlsx"},
-		domain:  "http://localhost/",
-		prefix:  "/download/downfile",
-		dateDir: true,
+		logger:     log.New(os.Stdout, "[uploadFile]", log.LstdFlags),
+		root:       os.TempDir(),
+		size:       100 * 1024 * 1024,
+		mimes:      []string{"text/plain", "image/jpeg", "image/jpg", "image/png", "image/gif", "application/octet-stream"},
+		extensions: []string{".txt", ".jpg", ".png", ".gif", ".xlsx"},
+		domain:     "http://localhost/",
+		prefix:     "/download/file",
+		dateDir:    true,
 	}
 }
 
@@ -93,24 +93,20 @@ func (uf *uploadFile) Handler() func(c *c.Context) {
 
 		files := c.MultipartFiles("file")
 		for _, file := range files {
-			err := verfiyFile(file, uf)
+			err := verifyFile(file, uf)
 			if err != nil {
 				uf.logger.Println(err)
 				c.JSON(getJson(err.Error(), 1))
 				return
 			}
 		}
-
-		ufiles := make([]UFile, 0)
+		uploadFiles := make([]UFile, 0)
 		saveFiles := make([]string, 0)
-
 		dateDir := ""
 		if uf.dateDir {
 			dateDir = time.Now().Format("20060102")
 		}
-
 		parentPath := filepath.Join(uf.root, dateDir)
-
 		_, err = ioutil.ReadDir(parentPath)
 		if err != nil {
 			err := os.MkdirAll(parentPath, os.ModePerm)
@@ -129,7 +125,7 @@ func (uf *uploadFile) Handler() func(c *c.Context) {
 			saveFilePath := filepath.Join(parentPath, saveFile)
 
 			fileUrl := fmt.Sprintf("%s%s?file=%s", uf.domain, uf.prefix, saveFile)
-			ufiles = append(ufiles, UFile{
+			uploadFiles = append(uploadFiles, UFile{
 				File: saveFile,
 				Url:  fileUrl,
 			})
@@ -148,7 +144,7 @@ func (uf *uploadFile) Handler() func(c *c.Context) {
 
 		c.JSON(getJsonData(map[string]interface{}{
 			"total": len(files),
-			"files": ufiles,
+			"files": uploadFiles,
 		}))
 
 	}
@@ -166,15 +162,15 @@ func (uf *uploadFile) Size(size int) *uploadFile {
 	return uf
 }
 
-// Exts set
-func (uf *uploadFile) Exts(exts []string) *uploadFile {
-	uf.exts = exts
+// Extensions set
+func (uf *uploadFile) Extensions(extensions []string) *uploadFile {
+	uf.extensions = extensions
 	return uf
 }
 
-// AddExt add exts
-func (uf *uploadFile) AddExt(exts ...string) *uploadFile {
-	uf.exts = append(uf.exts, exts...)
+// AddExtension add extensions
+func (uf *uploadFile) AddExtension(extensions ...string) *uploadFile {
+	uf.extensions = append(uf.extensions, extensions...)
 	return uf
 }
 
@@ -214,7 +210,7 @@ type UFile struct {
 	Url  string `json:"url"`
 }
 
-func verfiyFile(file *c.MultipartFile, uf *uploadFile) error {
+func verifyFile(file *c.MultipartFile, uf *uploadFile) error {
 
 	err := verifySize(file, uf)
 	if err != nil {
@@ -251,7 +247,7 @@ func verifyMime(file *c.MultipartFile, uf *uploadFile) error {
 }
 
 func verifyExt(file *c.MultipartFile, uf *uploadFile) error {
-	es := strings.Join(uf.exts, "|")
+	es := strings.Join(uf.extensions, "|")
 	extAll := fmt.Sprintf("|%s|", es)
 	extIndex := strings.LastIndexByte(file.Filename, '.')
 	if extIndex == -1 {
