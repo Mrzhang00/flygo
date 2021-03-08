@@ -113,7 +113,7 @@ func (s *static) Handler() func(c *c.Context) {
 			if !extHave {
 				mm = mime.BINARY
 			}
-			ctx.Rende(c.RenderBuilder().Buffer(buffer).ContentType(mm).Build())
+			ctx.Render(c.RenderBuilder().Buffer(buffer).ContentType(mm).Build())
 		} else {
 			bytes, err := ioutil.ReadFile(realPath)
 			if err != nil {
@@ -128,7 +128,7 @@ func (s *static) Handler() func(c *c.Context) {
 				if !extHave {
 					mm = mime.BINARY
 				}
-				ctx.Rende(c.RenderBuilder().Buffer(buffer).ContentType(mm).Build())
+				ctx.Render(c.RenderBuilder().Buffer(buffer).ContentType(mm).Build())
 			}
 		}
 	}

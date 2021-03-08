@@ -40,7 +40,7 @@ func (d *dispatcher) dispatch(r *http.Request, w http.ResponseWriter) {
 
 	ctx.Chain()
 
-	d.writeDone(ctx.Render(), w)
+	d.writeDone(ctx.Rendered(), w)
 }
 
 func (d *dispatcher) addChains(c *c.Context,
@@ -57,9 +57,11 @@ func (d *dispatcher) addChains(c *c.Context,
 
 	if handler != nil {
 		c.Add(handler)
+		c.MWData["HANDLER_ROUTED"] = true
 	} else {
 		for _, hmw := range handlerMWs {
 			c.Add(hmw.Handler())
+			c.MWData["HANDLER_ROUTED"] = true
 			break
 		}
 	}

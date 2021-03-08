@@ -43,10 +43,11 @@ func NotFound(handlers ...func(c *c.Context)) Middleware {
 }
 
 var notFoundHandler = func(c *c.Context) {
-	if !c.Render().Rended() {
-		c.WriteCode(http.StatusNotFound)
-		c.Write([]byte("404 Not Found"))
-	} else {
+	handleRouted, have := c.MWData["HANDLER_ROUTED"]
+	if have && handleRouted.(bool) {
 		c.Chain()
+		return
 	}
+	c.WriteCode(http.StatusNotFound)
+	c.Write([]byte("404 Not Found"))
 }

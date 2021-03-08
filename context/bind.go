@@ -10,12 +10,11 @@ import (
 func (c *Context) Bind(structPtr interface{}) {
 	readAll, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		c.logger.Error("%v", err)
-	} else {
-		jerr := json.Unmarshal(readAll, structPtr)
-		if jerr != nil {
-			c.logger.Error("%v", err)
-		}
+		panic(err)
+	}
+	err = json.Unmarshal(readAll, structPtr)
+	if err != nil {
+		panic(err)
 	}
 }
 

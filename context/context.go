@@ -9,20 +9,18 @@ import (
 
 // Context struct
 type Context struct {
-	logger log.Logger
-	// Request context
-	Request  *http.Request
-	render   *Render
-	pos      int
-	handlers []func(c *Context)
-	// MWData middleware data
-	MWData   map[string]interface{}
-	paramMap map[string][]string
-	// MultipartMap multiple map
+	logger         log.Logger
+	Request        *http.Request
+	render         *Render
+	pos            int
+	handlers       []func(c *Context)
+	MWData         map[string]interface{}
+	paramMap       map[string][]string
 	MultipartMap   map[string][]*MultipartFile
 	dataMap        map[string]interface{}
 	funcMap        template.FuncMap
 	templateConfig *config.YmlConfigTemplate
+	handlerRouted  bool
 }
 
 // New context
@@ -76,7 +74,6 @@ func (c *Context) Chain() {
 	}
 	c.pos++
 	if c.pos > len(c.handlers)-1 {
-
 		c.onDestroyed()
 		return
 	}

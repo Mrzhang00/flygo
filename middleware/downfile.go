@@ -44,7 +44,7 @@ func (df *downFile) Method() Method {
 
 // Pattern implements
 func (df *downFile) Pattern() Pattern {
-	return "/download/downfile"
+	return "/download/downloadFile"
 }
 
 // Handler implements
@@ -67,8 +67,8 @@ func (df *downFile) Handler() func(c *c.Context) {
 				ctx.JSON(map[string]interface{}{"code": 1, "msg": "file is not exists"})
 				return
 			}
-			ctx.Rende(c.RenderBuilder().Header(map[string][]string{
-				headers.ContentDisposition: {"attachement;filename=" + url.QueryEscape(fs.File)},
+			ctx.Render(c.RenderBuilder().Header(map[string][]string{
+				headers.ContentDisposition: {"attachment;filename=" + url.QueryEscape(fs.File)},
 			}).ContentType(mime.BINARY).Buffer(bytes).Build())
 		})
 	}

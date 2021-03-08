@@ -3,7 +3,6 @@ package middleware
 import (
 	"fmt"
 	c "github.com/billcoding/flygo/context"
-	"github.com/billcoding/flygo/headers"
 	"github.com/billcoding/flygo/mime"
 	"net/http"
 )
@@ -45,14 +44,12 @@ func Recovery(handlers ...func(c *c.Context)) Middleware {
 	return &recovery{recoveryHandler}
 }
 
-var recoveryHandler = func(c *c.Context) {
+var recoveryHandler = func(ctx *c.Context) {
 	defer func() {
 		if re := recover(); re != nil {
 			_ = fmt.Errorf("[Recovered]%v\n", re)
-			c.Header().Set(headers.MIME, mime.JSON)
-			c.WriteCode(http.StatusInternalServerError)
-			c.Write([]byte(fmt.Sprintf(`{"code":500,"msg":"%s"}`, re)))
+			ctx.Render(c.RenderBuilder().Buffer([]byte(fmt.Sprintf(`{"code":500,"msg":"%s"}`, re))).ContentType(mime.JSON).Code(http.StatusInternalServerError).Build())
 		}
 	}()
-	c.Chain()
+	ctx.Chain()
 }

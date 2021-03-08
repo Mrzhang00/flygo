@@ -13,7 +13,6 @@ import (
 
 // Render struct
 type Render struct {
-	rended      bool
 	Buffer      []byte
 	Header      http.Header
 	Cookies     []*http.Cookie
@@ -21,19 +20,13 @@ type Render struct {
 	ContentType string
 }
 
-// Render return the render
-func (c *Context) Render() *Render {
+// Rendered return the render
+func (c *Context) Rendered() *Render {
 	return c.render
 }
 
-// Rended return rended
-func (r *Render) Rended() bool {
-	return r.rended
-}
-
-// Rende from r
-func (c *Context) Rende(r *Render) {
-	c.render.rended = true
+// Render from r
+func (c *Context) Render(r *Render) {
 	if r.Buffer != nil {
 		c.render.Buffer = r.Buffer
 	}
@@ -57,7 +50,7 @@ func (c *Context) Rende(r *Render) {
 
 // Text render text
 func (c *Context) Text(text string) {
-	c.Rende(RenderBuilder().Buffer([]byte(text)).ContentType(mime.TEXT).Build())
+	c.Render(RenderBuilder().Buffer([]byte(text)).ContentType(mime.TEXT).Build())
 }
 
 // TextFile render text file
@@ -67,7 +60,7 @@ func (c *Context) TextFile(textFile string) {
 		c.logger.Error("[TextFile]%v", err)
 		return
 	}
-	c.Rende(RenderBuilder().Buffer([]byte(string(bytes))).ContentType(mime.TEXT).Build())
+	c.Render(RenderBuilder().Buffer([]byte(string(bytes))).ContentType(mime.TEXT).Build())
 }
 
 // JSON render JSON
@@ -77,12 +70,12 @@ func (c *Context) JSON(data interface{}) {
 		c.logger.Error("[JSON]%v", err.Error())
 		return
 	}
-	c.Rende(RenderBuilder().Buffer(jsonData).ContentType(mime.JSON).Build())
+	c.Render(RenderBuilder().Buffer(jsonData).ContentType(mime.JSON).Build())
 }
 
 // JSONText render JSON text
 func (c *Context) JSONText(json string) {
-	c.Rende(RenderBuilder().Buffer([]byte(json)).ContentType(mime.JSON).Build())
+	c.Render(RenderBuilder().Buffer([]byte(json)).ContentType(mime.JSON).Build())
 }
 
 // JSONFile render JSON file
@@ -92,7 +85,7 @@ func (c *Context) JSONFile(jsonFile string) {
 		c.logger.Error("[JSONFile]%v", err)
 		return
 	}
-	c.Rende(RenderBuilder().Buffer(bytes).ContentType(mime.JSON).Build())
+	c.Render(RenderBuilder().Buffer(bytes).ContentType(mime.JSON).Build())
 }
 
 // XML render XML
@@ -102,12 +95,12 @@ func (c *Context) XML(data interface{}) {
 		c.logger.Error("[XML]%v", err)
 		return
 	}
-	c.Rende(RenderBuilder().Buffer(xmlData).ContentType(mime.XML).Build())
+	c.Render(RenderBuilder().Buffer(xmlData).ContentType(mime.XML).Build())
 }
 
 // XMLText render XML text
 func (c *Context) XMLText(xml string) {
-	c.Rende(RenderBuilder().Buffer([]byte(xml)).ContentType(mime.XML).Build())
+	c.Render(RenderBuilder().Buffer([]byte(xml)).ContentType(mime.XML).Build())
 }
 
 // XMLFile render XML file
@@ -117,12 +110,12 @@ func (c *Context) XMLFile(xmlFile string) {
 		c.logger.Error("[XMLFile]%v", err)
 		return
 	}
-	c.Rende(RenderBuilder().Buffer(bytes).ContentType(mime.XML).Build())
+	c.Render(RenderBuilder().Buffer(bytes).ContentType(mime.XML).Build())
 }
 
 // Image render image
 func (c *Context) Image(buffer []byte) {
-	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.JPG).Build())
+	c.Render(RenderBuilder().Buffer(buffer).ContentType(mime.JPG).Build())
 }
 
 // ImageFile render image file
@@ -137,7 +130,7 @@ func (c *Context) ImageFile(imageFile string) {
 
 // ICO render ico
 func (c *Context) ICO(buffer []byte) {
-	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.ICO).Build())
+	c.Render(RenderBuilder().Buffer(buffer).ContentType(mime.ICO).Build())
 }
 
 // ICOFile render ico file
@@ -152,7 +145,7 @@ func (c *Context) ICOFile(icoFile string) {
 
 // BMP render bmp
 func (c *Context) BMP(buffer []byte) {
-	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.BMP).Build())
+	c.Render(RenderBuilder().Buffer(buffer).ContentType(mime.BMP).Build())
 }
 
 // BMPFile render bmp file
@@ -167,7 +160,7 @@ func (c *Context) BMPFile(bmpFile string) {
 
 // JPG render jpg
 func (c *Context) JPG(buffer []byte) {
-	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.JPG).Build())
+	c.Render(RenderBuilder().Buffer(buffer).ContentType(mime.JPG).Build())
 }
 
 // JPGFile render jpg file
@@ -182,7 +175,7 @@ func (c *Context) JPGFile(jpgFile string) {
 
 // JPEG render jpeg
 func (c *Context) JPEG(buffer []byte) {
-	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.JPG).Build())
+	c.Render(RenderBuilder().Buffer(buffer).ContentType(mime.JPG).Build())
 }
 
 // JPEGFile render jpeg file
@@ -192,7 +185,7 @@ func (c *Context) JPEGFile(jpegFile string) {
 
 // PNG render png
 func (c *Context) PNG(buffer []byte) {
-	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.PNG).Build())
+	c.Render(RenderBuilder().Buffer(buffer).ContentType(mime.PNG).Build())
 }
 
 // PNGFile render png file
@@ -207,7 +200,7 @@ func (c *Context) PNGFile(pngFile string) {
 
 // GIF render gif
 func (c *Context) GIF(buffer []byte) {
-	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.GIF).Build())
+	c.Render(RenderBuilder().Buffer(buffer).ContentType(mime.GIF).Build())
 }
 
 // GIFFile render gif file
@@ -222,7 +215,7 @@ func (c *Context) GIFFile(gifFile string) {
 
 // HTML render html
 func (c *Context) HTML(html string) {
-	c.Rende(RenderBuilder().Buffer([]byte(html)).ContentType(mime.HTML).Build())
+	c.Render(RenderBuilder().Buffer([]byte(html)).ContentType(mime.HTML).Build())
 }
 
 // HTMLFile render html file
@@ -232,12 +225,12 @@ func (c *Context) HTMLFile(htmlFile string) {
 		c.logger.Error("[HTMLFile]%v", err)
 		return
 	}
-	c.Rende(RenderBuilder().Buffer(bytes).ContentType(mime.HTML).Build())
+	c.Render(RenderBuilder().Buffer(bytes).ContentType(mime.HTML).Build())
 }
 
 // CSS render css
 func (c *Context) CSS(css string) {
-	c.Rende(RenderBuilder().Buffer([]byte(css)).ContentType(mime.CSS).Build())
+	c.Render(RenderBuilder().Buffer([]byte(css)).ContentType(mime.CSS).Build())
 }
 
 // CSSFile render css file
@@ -247,12 +240,12 @@ func (c *Context) CSSFile(cssFile string) {
 		c.logger.Error("[CSSFile]%v", err)
 		return
 	}
-	c.Rende(RenderBuilder().Buffer(bytes).ContentType(mime.CSS).Build())
+	c.Render(RenderBuilder().Buffer(bytes).ContentType(mime.CSS).Build())
 }
 
 // JS render js
 func (c *Context) JS(js string) {
-	c.Rende(RenderBuilder().Buffer([]byte(js)).ContentType(mime.JS).Build())
+	c.Render(RenderBuilder().Buffer([]byte(js)).ContentType(mime.JS).Build())
 }
 
 // JSFile render js file
@@ -262,12 +255,12 @@ func (c *Context) JSFile(jsFile string) {
 		c.logger.Error("[JSFile]%v", err)
 		return
 	}
-	c.Rende(RenderBuilder().Buffer(bytes).ContentType(mime.JS).Build())
+	c.Render(RenderBuilder().Buffer(bytes).ContentType(mime.JS).Build())
 }
 
 // Binary render bin
 func (c *Context) Binary(buffer []byte) {
-	c.Rende(RenderBuilder().Buffer(buffer).ContentType(mime.BINARY).Build())
+	c.Render(RenderBuilder().Buffer(buffer).ContentType(mime.BINARY).Build())
 }
 
 // File render file
@@ -288,7 +281,7 @@ func (c *Context) Download(file, fileName string) {
 		return
 	}
 	fn := url.PathEscape(fileName)
-	c.Rende(RenderBuilder().Buffer(bytes).ContentType(mime.BINARY).Header(http.Header{
+	c.Render(RenderBuilder().Buffer(bytes).ContentType(mime.BINARY).Header(http.Header{
 		headers.ContentDisposition: []string{fmt.Sprintf("attachment; filename=\"%s\"", fn)},
 	}).Build())
 }
