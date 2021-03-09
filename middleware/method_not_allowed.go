@@ -37,7 +37,7 @@ func (m *methodNotAllowed) Handler() func(c *c.Context) {
 
 // MethodNotAllowed return new methodNotAllowed
 func MethodNotAllowed(handlers ...func(c *c.Context)) Middleware {
-	if len(handlers) > 0 {
+	if len(handlers) > 0 && handlers[0] != nil {
 		return &methodNotAllowed{handlers[0]}
 	}
 	return &methodNotAllowed{methodNotAllowedHandler}

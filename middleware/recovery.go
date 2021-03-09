@@ -38,7 +38,7 @@ func (r *recovery) Handler() func(c *c.Context) {
 
 // Recovery return new recovery
 func Recovery(handlers ...func(c *c.Context)) Middleware {
-	if len(handlers) > 0 {
+	if len(handlers) > 0 && handlers[0] != nil {
 		return &recovery{handlers[0]}
 	}
 	return &recovery{recoveryHandler}

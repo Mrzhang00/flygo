@@ -36,7 +36,7 @@ func (n *notFound) Handler() func(c *c.Context) {
 
 // NotFound return new notFound
 func NotFound(handlers ...func(c *c.Context)) Middleware {
-	if len(handlers) > 0 {
+	if len(handlers) > 0 && handlers[0] != nil {
 		return &notFound{handlers[0]}
 	}
 	return &notFound{notFoundHandler}

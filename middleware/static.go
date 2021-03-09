@@ -37,7 +37,7 @@ func Static(cache bool, root string, handlers ...func(ctx *c.Context)) *static {
 		mimes:  defaultMimes(),
 		logger: log.New("[Static]"),
 	}
-	if len(handlers) > 0 {
+	if len(handlers) > 0 && handlers[0] != nil {
 		st.handler = handlers[0]
 	}
 	return st
