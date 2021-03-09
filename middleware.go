@@ -15,6 +15,9 @@ type defaultMWState struct {
 	methodNotAllowedHandler func(ctx *c.Context)
 	recovery                bool
 	recoveryHandler         func(ctx *c.Context)
+	recoveryCodeName        string
+	recoveryCodeVal         int
+	recoveryMsgName         string
 	notFound                bool
 	notFoundHandler         func(ctx *c.Context)
 	stdLogger               bool
@@ -66,6 +69,14 @@ func (a *App) MethodNotAllowedHandler(handlers ...func(c *c.Context)) *App {
 // UseRecovery Use Recovery Middleware
 func (a *App) UseRecovery() *App {
 	a.defaultMWState.recovery = true
+	return a
+}
+
+// RecoveryHandler Sets Recovery handler
+func (a *App) RecoveryConfig(codeName string, codeVal int, msgName string) *App {
+	a.defaultMWState.recoveryCodeName = codeName
+	a.defaultMWState.recoveryCodeVal = codeVal
+	a.defaultMWState.recoveryMsgName = msgName
 	return a
 }
 
@@ -132,7 +143,11 @@ func (a *App) useDefaultMWs() *App {
 	}
 
 	if a.defaultMWState.recovery {
-		a.middlewares[4] = mw.Recovery(a.defaultMWState.recoveryHandler)
+		if a.defaultMWState.recoveryMsgName != "" {
+			a.middlewares[4] = mw.RecoveryWithConfig(a.defaultMWState.recoveryCodeName, a.defaultMWState.recoveryCodeVal, a.defaultMWState.recoveryMsgName, a.defaultMWState.recoveryHandler)
+		} else {
+			a.middlewares[4] = mw.Recovery(a.defaultMWState.recoveryHandler)
+		}
 	}
 
 	if a.defaultMWState.notFound {
