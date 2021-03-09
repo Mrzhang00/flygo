@@ -47,8 +47,15 @@ func Recovery(handlers ...func(c *c.Context)) Middleware {
 var recoveryHandler = func(ctx *c.Context) {
 	defer func() {
 		if re := recover(); re != nil {
-			_ = fmt.Errorf("[Recovered]%v\n", re)
-			ctx.Render(c.RenderBuilder().Buffer([]byte(fmt.Sprintf(`{"code":500,"msg":"%s"}`, re))).ContentType(mime.JSON).Code(http.StatusInternalServerError).Build())
+			message := ""
+			fmt.Println(fmt.Sprintf("[Recovered]%v", re))
+			switch re.(type) {
+			case error:
+				message = re.(error).Error()
+			default:
+				message = fmt.Sprintf("%v", re)
+			}
+			ctx.Render(c.RenderBuilder().Buffer([]byte(fmt.Sprintf(`{"code":500,"msg":"%s"}`, message))).ContentType(mime.JSON).Code(http.StatusInternalServerError).Build())
 		}
 	}()
 	ctx.Chain()
