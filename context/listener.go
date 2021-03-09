@@ -5,9 +5,9 @@ type Listener interface {
 	// Created Listener
 	Created(c *Context)
 	// Before Listener
-	Before(c *Context, handler func(c *Context))
+	Before(c *Context)
 	// After Listener
-	After(c *Context, handler func(c *Context))
+	After(c *Context)
 	// Destroyed Listener
 	Destroyed(c *Context)
 }
@@ -25,15 +25,15 @@ func (c *Context) onCreated() {
 	}
 }
 
-func (c *Context) onBefore(handler func(c *Context)) {
+func (c *Context) onBefore() {
 	for _, listener := range listeners {
-		listener.Before(c, handler)
+		listener.Before(c)
 	}
 }
 
-func (c *Context) onAfter(handler func(c *Context)) {
+func (c *Context) onAfter() {
 	for _, listener := range listeners {
-		listener.After(c, handler)
+		listener.After(c)
 	}
 }
 

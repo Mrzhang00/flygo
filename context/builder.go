@@ -12,12 +12,6 @@ type Builder struct {
 
 // Build render
 func (r *Builder) Build() *Render {
-	if r.r.Header == nil {
-		r.r.Header = make(map[string][]string, 0)
-	}
-	if r.r.Cookies == nil {
-		r.r.Cookies = make([]*http.Cookie, 0)
-	}
 	return r.r
 }
 

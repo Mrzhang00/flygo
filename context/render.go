@@ -33,12 +33,12 @@ func (c *Context) Render(r *Render) {
 	if r.ContentType != "" {
 		c.render.ContentType = r.ContentType
 	}
-	if len(r.Header) > 0 {
+	if r.Header != nil && len(r.Header) > 0 {
 		for k, v := range r.Header {
 			c.render.Header[k] = v
 		}
 	}
-	if len(r.Cookies) > 0 {
+	if r.Cookies != nil && len(r.Cookies) > 0 {
 		for _, cookie := range r.Cookies {
 			c.render.Cookies = append(c.render.Cookies, cookie)
 		}
@@ -68,7 +68,6 @@ func (c *Context) JSON(data interface{}) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		c.logger.Error("[JSON]%v", err.Error())
-		return
 	}
 	c.Render(RenderBuilder().Buffer(jsonData).ContentType(mime.JSON).Build())
 }

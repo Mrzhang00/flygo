@@ -73,7 +73,11 @@ func (c *Context) Chain() {
 		return
 	}
 	c.pos++
+	if c.pos == 0 {
+		c.onBefore()
+	}
 	if c.pos > len(c.handlers)-1 {
+		c.onAfter()
 		c.onDestroyed()
 		return
 	}
