@@ -38,18 +38,31 @@ func (r *recovery) Handler() func(c *c.Context) {
 
 // Recovery return new recovery
 func Recovery(handlers ...func(c *c.Context)) Middleware {
-	if len(handlers) > 0 {
-		return &recovery{handlers[0]}
-	}
-	return &recovery{recoveryHandler}
+	return RecoveryWithConfig("code", 500, "message", handlers...)
 }
 
-var recoveryHandler = func(ctx *c.Context) {
-	defer func() {
-		if re := recover(); re != nil {
-			_ = fmt.Errorf("[Recovered]%v\n", re)
-			ctx.Render(c.RenderBuilder().Buffer([]byte(fmt.Sprintf(`{"code":500,"msg":"%s"}`, re))).ContentType(mime.JSON).Code(http.StatusInternalServerError).Build())
+// RecoveryWithConfig return new recovery
+func RecoveryWithConfig(codeName string, codeVal int, msgName string, handlers ...func(c *c.Context)) Middleware {
+	var handler func(ctx *c.Context)
+	if len(handlers) > 0 && handlers[0] != nil {
+		handler = handlers[0]
+	} else {
+		handler = func(ctx *c.Context) {
+			defer func() {
+				if re := recover(); re != nil {
+					message := ""
+					fmt.Println(fmt.Sprintf("[Recovered]%v", re))
+					switch re.(type) {
+					case error:
+						message = re.(error).Error()
+					default:
+						message = fmt.Sprintf("%v", re)
+					}
+					ctx.Render(c.RenderBuilder().Buffer([]byte(fmt.Sprintf(`{"%s":%d,"%s":"%s"}`, codeName, codeVal, msgName, message))).ContentType(mime.JSON).Code(http.StatusInternalServerError).Build())
+				}
+			}()
+			ctx.Chain()
 		}
-	}()
-	ctx.Chain()
+	}
+	return &recovery{handler}
 }

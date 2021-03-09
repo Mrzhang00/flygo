@@ -11,15 +11,16 @@ import (
 )
 
 type static struct {
-	cache  bool
-	caches map[string][]byte
-	root   string
-	mimes  map[string]string
-	logger log.Logger
+	cache   bool
+	caches  map[string][]byte
+	root    string
+	mimes   map[string]string
+	logger  log.Logger
+	handler func(c *c.Context)
 }
 
 // Static new static
-func Static(cache bool, root string) *static {
+func Static(cache bool, root string, handlers ...func(ctx *c.Context)) *static {
 	rot := root
 	if rot == "" || rot == "." || rot == "./" {
 		executeDir, _ := os.Executable()
@@ -29,13 +30,17 @@ func Static(cache bool, root string) *static {
 		executeDir, _ := os.Executable()
 		rot = filepath.Join(filepath.Dir(executeDir), strings.TrimPrefix(rot, "./"))
 	}
-	return &static{
+	st := &static{
 		cache:  cache,
 		caches: make(map[string][]byte, 0),
 		root:   rot,
 		mimes:  defaultMimes(),
 		logger: log.New("[Static]"),
 	}
+	if len(handlers) > 0 && handlers[0] != nil {
+		st.handler = handlers[0]
+	}
+	return st
 }
 
 func defaultMimes() map[string]string {
@@ -95,6 +100,9 @@ func (s *static) Pattern() Pattern {
 
 // Type implements
 func (s *static) Handler() func(c *c.Context) {
+	if s.handler != nil {
+		return s.handler
+	}
 	return func(ctx *c.Context) {
 		if strings.HasSuffix(ctx.Request.URL.Path, "/") {
 			ctx.Chain()

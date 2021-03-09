@@ -10,18 +10,25 @@ import (
 )
 
 type defaultMWState struct {
-	header           bool
-	methodNotAllowed bool
-	recovery         bool
-	notFound         bool
-	stdLogger        bool
-	session          bool
-	provider         se.Provider
-	config           *se.Config
-	listener         *se.Listener
-	static           bool
-	staticCache      bool
-	staticRoot       string
+	header                  bool
+	methodNotAllowed        bool
+	methodNotAllowedHandler func(ctx *c.Context)
+	recovery                bool
+	recoveryHandler         func(ctx *c.Context)
+	recoveryCodeName        string
+	recoveryCodeVal         int
+	recoveryMsgName         string
+	notFound                bool
+	notFoundHandler         func(ctx *c.Context)
+	stdLogger               bool
+	session                 bool
+	provider                se.Provider
+	config                  *se.Config
+	listener                *se.Listener
+	static                  bool
+	staticHandler           func(ctx *c.Context)
+	staticCache             bool
+	staticRoot              string
 }
 
 // Use Middlewares
@@ -51,15 +58,47 @@ func (a *App) UseMethodNotAllowed() *App {
 	return a
 }
 
+// MethodNotAllowedHandler Sets MethodNotAllowed handler
+func (a *App) MethodNotAllowedHandler(handlers ...func(c *c.Context)) *App {
+	if len(handlers) > 0 {
+		a.defaultMWState.methodNotAllowedHandler = handlers[0]
+	}
+	return a
+}
+
 // UseRecovery Use Recovery Middleware
 func (a *App) UseRecovery() *App {
 	a.defaultMWState.recovery = true
 	return a
 }
 
+// RecoveryHandler Sets Recovery handler
+func (a *App) RecoveryConfig(codeName string, codeVal int, msgName string) *App {
+	a.defaultMWState.recoveryCodeName = codeName
+	a.defaultMWState.recoveryCodeVal = codeVal
+	a.defaultMWState.recoveryMsgName = msgName
+	return a
+}
+
+// RecoveryHandler Sets Recovery handler
+func (a *App) RecoveryHandler(handlers ...func(c *c.Context)) *App {
+	if len(handlers) > 0 {
+		a.defaultMWState.recoveryHandler = handlers[0]
+	}
+	return a
+}
+
 // UseNotFound Use Not Found Middleware
 func (a *App) UseNotFound() *App {
 	a.defaultMWState.notFound = true
+	return a
+}
+
+// NotFoundHandler Sets Not Found handler
+func (a *App) NotFoundHandler(handlers ...func(c *c.Context)) *App {
+	if len(handlers) > 0 {
+		a.defaultMWState.notFoundHandler = handlers[0]
+	}
 	return a
 }
 
@@ -77,6 +116,14 @@ func (a *App) UseStatic(cache bool, root string) *App {
 	return a
 }
 
+// StaticHandler Sets Static Resources handler
+func (a *App) StaticHandler(handlers ...func(c *c.Context)) *App {
+	if len(handlers) > 0 {
+		a.defaultMWState.staticHandler = handlers[0]
+	}
+	return a
+}
+
 func (a *App) useDefaultMWs() *App {
 
 	if a.defaultMWState.session {
@@ -88,7 +135,7 @@ func (a *App) useDefaultMWs() *App {
 	}
 
 	if a.defaultMWState.methodNotAllowed {
-		a.middlewares[2] = mw.MethodNotAllowed()
+		a.middlewares[2] = mw.MethodNotAllowed(a.defaultMWState.methodNotAllowedHandler)
 	}
 
 	if a.defaultMWState.stdLogger {
@@ -96,15 +143,19 @@ func (a *App) useDefaultMWs() *App {
 	}
 
 	if a.defaultMWState.recovery {
-		a.middlewares[4] = mw.Recovery()
+		if a.defaultMWState.recoveryMsgName != "" {
+			a.middlewares[4] = mw.RecoveryWithConfig(a.defaultMWState.recoveryCodeName, a.defaultMWState.recoveryCodeVal, a.defaultMWState.recoveryMsgName, a.defaultMWState.recoveryHandler)
+		} else {
+			a.middlewares[4] = mw.Recovery(a.defaultMWState.recoveryHandler)
+		}
 	}
 
 	if a.defaultMWState.notFound {
-		a.middlewares[5] = mw.NotFound()
+		a.middlewares[5] = mw.NotFound(a.defaultMWState.notFoundHandler)
 	}
 
 	if a.defaultMWState.static {
-		a.middlewares = append(a.middlewares, mw.Static(a.defaultMWState.staticCache, a.defaultMWState.staticRoot))
+		a.middlewares = append(a.middlewares, mw.Static(a.defaultMWState.staticCache, a.defaultMWState.staticRoot, a.defaultMWState.staticHandler))
 	}
 
 	return a
