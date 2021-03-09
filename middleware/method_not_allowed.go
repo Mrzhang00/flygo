@@ -27,7 +27,7 @@ func (m *methodNotAllowed) Method() Method {
 
 // Pattern implements
 func (m *methodNotAllowed) Pattern() Pattern {
-	return PatternNoRoute
+	return PatternAny
 }
 
 // Handler implements
