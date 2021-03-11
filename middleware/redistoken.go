@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"fmt"
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/log"
 	"github.com/go-redis/redis"
 	"math/rand"
@@ -64,7 +64,7 @@ func (r *redisToken) Pattern() Pattern {
 }
 
 // Handler implements
-func (r *redisToken) Handler() func(c *c.Context) {
+func (r *redisToken) Handler() func(ctx *context.Context) {
 	type jd struct {
 		Msg  string `json:"msg"`
 		Code int    `json:"code"`
@@ -91,21 +91,21 @@ func (r *redisToken) Handler() func(c *c.Context) {
 		AppKey    string `binding:"name(appKey)" validate:"required(T) minlength(1) message(appKey is empty)"`
 		AppSecret string `binding:"name(appSecret)" validate:"required(T) minlength(1) message(appSecret is empty)"`
 	}
-	return func(c *c.Context) {
+	return func(ctx *context.Context) {
 		m := model{}
-		c.BindAndValidate(&m, func() {
+		ctx.BindAndValidate(&m, func() {
 			hGet := r.client.HGet(r.appKey, m.AppKey)
 			if err := hGet.Err(); err != nil {
-				c.JSON(getJson(r.msg, r.code))
+				ctx.JSON(getJson(r.msg, r.code))
 				return
 			}
 			if m.AppSecret != hGet.Val() {
-				c.JSON(getJson(r.msg, r.code))
+				ctx.JSON(getJson(r.msg, r.code))
 				return
 			}
 			token := newToken(r.length)
 			r.client.Set(r.key+":"+token, getAppJson(m.AppKey, m.AppSecret), r.expires)
-			c.JSON(getJsonToken(token))
+			ctx.JSON(getJsonToken(token))
 		})
 	}
 }

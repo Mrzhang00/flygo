@@ -1,6 +1,6 @@
 package router
 
-import c "github.com/billcoding/flygo/context"
+import "github.com/billcoding/flygo/context"
 
 // Simple struct
 type Simple struct {
@@ -9,5 +9,5 @@ type Simple struct {
 	// Pattern route pattern
 	Pattern string
 	// Handler route handler
-	Handler func(c *c.Context)
+	Handler func(ctx *context.Context)
 }

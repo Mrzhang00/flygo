@@ -3,7 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/billcoding/flygo"
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -49,7 +49,7 @@ func testServeWithHost(t *testing.T, host string, port int, method, expected str
 		app := flygo.NewApp()
 		app.Config.Flygo.Server.Host = host
 		app.Config.Flygo.Server.Port = port
-		app.Route(strings.ToUpper(method), "/", func(c *c.Context) {
+		app.Route(strings.ToUpper(method), "/", func(ctx *context.Context) {
 			c.Text(expected)
 		}).Run()
 	}()

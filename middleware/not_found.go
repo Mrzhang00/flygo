@@ -1,12 +1,12 @@
 package middleware
 
 import (
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"net/http"
 )
 
 type notFound struct {
-	handler func(c *c.Context)
+	handler func(ctx *context.Context)
 }
 
 // Name implements
@@ -30,24 +30,24 @@ func (n *notFound) Pattern() Pattern {
 }
 
 // Handler implements
-func (n *notFound) Handler() func(c *c.Context) {
+func (n *notFound) Handler() func(ctx *context.Context) {
 	return n.handler
 }
 
 // NotFound return new notFound
-func NotFound(handlers ...func(c *c.Context)) Middleware {
+func NotFound(handlers ...func(ctx *context.Context)) Middleware {
 	if len(handlers) > 0 && handlers[0] != nil {
 		return &notFound{handlers[0]}
 	}
 	return &notFound{notFoundHandler}
 }
 
-var notFoundHandler = func(c *c.Context) {
-	handleRouted, have := c.MWData["HANDLER_ROUTED"]
+var notFoundHandler = func(ctx *context.Context) {
+	handleRouted, have := ctx.MWData["HANDLER_ROUTED"]
 	if have && handleRouted.(bool) {
-		c.Chain()
+		ctx.Chain()
 		return
 	}
-	c.WriteCode(http.StatusNotFound)
-	c.Write([]byte("404 Not Found"))
+	ctx.WriteCode(http.StatusNotFound)
+	ctx.Write([]byte("404 Not Found"))
 }

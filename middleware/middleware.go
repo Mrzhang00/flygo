@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"net/http"
 )
 
@@ -11,7 +11,7 @@ type Middleware interface {
 	Name() string
 	Method() Method
 	Pattern() Pattern
-	Handler() func(c *c.Context)
+	Handler() func(ctx *context.Context)
 }
 
 type (
@@ -52,13 +52,13 @@ const (
 )
 
 // SetMWData set middleware data
-func SetMWData(c *c.Context, name string, mwData map[string]interface{}) {
-	c.MWData[name] = mwData
+func SetMWData(ctx *context.Context, name string, mwData map[string]interface{}) {
+	ctx.MWData[name] = mwData
 }
 
 // GetMWData get middleware data
-func GetMWData(c *c.Context, name string) map[string]interface{} {
-	val, have := c.MWData[name]
+func GetMWData(ctx *context.Context, name string) map[string]interface{} {
+	val, have := ctx.MWData[name]
 	if have {
 		return val.(map[string]interface{})
 	}

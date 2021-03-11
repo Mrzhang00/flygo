@@ -1,13 +1,13 @@
 package middleware
 
 import (
-	c "github.com/billcoding/flygo/context"
-	l "github.com/billcoding/flygo/log"
+	"github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/log"
 )
 
 type logger struct {
-	logger  l.Logger
-	handler func(c *c.Context)
+	logger  log.Logger
+	handler func(ctx *context.Context)
 }
 
 // Type implements
@@ -31,16 +31,16 @@ func (l *logger) Pattern() Pattern {
 }
 
 // Handler implements
-func (l *logger) Handler() func(c *c.Context) {
-	return func(c *c.Context) {
-		c.Chain()
-		l.logger.Info("[%s]%s => %d", c.Request.Method, c.Request.URL.Path, c.Rendered().Code)
+func (l *logger) Handler() func(ctx *context.Context) {
+	return func(ctx *context.Context) {
+		ctx.Chain()
+		l.logger.Info("[%s]%s => %d", ctx.Request.Method, ctx.Request.URL.Path, ctx.Rendered().Code)
 	}
 }
 
 // StdLogger return logger
 func StdLogger() Middleware {
 	return &logger{
-		logger: l.New("[StdLogger]"),
+		logger: log.New("[StdLogger]"),
 	}
 }

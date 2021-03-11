@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/log"
 	"github.com/billcoding/flygo/mime"
 	"io/ioutil"
@@ -16,11 +16,11 @@ type static struct {
 	root    string
 	mimes   map[string]string
 	logger  log.Logger
-	handler func(c *c.Context)
+	handler func(ctx *context.Context)
 }
 
 // Static new static
-func Static(cache bool, root string, handlers ...func(ctx *c.Context)) *static {
+func Static(cache bool, root string, handlers ...func(ctx *context.Context)) *static {
 	rot := root
 	if rot == "" || rot == "." || rot == "./" {
 		executeDir, _ := os.Executable()
@@ -99,11 +99,11 @@ func (s *static) Pattern() Pattern {
 }
 
 // Type implements
-func (s *static) Handler() func(c *c.Context) {
+func (s *static) Handler() func(ctx *context.Context) {
 	if s.handler != nil {
 		return s.handler
 	}
-	return func(ctx *c.Context) {
+	return func(ctx *context.Context) {
 		if strings.HasSuffix(ctx.Request.URL.Path, "/") {
 			ctx.Chain()
 			return
@@ -121,7 +121,7 @@ func (s *static) Handler() func(c *c.Context) {
 			if !extHave {
 				mm = mime.BINARY
 			}
-			ctx.Render(c.RenderBuilder().Buffer(buffer).ContentType(mm).Build())
+			ctx.Render(context.RenderBuilder().Buffer(buffer).ContentType(mm).Build())
 		} else {
 			bytes, err := ioutil.ReadFile(realPath)
 			if err != nil {
@@ -136,7 +136,7 @@ func (s *static) Handler() func(c *c.Context) {
 				if !extHave {
 					mm = mime.BINARY
 				}
-				ctx.Render(c.RenderBuilder().Buffer(buffer).ContentType(mm).Build())
+				ctx.Render(context.RenderBuilder().Buffer(buffer).ContentType(mm).Build())
 			}
 		}
 	}

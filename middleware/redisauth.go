@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/log"
 	"github.com/go-redis/redis"
 )
@@ -54,8 +54,8 @@ func (r *redisAuth) Pattern() Pattern {
 }
 
 // Handler implements
-func (r *redisAuth) Handler() func(c *c.Context) {
-	return func(c *c.Context) {
+func (r *redisAuth) Handler() func(ctx *context.Context) {
+	return func(ctx *context.Context) {
 		type jd struct {
 			Msg  string `json:"msg"`
 			Code int    `json:"code"`
@@ -70,28 +70,28 @@ func (r *redisAuth) Handler() func(c *c.Context) {
 		defer func() {
 			_ = client.Close()
 		}()
-		authorization := c.Request.Header.Get("Authorization")
+		authorization := ctx.Request.Header.Get("Authorization")
 		if authorization == "" {
-			c.JSON(getJd(r))
+			ctx.JSON(getJd(r))
 			return
 		}
 		getCmd := client.Get(r.key + authorization)
 		authorizationData := getCmd.Val()
 		if authorizationData == "" {
-			c.JSON(getJd(r))
+			ctx.JSON(getJd(r))
 			return
 		}
-		setRedisAuthData(c, authorizationData)
+		setRedisAuthData(ctx, authorizationData)
 	}
 }
 
-func setRedisAuthData(c *c.Context, data interface{}) {
-	c.SetData("RedisAuth", data)
+func setRedisAuthData(ctx *context.Context, data interface{}) {
+	ctx.SetData("RedisAuth", data)
 }
 
 // GetRedisAuthData get data
-func GetRedisAuthData(c *c.Context) interface{} {
-	return c.GetData("RedisAuth")
+func GetRedisAuthData(ctx *context.Context) interface{} {
+	return ctx.GetData("RedisAuth")
 }
 
 // Msg set

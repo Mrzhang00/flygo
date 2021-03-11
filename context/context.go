@@ -31,7 +31,7 @@ func New(r *http.Request, templateConfig *config.YmlConfigTemplate) *Context {
 			funcMap[k] = v
 		}
 	}
-	c := &Context{
+	ctx := &Context{
 		logger:         log.New("[Context]"),
 		Request:        r,
 		render:         RenderBuilder().DefaultBuild(),
@@ -44,63 +44,63 @@ func New(r *http.Request, templateConfig *config.YmlConfigTemplate) *Context {
 		funcMap:        funcMap,
 		templateConfig: templateConfig,
 	}
-	c.onCreated()
+	ctx.onCreated()
 
 	// try parse form
-	_ = c.Request.ParseForm()
+	_ = ctx.Request.ParseForm()
 
-	if c.Request.Form != nil {
-		for k := range c.Request.Form {
-			c.paramMap[k] = c.Request.Form[k]
+	if ctx.Request.Form != nil {
+		for k := range ctx.Request.Form {
+			ctx.paramMap[k] = ctx.Request.Form[k]
 		}
 	}
 
-	return c
+	return ctx
 }
 
 // Add context handler
-func (c *Context) Add(handlers ...func(c *Context)) *Context {
+func (ctx *Context) Add(handlers ...func(ctx *Context)) *Context {
 	if len(handlers) <= 0 {
-		return c
+		return ctx
 	}
-	c.handlers = append(c.handlers, handlers...)
-	return c
+	ctx.handlers = append(ctx.handlers, handlers...)
+	return ctx
 }
 
 // Chain execute context handler
-func (c *Context) Chain() {
-	if len(c.handlers) <= 0 {
+func (ctx *Context) Chain() {
+	if len(ctx.handlers) <= 0 {
 		return
 	}
-	c.pos++
-	if c.pos == 0 {
-		c.onBefore()
+	ctx.pos++
+	if ctx.pos == 0 {
+		ctx.onBefore()
 	}
-	if c.pos > len(c.handlers)-1 {
-		c.onAfter()
-		c.onDestroyed()
+	if ctx.pos > len(ctx.handlers)-1 {
+		ctx.onAfter()
+		ctx.onDestroyed()
 		return
 	}
-	c.handlers[c.pos](c)
+	ctx.handlers[ctx.pos](ctx)
 }
 
 // Write buffer
-func (c *Context) Write(buffer []byte) {
-	c.render.Buffer = buffer
+func (ctx *Context) Write(buffer []byte) {
+	ctx.render.Buffer = buffer
 }
 
 // WriteCode code
-func (c *Context) WriteCode(code int) {
-	c.render.Code = code
+func (ctx *Context) WriteCode(code int) {
+	ctx.render.Code = code
 }
 
 // Header return header
-func (c *Context) Header() http.Header {
-	return c.render.Header
+func (ctx *Context) Header() http.Header {
+	return ctx.render.Header
 }
 
 // AddCookie add cookie
-func (c *Context) AddCookie(cookies ...*http.Cookie) *Context {
-	c.render.Cookies = append(c.render.Cookies, cookies...)
-	return c
+func (ctx *Context) AddCookie(cookies ...*http.Cookie) *Context {
+	ctx.render.Cookies = append(ctx.render.Cookies, cookies...)
+	return ctx
 }

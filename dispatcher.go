@@ -1,9 +1,9 @@
 package flygo
 
 import (
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/headers"
-	mw "github.com/billcoding/flygo/middleware"
+	"github.com/billcoding/flygo/middleware"
 	"net/http"
 	"sync"
 )
@@ -30,42 +30,42 @@ func (d *dispatcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (d *dispatcher) dispatch(r *http.Request, w http.ResponseWriter) {
 
-	ctx := c.New(r, d.app.Config.Flygo.Template)
+	ctx := context.New(r, d.app.Config.Flygo.Template)
 
 	d.addChains(ctx,
 		d.app.parsedRouters.Handler(ctx),
-		d.app.Middlewares(ctx, mw.TypeBefore),
-		d.app.Middlewares(ctx, mw.TypeHandler),
-		d.app.Middlewares(ctx, mw.TypeAfter))
+		d.app.Middlewares(ctx, middleware.TypeBefore),
+		d.app.Middlewares(ctx, middleware.TypeHandler),
+		d.app.Middlewares(ctx, middleware.TypeAfter))
 
 	ctx.Chain()
 
 	d.writeDone(ctx.Rendered(), w)
 }
 
-func (d *dispatcher) addChains(c *c.Context, handler func(c *c.Context), beforeMWs, handlerMWs, afterMWs []mw.Middleware) {
+func (d *dispatcher) addChains(ctx *context.Context, handler func(ctx *context.Context), beforeMWs, handlerMWs, afterMWs []middleware.Middleware) {
 
 	if handler != nil || len(handlerMWs) > 0 {
 		for _, bmw := range beforeMWs {
 			// Add all route before MW
-			c.Add(bmw.Handler())
+			ctx.Add(bmw.Handler())
 		}
 	} else {
 		// Add No route before MW
 		for _, bmw := range beforeMWs {
-			if bmw.Pattern() == mw.PatternNoRoute {
-				c.Add(bmw.Handler())
+			if bmw.Pattern() == middleware.PatternNoRoute {
+				ctx.Add(bmw.Handler())
 			}
 		}
 	}
 
 	if handler != nil {
-		c.Add(handler)
-		c.MWData["HANDLER_ROUTED"] = true
+		ctx.Add(handler)
+		ctx.MWData["HANDLER_ROUTED"] = true
 	} else {
 		for _, hmw := range handlerMWs {
-			c.Add(hmw.Handler())
-			c.MWData["HANDLER_ROUTED"] = true
+			ctx.Add(hmw.Handler())
+			ctx.MWData["HANDLER_ROUTED"] = true
 			break
 		}
 	}
@@ -73,22 +73,21 @@ func (d *dispatcher) addChains(c *c.Context, handler func(c *c.Context), beforeM
 	if handler != nil || len(handlerMWs) > 0 {
 		// Add all route after MW
 		for _, amw := range afterMWs {
-			if amw.Pattern() == mw.PatternNoRoute {
-				c.Add(amw.Handler())
+			if amw.Pattern() == middleware.PatternNoRoute {
+				ctx.Add(amw.Handler())
 			}
 		}
 	} else {
 		// Add No route after MW
 		for _, amw := range afterMWs {
-			if amw.Pattern() == mw.PatternNoRoute {
-				c.Add(amw.Handler())
+			if amw.Pattern() == middleware.PatternNoRoute {
+				ctx.Add(amw.Handler())
 			}
 		}
 	}
-
 }
 
-func (d *dispatcher) writeDone(r *c.Render, w http.ResponseWriter) {
+func (d *dispatcher) writeDone(r *context.Render, w http.ResponseWriter) {
 	for k, v := range r.Header {
 		for _, vv := range v {
 			w.Header().Add(k, vv)

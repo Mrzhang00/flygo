@@ -1,22 +1,22 @@
 package context
 
 // SetData Set data into context
-func (c *Context) SetData(name string, value interface{}) *Context {
-	c.dataMap[name] = value
-	return c
+func (ctx *Context) SetData(name string, value interface{}) *Context {
+	ctx.dataMap[name] = value
+	return ctx
 }
 
 // SetDataMap Set data map into context
-func (c *Context) SetDataMap(dmap map[string]interface{}) *Context {
+func (ctx *Context) SetDataMap(dmap map[string]interface{}) *Context {
 	if dmap != nil {
 		for k, v := range dmap {
-			c.SetData(k, v)
+			ctx.SetData(k, v)
 		}
 	}
-	return c
+	return ctx
 }
 
 // GetData get data from context
-func (c *Context) GetData(name string) interface{} {
-	return c.dataMap[name]
+func (ctx *Context) GetData(name string) interface{} {
+	return ctx.dataMap[name]
 }

@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"fmt"
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -58,9 +58,9 @@ func (uf *uploadFile) Pattern() Pattern {
 }
 
 // Handler implements
-func (uf *uploadFile) Handler() func(c *c.Context) {
-	return func(c *c.Context) {
-		defer removeTmpFiles(c)
+func (uf *uploadFile) Handler() func(ctx *context.Context) {
+	return func(ctx *context.Context) {
+		defer removeTmpFiles(ctx)
 		type jd struct {
 			Msg  string `json:"msg"`
 			Code int    `json:"code"`
@@ -84,19 +84,19 @@ func (uf *uploadFile) Handler() func(c *c.Context) {
 			}
 		}
 
-		err := c.ParseMultipart(int64(uf.size))
+		err := ctx.ParseMultipart(int64(uf.size))
 		if err != nil {
 			uf.logger.Println(err)
-			c.JSON(getJson("parse file error", 1))
+			ctx.JSON(getJson("parse file error", 1))
 			return
 		}
 
-		files := c.MultipartFiles("file")
+		files := ctx.MultipartFiles("file")
 		for _, file := range files {
 			err := verifyFile(file, uf)
 			if err != nil {
 				uf.logger.Println(err)
-				c.JSON(getJson(err.Error(), 1))
+				ctx.JSON(getJson(err.Error(), 1))
 				return
 			}
 		}
@@ -112,7 +112,7 @@ func (uf *uploadFile) Handler() func(c *c.Context) {
 			err := os.MkdirAll(parentPath, os.ModePerm)
 			if err != nil {
 				uf.logger.Println(err)
-				c.JSON(getJson(err.Error(), 1))
+				ctx.JSON(getJson(err.Error(), 1))
 				return
 			}
 		}
@@ -135,14 +135,14 @@ func (uf *uploadFile) Handler() func(c *c.Context) {
 				uf.logger.Println(err)
 				_ = os.Chmod(saveFilePath, os.ModePerm)
 				removeSaveFiles(saveFiles)
-				c.JSON(getJson(err.Error(), 1))
+				ctx.JSON(getJson(err.Error(), 1))
 				return
 			}
 
 			saveFiles = append(saveFiles, saveFilePath)
 		}
 
-		c.JSON(getJsonData(map[string]interface{}{
+		ctx.JSON(getJsonData(map[string]interface{}{
 			"total": len(files),
 			"files": uploadFiles,
 		}))
@@ -210,7 +210,7 @@ type UFile struct {
 	Url  string `json:"url"`
 }
 
-func verifyFile(file *c.MultipartFile, uf *uploadFile) error {
+func verifyFile(file *context.MultipartFile, uf *uploadFile) error {
 
 	err := verifySize(file, uf)
 	if err != nil {
@@ -230,14 +230,14 @@ func verifyFile(file *c.MultipartFile, uf *uploadFile) error {
 	return nil
 }
 
-func verifySize(file *c.MultipartFile, uf *uploadFile) error {
+func verifySize(file *context.MultipartFile, uf *uploadFile) error {
 	if file.Size > int64(uf.size) {
 		return fmt.Errorf("the file size exceed limit[max:%d, current:%d]", uf.size, file.Size)
 	}
 	return nil
 }
 
-func verifyMime(file *c.MultipartFile, uf *uploadFile) error {
+func verifyMime(file *context.MultipartFile, uf *uploadFile) error {
 	ms := strings.Join(uf.mimes, "|")
 	mimeAll := fmt.Sprintf("|%s|", ms)
 	if !strings.Contains(mimeAll, fmt.Sprintf("|%s|", file.ContentType)) {
@@ -246,7 +246,7 @@ func verifyMime(file *c.MultipartFile, uf *uploadFile) error {
 	return nil
 }
 
-func verifyExt(file *c.MultipartFile, uf *uploadFile) error {
+func verifyExt(file *context.MultipartFile, uf *uploadFile) error {
 	es := strings.Join(uf.extensions, "|")
 	extAll := fmt.Sprintf("|%s|", es)
 	extIndex := strings.LastIndexByte(file.Filename, '.')
@@ -260,12 +260,12 @@ func verifyExt(file *c.MultipartFile, uf *uploadFile) error {
 	return nil
 }
 
-func removeTmpFiles(c *c.Context) {
+func removeTmpFiles(ctx *context.Context) {
 	defer func() {
 		if re := recover(); re != nil {
 		}
 	}()
-	form := c.Request.MultipartForm
+	form := ctx.Request.MultipartForm
 	if form != nil {
 		_ = form.RemoveAll()
 	}

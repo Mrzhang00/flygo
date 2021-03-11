@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/headers"
 	"net/http"
 	"strings"
@@ -45,19 +45,19 @@ func (cs *cors) Pattern() Pattern {
 }
 
 // Handler implements
-func (cs *cors) Handler() func(c *c.Context) {
-	return func(c *c.Context) {
+func (cs *cors) Handler() func(ctx *context.Context) {
+	return func(ctx *context.Context) {
 		cs.header.Set(headers.Allow, strings.Join(cs.methods, ","))
 		cs.header.Set(headers.AccessControlAllowHeaders, strings.Join(cs.allowHeaders, ","))
 		cs.header.Set(headers.AccessControlAllowOrigin, cs.origin)
 		cs.header.Set(headers.AccessControlAllowMethods, strings.Join(cs.methods, ","))
 		for k, v := range cs.header {
 			for _, vv := range v {
-				c.Header().Add(k, vv)
+				ctx.Header().Add(k, vv)
 			}
 		}
-		if c.Request.Method != http.MethodHead && c.Request.Method != http.MethodOptions {
-			c.Chain()
+		if ctx.Request.Method != http.MethodHead && ctx.Request.Method != http.MethodOptions {
+			ctx.Chain()
 		}
 	}
 }

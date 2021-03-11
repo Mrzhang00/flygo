@@ -1,13 +1,13 @@
 package middleware
 
 import (
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/util"
 	"net/http"
 )
 
 type methodNotAllowed struct {
-	handler func(c *c.Context)
+	handler func(ctx *context.Context)
 }
 
 // Type implements
@@ -31,22 +31,22 @@ func (m *methodNotAllowed) Pattern() Pattern {
 }
 
 // Handler implements
-func (m *methodNotAllowed) Handler() func(c *c.Context) {
+func (m *methodNotAllowed) Handler() func(ctx *context.Context) {
 	return m.handler
 }
 
 // MethodNotAllowed return new methodNotAllowed
-func MethodNotAllowed(handlers ...func(c *c.Context)) Middleware {
+func MethodNotAllowed(handlers ...func(ctx *context.Context)) Middleware {
 	if len(handlers) > 0 && handlers[0] != nil {
 		return &methodNotAllowed{handlers[0]}
 	}
 	return &methodNotAllowed{methodNotAllowedHandler}
 }
 
-var methodNotAllowedHandler = func(c *c.Context) {
-	if !util.RequestSupport(c.Request.Method) {
-		c.WriteCode(http.StatusMethodNotAllowed)
+var methodNotAllowedHandler = func(ctx *context.Context) {
+	if !util.RequestSupport(ctx.Request.Method) {
+		ctx.WriteCode(http.StatusMethodNotAllowed)
 	} else {
-		c.Chain()
+		ctx.Chain()
 	}
 }

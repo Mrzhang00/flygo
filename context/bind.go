@@ -7,8 +7,8 @@ import (
 )
 
 // Bind struct ptr
-func (c *Context) Bind(structPtr interface{}) {
-	readAll, err := ioutil.ReadAll(c.Request.Body)
+func (ctx *Context) Bind(structPtr interface{}) {
+	readAll, err := ioutil.ReadAll(ctx.Request.Body)
 	if err != nil {
 		panic(err)
 	}
@@ -19,12 +19,12 @@ func (c *Context) Bind(structPtr interface{}) {
 }
 
 // Validate struct ptr
-func (c *Context) Validate(structPtr interface{}, call func()) {
-	c.ValidateWithParams(structPtr, "Parameters is invalid", 500, call)
+func (ctx *Context) Validate(structPtr interface{}, call func()) {
+	ctx.ValidateWithParams(structPtr, "Parameters is invalid", 500, call)
 }
 
 // ValidateWithParams struct ptr
-func (c *Context) ValidateWithParams(structPtr interface{}, message string, code int, call func()) {
+func (ctx *Context) ValidateWithParams(structPtr interface{}, message string, code int, call func()) {
 	result := v.New(structPtr).Validate()
 	if result.Passed {
 		call()
@@ -33,18 +33,18 @@ func (c *Context) ValidateWithParams(structPtr interface{}, message string, code
 		if msg == "" {
 			msg = message
 		}
-		c.JSON(map[string]interface{}{"message": msg, "code": code})
+		ctx.JSON(map[string]interface{}{"message": msg, "code": code})
 	}
 }
 
 // BindAndValidate struct ptr
-func (c *Context) BindAndValidate(structPtr interface{}, call func()) {
-	c.Bind(structPtr)
-	c.Validate(structPtr, call)
+func (ctx *Context) BindAndValidate(structPtr interface{}, call func()) {
+	ctx.Bind(structPtr)
+	ctx.Validate(structPtr, call)
 }
 
 // BindAndValidateWithParams struct ptr
-func (c *Context) BindAndValidateWithParams(structPtr interface{}, message string, code int, call func()) {
-	c.Bind(structPtr)
-	c.ValidateWithParams(structPtr, message, code, call)
+func (ctx *Context) BindAndValidateWithParams(structPtr interface{}, message string, code int, call func()) {
+	ctx.Bind(structPtr)
+	ctx.ValidateWithParams(structPtr, message, code, call)
 }

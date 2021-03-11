@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/headers"
 	se "github.com/billcoding/flygo/session"
 	"net/http"
@@ -35,13 +35,13 @@ func (s *session) Pattern() Pattern {
 	return PatternAny
 }
 
-func (s *session) setSession(c *c.Context, session se.Session) {
-	c.MWData[s.Name()] = session
+func (s *session) setSession(ctx *context.Context, session se.Session) {
+	ctx.MWData[s.Name()] = session
 }
 
 // GetSession get current session
-func GetSession(c *c.Context) se.Session {
-	sess, have := c.MWData[sessionMWName]
+func GetSession(ctx *context.Context) se.Session {
+	sess, have := ctx.MWData[sessionMWName]
 	if have {
 		return sess.(se.Session)
 	}
@@ -49,9 +49,9 @@ func GetSession(c *c.Context) se.Session {
 }
 
 // Handler implements
-func (s *session) Handler() func(c *c.Context) {
-	return func(c *c.Context) {
-		sessionId := s.provider.GetId(c.Request)
+func (s *session) Handler() func(ctx *context.Context) {
+	return func(ctx *context.Context) {
+		sessionId := s.provider.GetId(ctx.Request)
 		have := false
 		if sessionId != "" {
 			have = s.provider.Exists(sessionId)
@@ -59,18 +59,18 @@ func (s *session) Handler() func(c *c.Context) {
 		if have {
 			session := s.provider.Get(sessionId)
 			s.provider.Refresh(session, s.config, s.listener)
-			c.SetData("session", session.GetAll())
+			ctx.SetData("session", session.GetAll())
 		} else {
 			session := s.provider.New(s.config, s.listener)
-			s.setSession(c, session)
-			c.Header().Add(headers.SetCookie, (&http.Cookie{
+			s.setSession(ctx, session)
+			ctx.Header().Add(headers.SetCookie, (&http.Cookie{
 				Name:  s.provider.CookieName(),
 				Value: session.Id(),
 				Path:  "/",
 			}).String())
-			c.SetData("session", session.GetAll())
+			ctx.SetData("session", session.GetAll())
 		}
-		c.Chain()
+		ctx.Chain()
 	}
 }
 

@@ -2,14 +2,14 @@ package middleware
 
 import (
 	"fmt"
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/mime"
 	"net/http"
 	"runtime"
 )
 
 type recovery struct {
-	handler func(c *c.Context)
+	handler func(ctx *context.Context)
 }
 
 // Type implements
@@ -33,22 +33,22 @@ func (r *recovery) Pattern() Pattern {
 }
 
 // Handler implements
-func (r *recovery) Handler() func(c *c.Context) {
+func (r *recovery) Handler() func(ctx *context.Context) {
 	return r.handler
 }
 
 // Recovery return new recovery
-func Recovery(handlers ...func(c *c.Context)) Middleware {
+func Recovery(handlers ...func(ctx *context.Context)) Middleware {
 	return RecoveryWithConfig("code", 500, "message", handlers...)
 }
 
 // RecoveryWithConfig return new recovery
-func RecoveryWithConfig(codeName string, codeVal int, msgName string, handlers ...func(c *c.Context)) Middleware {
-	var handler func(ctx *c.Context)
+func RecoveryWithConfig(codeName string, codeVal int, msgName string, handlers ...func(ctx *context.Context)) Middleware {
+	var handler func(ctx *context.Context)
 	if len(handlers) > 0 && handlers[0] != nil {
 		handler = handlers[0]
 	} else {
-		handler = func(ctx *c.Context) {
+		handler = func(ctx *context.Context) {
 			defer func() {
 				if re := recover(); re != nil {
 					fmt.Println(fmt.Sprintf("[Recovered]%v", re))
@@ -64,7 +64,7 @@ func RecoveryWithConfig(codeName string, codeVal int, msgName string, handlers .
 					default:
 						message = fmt.Sprintf("%v", re)
 					}
-					ctx.Render(c.RenderBuilder().Buffer([]byte(fmt.Sprintf(`{"%s":%d,"%s":"%s"}`, codeName, codeVal, msgName, message))).ContentType(mime.JSON).Code(http.StatusInternalServerError).Build())
+					ctx.Render(context.RenderBuilder().Buffer([]byte(fmt.Sprintf(`{"%s":%d,"%s":"%s"}`, codeName, codeVal, msgName, message))).ContentType(mime.JSON).Code(http.StatusInternalServerError).Build())
 				}
 			}()
 			ctx.Chain()

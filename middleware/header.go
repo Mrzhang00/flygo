@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"fmt"
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/headers"
 	"runtime"
 )
@@ -32,12 +32,12 @@ func (h *header) Pattern() Pattern {
 }
 
 // Handler implements
-func (h *header) Handler() func(c *c.Context) {
-	return func(c *c.Context) {
+func (h *header) Handler() func(ctx *context.Context) {
+	return func(ctx *context.Context) {
 		for k, v := range h.headers {
-			c.Header().Set(k, v)
+			ctx.Header().Set(k, v)
 		}
-		c.Chain()
+		ctx.Chain()
 	}
 }
 

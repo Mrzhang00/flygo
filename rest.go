@@ -2,12 +2,12 @@ package flygo
 
 import (
 	"fmt"
-	rf "github.com/billcoding/flygo/rest"
+	"github.com/billcoding/flygo/rest"
 	"net/http"
 )
 
 // REST Route REST ful Controller
-func (a *App) REST(c ...rf.Controller) *App {
+func (a *App) REST(c ...rest.Controller) *App {
 	a.controllers = append(a.controllers, c...)
 	return a
 }

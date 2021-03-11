@@ -6,8 +6,8 @@ import (
 )
 
 // Redirect url
-func (c *Context) Redirect(url string) {
-	c.render = RenderBuilder().Header(http.Header{
+func (ctx *Context) Redirect(url string) {
+	ctx.render = RenderBuilder().Header(http.Header{
 		headers.Location: []string{url},
 	}).Code(http.StatusTemporaryRedirect).Build()
 }

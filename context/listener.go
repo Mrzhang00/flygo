@@ -19,26 +19,26 @@ func AddListeners(ls ...Listener) {
 	listeners = append(listeners, ls...)
 }
 
-func (c *Context) onCreated() {
+func (ctx *Context) onCreated() {
 	for _, listener := range listeners {
-		listener.Created(c)
+		listener.Created(ctx)
 	}
 }
 
-func (c *Context) onBefore() {
+func (ctx *Context) onBefore() {
 	for _, listener := range listeners {
-		listener.Before(c)
+		listener.Before(ctx)
 	}
 }
 
-func (c *Context) onAfter() {
+func (ctx *Context) onAfter() {
 	for _, listener := range listeners {
-		listener.After(c)
+		listener.After(ctx)
 	}
 }
 
-func (c *Context) onDestroyed() {
+func (ctx *Context) onDestroyed() {
 	for _, listener := range listeners {
-		listener.Destroyed(c)
+		listener.Destroyed(ctx)
 	}
 }

@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/headers"
 	"github.com/billcoding/flygo/mime"
 	"io/ioutil"
@@ -48,8 +48,8 @@ func (df *downFile) Pattern() Pattern {
 }
 
 // Handler implements
-func (df *downFile) Handler() func(c *c.Context) {
-	return func(ctx *c.Context) {
+func (df *downFile) Handler() func(ctx *context.Context) {
+	return func(ctx *context.Context) {
 		type req struct {
 			File string `binding:"name(file)" validate:"required(T) minlength(1) message(file is empty)"`
 		}
@@ -67,7 +67,7 @@ func (df *downFile) Handler() func(c *c.Context) {
 				ctx.JSON(map[string]interface{}{"code": 1, "msg": "file is not exists"})
 				return
 			}
-			ctx.Render(c.RenderBuilder().Header(map[string][]string{
+			ctx.Render(context.RenderBuilder().Header(map[string][]string{
 				headers.ContentDisposition: {"attachment;filename=" + url.QueryEscape(fs.File)},
 			}).ContentType(mime.BINARY).Buffer(bytes).Build())
 		})

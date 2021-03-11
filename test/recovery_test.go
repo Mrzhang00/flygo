@@ -2,7 +2,7 @@ package test
 
 import (
 	"github.com/billcoding/flygo"
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"io"
 	"net/http"
 	"testing"
@@ -12,7 +12,7 @@ import (
 func TestRecovery(t *testing.T) {
 	go func() {
 		app := flygo.GetApp()
-		app.GET("", func(c *c.Context) {
+		app.GET("", func(ctx *context.Context) {
 			panic(`This is panic message`)
 		})
 		app.UseRecovery()

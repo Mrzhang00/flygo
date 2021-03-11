@@ -12,58 +12,58 @@ var templateCaches = make(map[string]string, 0)
 var mutex = &sync.Mutex{}
 
 // AddFunc add func
-func (c *Context) AddFunc(name string, tfunc interface{}) *Context {
+func (ctx *Context) AddFunc(name string, tfunc interface{}) *Context {
 	if name != "" && tfunc != nil {
-		c.funcMap[name] = tfunc
+		ctx.funcMap[name] = tfunc
 	}
-	return c
+	return ctx
 }
 
 // AddFuncMap add funcMap
-func (c *Context) AddFuncMap(funcMap template.FuncMap) *Context {
+func (ctx *Context) AddFuncMap(funcMap template.FuncMap) *Context {
 	if funcMap != nil && len(funcMap) > 0 {
 		for k, v := range funcMap {
-			c.AddFunc(k, v)
+			ctx.AddFunc(k, v)
 		}
 	}
-	return c
+	return ctx
 }
 
 // Template render template
-func (c *Context) Template(prefix string, data map[string]interface{}) {
-	if !c.templateConfig.Enable {
-		c.logger.Warn("[Template]disabled")
+func (ctx *Context) Template(prefix string, data map[string]interface{}) {
+	if !ctx.templateConfig.Enable {
+		ctx.logger.Warn("[Template]disabled")
 	} else {
 		mutex.Lock()
 		defer mutex.Unlock()
-		fileName := prefix + c.templateConfig.Suffix
-		realPath := filepath.Join(c.templateConfig.Root, fileName)
+		fileName := prefix + ctx.templateConfig.Suffix
+		realPath := filepath.Join(ctx.templateConfig.Root, fileName)
 		tpl, have := templateCaches[fileName]
 		if !have {
 			bytes2, err := ioutil.ReadFile(realPath)
 			if err != nil {
-				c.logger.Error("[Template]%v", err)
+				ctx.logger.Error("[Template]%v", err)
 			} else {
 				tpl = string(bytes2)
-				if c.templateConfig.Cache {
+				if ctx.templateConfig.Cache {
 					templateCaches[fileName] = tpl
 				}
 			}
 		}
 		if data != nil {
-			c.SetDataMap(data)
+			ctx.SetDataMap(data)
 		}
 		t, err := template.New("HTML").Parse(tpl)
 		if err != nil {
-			c.logger.Error("[Template]%v", err)
+			ctx.logger.Error("[Template]%v", err)
 		} else {
-			t.Funcs(c.funcMap)
+			t.Funcs(ctx.funcMap)
 			var w bytes.Buffer
-			err := t.Execute(&w, c.dataMap)
+			err := t.Execute(&w, ctx.dataMap)
 			if err != nil {
-				c.logger.Error("[Template]%v", err)
+				ctx.logger.Error("[Template]%v", err)
 			} else {
-				c.HTML(w.String())
+				ctx.HTML(w.String())
 			}
 		}
 	}

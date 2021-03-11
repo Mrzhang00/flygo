@@ -2,7 +2,7 @@ package router
 
 import (
 	"errors"
-	c "github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/util"
 	"net/http"
 	"strings"
@@ -23,64 +23,60 @@ func NewRouter() *Router {
 }
 
 // REQUEST Route all Methods
-func (r *Router) REQUEST(pattern string, handler func(c *c.Context)) *Router {
+func (r *Router) REQUEST(pattern string, handler func(ctx *context.Context)) *Router {
 	return r.Route("*", pattern, handler)
 }
 
 // GET Route Get Method
-func (r *Router) GET(pattern string, handler func(c *c.Context)) *Router {
+func (r *Router) GET(pattern string, handler func(ctx *context.Context)) *Router {
 	return r.Route(http.MethodGet, pattern, handler)
 }
 
 // POST Route POST Method
-func (r *Router) POST(pattern string, handler func(c *c.Context)) *Router {
+func (r *Router) POST(pattern string, handler func(ctx *context.Context)) *Router {
 	return r.Route(http.MethodPost, pattern, handler)
 }
 
 // PUT Route PUT Method
-func (r *Router) PUT(pattern string, handler func(c *c.Context)) *Router {
+func (r *Router) PUT(pattern string, handler func(ctx *context.Context)) *Router {
 	return r.Route(http.MethodPut, pattern, handler)
 }
 
 // DELETE Route DELETE Method
-func (r *Router) DELETE(pattern string, handler func(c *c.Context)) *Router {
+func (r *Router) DELETE(pattern string, handler func(ctx *context.Context)) *Router {
 	return r.Route(http.MethodDelete, pattern, handler)
 }
 
 // PATCH Route PATCH Method
-func (r *Router) PATCH(pattern string, handler func(c *c.Context)) *Router {
+func (r *Router) PATCH(pattern string, handler func(ctx *context.Context)) *Router {
 	return r.Route(http.MethodPatch, pattern, handler)
 }
 
 // HEAD Route HEAD Method
-func (r *Router) HEAD(pattern string, handler func(c *c.Context)) *Router {
+func (r *Router) HEAD(pattern string, handler func(ctx *context.Context)) *Router {
 	return r.Route(http.MethodHead, pattern, handler)
 }
 
 // OPTIONS Route OPTIONS Method
-func (r *Router) OPTIONS(pattern string, handler func(c *c.Context)) *Router {
+func (r *Router) OPTIONS(pattern string, handler func(ctx *context.Context)) *Router {
 	return r.Route(http.MethodOptions, pattern, handler)
 }
 
 // Route Route DIY Method
-func (r *Router) Route(method, pattern string, handler func(c *c.Context)) *Router {
-
+func (r *Router) Route(method, pattern string, handler func(ctx *context.Context)) *Router {
 	if !util.RouteSupport(method) {
 		panic(errors.New("method not supported : " + method))
 	}
-
 	pattern = util.TrimSpecialChars(pattern)
-
 	if r.isSimpleRoute(pattern) {
 		r.simpleRoute(method, pattern, handler)
 	} else {
 		r.dynamicRoute(method, pattern, handler)
 	}
-
 	return r
 }
 
-func _simpleRoute(r *Router, method, pattern string, handler func(c *c.Context)) {
+func _simpleRoute(r *Router, method, pattern string, handler func(ctx *context.Context)) {
 	r.Simples = append(r.Simples, &Simple{
 		Method:  method,
 		Pattern: pattern,
@@ -88,11 +84,9 @@ func _simpleRoute(r *Router, method, pattern string, handler func(c *c.Context))
 	})
 }
 
-func (r *Router) simpleRoute(method, pattern string, handler func(c *c.Context)) *Router {
-
+func (r *Router) simpleRoute(method, pattern string, handler func(ctx *context.Context)) *Router {
 	methods := []string{method}
 	if method == "*" {
-
 		methods = util.AllMethods()
 	}
 	for _, m := range methods {
@@ -101,7 +95,7 @@ func (r *Router) simpleRoute(method, pattern string, handler func(c *c.Context))
 	return r
 }
 
-func _dynamicRoute(r *Router, method, pattern string, pos map[int]string, handler func(c *c.Context)) {
+func _dynamicRoute(r *Router, method, pattern string, pos map[int]string, handler func(ctx *context.Context)) {
 	r.Dynamics = append(r.Dynamics, &Dynamic{
 		Pos: pos,
 		Simple: &Simple{
@@ -112,7 +106,7 @@ func _dynamicRoute(r *Router, method, pattern string, pos map[int]string, handle
 	})
 }
 
-func (r *Router) dynamicRoute(method, pattern string, handler func(c *c.Context)) *Router {
+func (r *Router) dynamicRoute(method, pattern string, handler func(ctx *context.Context)) *Router {
 
 	patterns := strings.Split(pattern, "/")
 	pos := make(map[int]string, 0)
