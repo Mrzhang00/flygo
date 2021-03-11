@@ -28,7 +28,7 @@ func (h *header) Method() Method {
 
 // Pattern implements
 func (h *header) Pattern() Pattern {
-	return PatternAny
+	return PatternNoRoute
 }
 
 // Handler implements

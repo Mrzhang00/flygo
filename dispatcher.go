@@ -33,8 +33,8 @@ func (d *dispatcher) dispatch(r *http.Request, w http.ResponseWriter) {
 	ctx := c.New(r, d.app.Config.Flygo.Template)
 
 	d.addChains(ctx,
+		d.app.parsedRouters.Handler(ctx),
 		d.app.Middlewares(ctx, mw.TypeBefore),
-		d.app.parsedRouters.Handlers(ctx),
 		d.app.Middlewares(ctx, mw.TypeHandler),
 		d.app.Middlewares(ctx, mw.TypeAfter))
 
@@ -43,15 +43,19 @@ func (d *dispatcher) dispatch(r *http.Request, w http.ResponseWriter) {
 	d.writeDone(ctx.Rendered(), w)
 }
 
-func (d *dispatcher) addChains(c *c.Context,
-	beforeMWs []mw.Middleware,
-	handler func(c *c.Context),
-	handlerMWs []mw.Middleware,
-	afterMWs []mw.Middleware) {
+func (d *dispatcher) addChains(c *c.Context, handler func(c *c.Context), beforeMWs, handlerMWs, afterMWs []mw.Middleware) {
 
-	if len(beforeMWs) > 0 {
+	if handler != nil || len(handlerMWs) > 0 {
 		for _, bmw := range beforeMWs {
+			// Add all route before MW
 			c.Add(bmw.Handler())
+		}
+	} else {
+		// Add No route before MW
+		for _, bmw := range beforeMWs {
+			if bmw.Pattern() == mw.PatternNoRoute {
+				c.Add(bmw.Handler())
+			}
 		}
 	}
 
@@ -66,11 +70,22 @@ func (d *dispatcher) addChains(c *c.Context,
 		}
 	}
 
-	if len(afterMWs) > 0 {
+	if handler != nil || len(handlerMWs) > 0 {
+		// Add all route after MW
 		for _, amw := range afterMWs {
-			c.Add(amw.Handler())
+			if amw.Pattern() == mw.PatternNoRoute {
+				c.Add(amw.Handler())
+			}
+		}
+	} else {
+		// Add No route after MW
+		for _, amw := range afterMWs {
+			if amw.Pattern() == mw.PatternNoRoute {
+				c.Add(amw.Handler())
+			}
 		}
 	}
+
 }
 
 func (d *dispatcher) writeDone(r *c.Render, w http.ResponseWriter) {

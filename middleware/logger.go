@@ -27,7 +27,7 @@ func (l *logger) Method() Method {
 
 // Pattern implements
 func (l *logger) Pattern() Pattern {
-	return PatternNoRoute
+	return PatternAny
 }
 
 // Handler implements
