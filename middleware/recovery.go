@@ -5,6 +5,7 @@ import (
 	c "github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/mime"
 	"net/http"
+	"runtime"
 )
 
 type recovery struct {
@@ -50,9 +51,14 @@ func RecoveryWithConfig(codeName string, codeVal int, msgName string, handlers .
 		handler = func(ctx *c.Context) {
 			defer func() {
 				if re := recover(); re != nil {
-					message := ""
 					fmt.Println(fmt.Sprintf("[Recovered]%v", re))
+					var buf [4096]byte
+					n := runtime.Stack(buf[:], false)
+					fmt.Printf("%s\n", string(buf[:n]))
+					message := ""
 					switch re.(type) {
+					case string:
+						message = fmt.Sprintf("%v", re)
 					case error:
 						message = re.(error).Error()
 					default:
