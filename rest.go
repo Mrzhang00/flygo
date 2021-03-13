@@ -3,6 +3,7 @@ package flygo
 import (
 	"fmt"
 	"github.com/billcoding/flygo/rest"
+	"github.com/billcoding/flygo/util"
 	"net/http"
 )
 
@@ -14,7 +15,7 @@ func (a *App) REST(c ...rest.Controller) *App {
 
 func (a *App) routeRestControllers() *App {
 	for _, c := range a.controllers {
-		prefix := c.Prefix()
+		prefix := util.TrimSpecialChars(c.Prefix())
 
 		if c.GET() != nil {
 			getPattern := fmt.Sprintf("%s/{RESTFUL_ID}", prefix)
