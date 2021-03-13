@@ -31,7 +31,8 @@ func (a *App) routeRestControllers() *App {
 		}
 
 		if c.PUT() != nil {
-			a.Route(http.MethodPut, prefix, c.PUT())
+			putPattern := fmt.Sprintf("%s/{RESTFUL_ID}", prefix)
+			a.Route(http.MethodPut, putPattern, c.PUT())
 		}
 
 		if c.DELETE() != nil {
