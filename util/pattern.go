@@ -8,12 +8,12 @@ import (
 
 // TrimSpecialChars string
 func TrimSpecialChars(str string) string {
-	str = trimLeftAndRight(str)
+	str = TrimLeftAndRight(str)
 	re := regexp.MustCompile(`[^/\w-._{}]`)
 	return re.ReplaceAllString(str, "")
 }
 
-func trimLeftAndRight(pattern string) string {
+func TrimLeftAndRight(pattern string) string {
 	pattern = strings.TrimLeft(pattern, "//")
 	pattern = strings.TrimRight(pattern, "//")
 	pattern = strings.TrimLeft(pattern, "/")
@@ -23,7 +23,7 @@ func trimLeftAndRight(pattern string) string {
 }
 
 func TrimPattern(pattern string) string {
-	pattern = trimLeftAndRight(pattern)
+	pattern = TrimLeftAndRight(pattern)
 	re := regexp.MustCompile(`[^/\w-._*]`)
 	np := re.ReplaceAllString(pattern, "")
 	np = strings.ReplaceAll(np, "**", "*")

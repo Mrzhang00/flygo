@@ -3,6 +3,7 @@ package router
 import (
 	"fmt"
 	"github.com/billcoding/flygo/context"
+	"github.com/billcoding/flygo/util"
 	"regexp"
 	"strings"
 )
@@ -28,7 +29,7 @@ func (pr *ParsedRouter) simple(ctx *context.Context) func(ctx *context.Context) 
 	if len(pr.Simples) <= 0 {
 		return nil
 	}
-	routeKey := fmt.Sprintf("%s:%s", ctx.Request.Method, strings.TrimRight(ctx.Request.URL.Path, "/"))
+	routeKey := fmt.Sprintf("%s:%s", ctx.Request.Method, util.TrimLeftAndRight(ctx.Request.URL.Path))
 	simple, have := pr.Simples[routeKey]
 	if have {
 		return func(ctx *context.Context) {
@@ -45,7 +46,7 @@ func (pr *ParsedRouter) dynamic(ctx *context.Context) func(ctx *context.Context)
 	}
 	for pattern, mp := range pr.Dynamics {
 		re := regexp.MustCompile(pattern)
-		reqPath := strings.TrimRight(ctx.Request.URL.Path, "/")
+		reqPath := util.TrimLeftAndRight(ctx.Request.URL.Path)
 		matched := re.MatchString(reqPath)
 		if matched {
 			dy, routed := mp[ctx.Request.Method]

@@ -175,12 +175,12 @@ func (a *App) Middlewares(ctx *context.Context, mtype *middleware.Type) []middle
 						matched = true
 					} else if mw.Pattern() == middleware.PatternAny {
 						matched = true
-					} else if string(mw.Pattern()) == ctx.Request.URL.Path {
+					} else if string(mw.Pattern()) == util.TrimLeftAndRight(ctx.Request.URL.Path) {
 						matched = true
 					} else {
 						reEp := util.TrimPattern(string(mw.Pattern()))
 						re := regexp.MustCompile(reEp)
-						matched = re.MatchString(ctx.Request.URL.Path)
+						matched = re.MatchString(util.TrimLeftAndRight(ctx.Request.URL.Path))
 					}
 				}
 			}
