@@ -41,7 +41,7 @@ func (cs *cors) Method() Method {
 
 // Pattern implements
 func (cs *cors) Pattern() Pattern {
-	return PatternAny
+	return PatternNoRoute
 }
 
 // Handler implements
