@@ -3,6 +3,7 @@ package middleware
 import (
 	"github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/log"
+	"github.com/billcoding/flygo/util"
 )
 
 type logger struct {
@@ -34,7 +35,7 @@ func (l *logger) Pattern() Pattern {
 func (l *logger) Handler() func(ctx *context.Context) {
 	return func(ctx *context.Context) {
 		ctx.Chain()
-		l.logger.Info("[%s]%s => %d", ctx.Request.Method, ctx.Request.URL.Path, ctx.Rendered().Code)
+		l.logger.Info("[%s]%s => %d", ctx.Request.Method, util.TrimLeftAndRight(ctx.Request.URL.Path), ctx.Rendered().Code)
 	}
 }
 

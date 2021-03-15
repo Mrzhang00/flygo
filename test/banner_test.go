@@ -2,7 +2,6 @@ package test
 
 import (
 	"github.com/billcoding/flygo"
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -23,7 +22,7 @@ func TestBannerText(t *testing.T) {
 // TestBannerFile test
 func TestBannerFile(t *testing.T) {
 	go func() {
-		_ = ioutil.WriteFile("banner.txt", []byte(`THIS IS FLYGO BANNER FROM FILE!!!!`), 0760)
+		_ = os.WriteFile("banner.txt", []byte(`THIS IS FLYGO BANNER FROM FILE!!!!`), 0760)
 		app := flygo.GetApp()
 		app.Config.Flygo.Banner.Type = "file"
 		setAppPort()

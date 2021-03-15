@@ -4,6 +4,7 @@ import (
 	"github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/log"
 	"github.com/billcoding/flygo/mime"
+	"github.com/billcoding/flygo/util"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -104,11 +105,11 @@ func (s *static) Handler() func(ctx *context.Context) {
 		return s.handler
 	}
 	return func(ctx *context.Context) {
-		if strings.HasSuffix(ctx.Request.URL.Path, "/") {
+		if strings.HasSuffix(util.TrimLeftAndRight(ctx.Request.URL.Path), "/") {
 			ctx.Chain()
 			return
 		}
-		urlPath := strings.TrimPrefix(ctx.Request.URL.Path, "/static")
+		urlPath := strings.TrimPrefix(util.TrimLeftAndRight(ctx.Request.URL.Path), "/static")
 		realPath := filepath.Join(s.root, urlPath)
 		ext := ""
 		extPos := strings.LastIndexByte(urlPath, '.')

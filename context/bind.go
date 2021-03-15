@@ -20,11 +20,11 @@ func (ctx *Context) Bind(structPtr interface{}) {
 
 // Validate struct ptr
 func (ctx *Context) Validate(structPtr interface{}, call func()) {
-	ctx.ValidateWithParams(structPtr, "Parameters is invalid", 500, call)
+	ctx.ValidateWithParams(structPtr, "message", "Parameters is invalid", "code", 500, call)
 }
 
 // ValidateWithParams struct ptr
-func (ctx *Context) ValidateWithParams(structPtr interface{}, message string, code int, call func()) {
+func (ctx *Context) ValidateWithParams(structPtr interface{}, messageName, message, codeName string, code int, call func()) {
 	result := v.New(structPtr).Validate()
 	if result.Passed {
 		call()
@@ -33,7 +33,7 @@ func (ctx *Context) ValidateWithParams(structPtr interface{}, message string, co
 		if msg == "" {
 			msg = message
 		}
-		ctx.JSON(map[string]interface{}{"message": msg, "code": code})
+		ctx.JSON(map[string]interface{}{messageName: msg, codeName: code})
 	}
 }
 
@@ -44,7 +44,7 @@ func (ctx *Context) BindAndValidate(structPtr interface{}, call func()) {
 }
 
 // BindAndValidateWithParams struct ptr
-func (ctx *Context) BindAndValidateWithParams(structPtr interface{}, message string, code int, call func()) {
+func (ctx *Context) BindAndValidateWithParams(structPtr interface{}, messageName, message, codeName string, code int, call func()) {
 	ctx.Bind(structPtr)
-	ctx.ValidateWithParams(structPtr, message, code, call)
+	ctx.ValidateWithParams(structPtr, messageName, message, codeName, code, call)
 }

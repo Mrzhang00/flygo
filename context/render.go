@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/billcoding/flygo/headers"
 	"github.com/billcoding/flygo/mime"
-	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 )
 
 // Render struct
@@ -20,7 +20,7 @@ type Render struct {
 	ContentType string
 }
 
-// Rendered return the render
+// Rendered panic(err) the render
 func (ctx *Context) Rendered() *Render {
 	return ctx.render
 }
@@ -58,9 +58,9 @@ func (ctx *Context) TextFile(textFile string) {
 	bytes, err := readFile(textFile)
 	if err != nil {
 		ctx.logger.Error("[TextFile]%v", err)
-		return
+		panic(err)
 	}
-	ctx.Render(RenderBuilder().Buffer([]byte(string(bytes))).ContentType(mime.TEXT).Build())
+	ctx.Render(RenderBuilder().Buffer([]byte(bytes)).ContentType(mime.TEXT).Build())
 }
 
 // JSON render JSON
@@ -82,7 +82,7 @@ func (ctx *Context) JSONFile(jsonFile string) {
 	bytes, err := readFile(jsonFile)
 	if err != nil {
 		ctx.logger.Error("[JSONFile]%v", err)
-		return
+		panic(err)
 	}
 	ctx.Render(RenderBuilder().Buffer(bytes).ContentType(mime.JSON).Build())
 }
@@ -92,7 +92,7 @@ func (ctx *Context) XML(data interface{}) {
 	xmlData, err := xml.Marshal(data)
 	if err != nil {
 		ctx.logger.Error("[XML]%v", err)
-		return
+		panic(err)
 	}
 	ctx.Render(RenderBuilder().Buffer(xmlData).ContentType(mime.XML).Build())
 }
@@ -107,7 +107,7 @@ func (ctx *Context) XMLFile(xmlFile string) {
 	bytes, err := readFile(xmlFile)
 	if err != nil {
 		ctx.logger.Error("[XMLFile]%v", err)
-		return
+		panic(err)
 	}
 	ctx.Render(RenderBuilder().Buffer(bytes).ContentType(mime.XML).Build())
 }
@@ -122,7 +122,7 @@ func (ctx *Context) ImageFile(imageFile string) {
 	bytes, err := readFile(imageFile)
 	if err != nil {
 		ctx.logger.Error("[ImageFile]%v", err)
-		return
+		panic(err)
 	}
 	ctx.Image(bytes)
 }
@@ -137,7 +137,7 @@ func (ctx *Context) ICOFile(icoFile string) {
 	bytes, err := readFile(icoFile)
 	if err != nil {
 		ctx.logger.Error("[ICOFile]%v", err)
-		return
+		panic(err)
 	}
 	ctx.ICO(bytes)
 }
@@ -152,7 +152,7 @@ func (ctx *Context) BMPFile(bmpFile string) {
 	bytes, err := readFile(bmpFile)
 	if err != nil {
 		ctx.logger.Error("[BMPFile]%v", err)
-		return
+		panic(err)
 	}
 	ctx.BMP(bytes)
 }
@@ -167,7 +167,7 @@ func (ctx *Context) JPGFile(jpgFile string) {
 	bytes, err := readFile(jpgFile)
 	if err != nil {
 		ctx.logger.Error("[JPGFile]%v", err)
-		return
+		panic(err)
 	}
 	ctx.JPG(bytes)
 }
@@ -192,7 +192,7 @@ func (ctx *Context) PNGFile(pngFile string) {
 	bytes, err := readFile(pngFile)
 	if err != nil {
 		ctx.logger.Error("[PNGFile]%v", err)
-		return
+		panic(err)
 	}
 	ctx.PNG(bytes)
 }
@@ -207,7 +207,7 @@ func (ctx *Context) GIFFile(gifFile string) {
 	bytes, err := readFile(gifFile)
 	if err != nil {
 		ctx.logger.Error("[GIFFile]%v", err)
-		return
+		panic(err)
 	}
 	ctx.GIF(bytes)
 }
@@ -222,7 +222,7 @@ func (ctx *Context) HTMLFile(htmlFile string) {
 	bytes, err := readFile(htmlFile)
 	if err != nil {
 		ctx.logger.Error("[HTMLFile]%v", err)
-		return
+		panic(err)
 	}
 	ctx.Render(RenderBuilder().Buffer(bytes).ContentType(mime.HTML).Build())
 }
@@ -237,7 +237,7 @@ func (ctx *Context) CSSFile(cssFile string) {
 	bytes, err := readFile(cssFile)
 	if err != nil {
 		ctx.logger.Error("[CSSFile]%v", err)
-		return
+		panic(err)
 	}
 	ctx.Render(RenderBuilder().Buffer(bytes).ContentType(mime.CSS).Build())
 }
@@ -252,7 +252,7 @@ func (ctx *Context) JSFile(jsFile string) {
 	bytes, err := readFile(jsFile)
 	if err != nil {
 		ctx.logger.Error("[JSFile]%v", err)
-		return
+		panic(err)
 	}
 	ctx.Render(RenderBuilder().Buffer(bytes).ContentType(mime.JS).Build())
 }
@@ -267,7 +267,7 @@ func (ctx *Context) File(file string) {
 	bytes, err := readFile(file)
 	if err != nil {
 		ctx.logger.Error("[File]%v", err)
-		return
+		panic(err)
 	}
 	ctx.Binary(bytes)
 }
@@ -277,7 +277,7 @@ func (ctx *Context) Download(file, fileName string) {
 	bytes, err := readFile(file)
 	if err != nil {
 		ctx.logger.Error("[Download]%v", err)
-		return
+		panic(err)
 	}
 	fn := url.PathEscape(fileName)
 	ctx.Render(RenderBuilder().Buffer(bytes).ContentType(mime.BINARY).Header(http.Header{
@@ -286,5 +286,5 @@ func (ctx *Context) Download(file, fileName string) {
 }
 
 func readFile(fileName string) ([]byte, error) {
-	return ioutil.ReadFile(fileName)
+	return os.ReadFile(fileName)
 }
