@@ -16,7 +16,7 @@ func TestRecovery(t *testing.T) {
 			panic(`This is panic message`)
 		})
 		app.UseRecovery()
-		app.RecoveryConfig("code_val", 5000, "messagex")
+		app.RecoveryConfig("code_val", 5000, "message")
 		app.Run()
 	}()
 	<-time.After(time.Second)

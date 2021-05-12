@@ -60,7 +60,7 @@ func (ctx *Context) TextFile(textFile string) {
 		ctx.logger.Error("[TextFile]%v", err)
 		panic(err)
 	}
-	ctx.Render(RenderBuilder().Buffer([]byte(bytes)).ContentType(mime.TEXT).Build())
+	ctx.Render(RenderBuilder().Buffer(bytes).ContentType(mime.TEXT).Build())
 }
 
 // JSON render JSON

@@ -35,7 +35,7 @@ func (ctx *Context) XMLFSFile(fs *embed.FS, name string) {
 	ctx.Render(RenderBuilder().Buffer(bytes).ContentType(mime.XML).Build())
 }
 
-// ImageFile render image FS file
+// ImageFSFile render image FS file
 func (ctx *Context) ImageFSFile(fs *embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {
@@ -65,7 +65,7 @@ func (ctx *Context) BMPFSFile(fs *embed.FS, name string) {
 	ctx.BMP(bytes)
 }
 
-// JPGFile render jpg FS file
+// JPGFSFile render jpg FS file
 func (ctx *Context) JPGFSFile(fs *embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {
@@ -130,7 +130,7 @@ func (ctx *Context) JSFSFile(fs *embed.FS, name string) {
 	ctx.Render(RenderBuilder().Buffer(bytes).ContentType(mime.JS).Build())
 }
 
-// File render file
+// FileFS render file
 func (ctx *Context) FileFS(fs *embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {

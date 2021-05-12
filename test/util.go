@@ -50,7 +50,7 @@ func testServeWithHost(t *testing.T, host string, port int, method, expected str
 		app.Config.Flygo.Server.Host = host
 		app.Config.Flygo.Server.Port = port
 		app.Route(strings.ToUpper(method), "/", func(ctx *context.Context) {
-			c.Text(expected)
+			ctx.Text(expected)
 		}).Run()
 	}()
 	<-time.After(time.Millisecond)

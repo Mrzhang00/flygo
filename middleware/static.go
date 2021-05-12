@@ -99,7 +99,7 @@ func (s *static) Pattern() Pattern {
 	return "/static/*"
 }
 
-// Type implements
+// Handler implements
 func (s *static) Handler() func(ctx *context.Context) {
 	if s.handler != nil {
 		return s.handler

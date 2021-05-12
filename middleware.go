@@ -71,7 +71,7 @@ func (a *App) UseRecovery() *App {
 	return a
 }
 
-// RecoveryHandler Sets Recovery handler
+// RecoveryConfig Sets Recovery config
 func (a *App) RecoveryConfig(codeName string, codeVal int, msgName string) *App {
 	a.defaultMWState.recoveryCodeName = codeName
 	a.defaultMWState.recoveryCodeVal = codeVal
