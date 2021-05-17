@@ -73,9 +73,7 @@ func (d *dispatcher) addChains(ctx *context.Context, handler func(ctx *context.C
 	if handler != nil || len(handlerMWs) > 0 {
 		// Add all route after MW
 		for _, amw := range afterMWs {
-			if amw.Pattern() == middleware.PatternNoRoute {
-				ctx.Add(amw.Handler())
-			}
+			ctx.Add(amw.Handler())
 		}
 	} else {
 		// Add No route after MW
