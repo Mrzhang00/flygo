@@ -50,27 +50,26 @@ func (df *downFile) Pattern() Pattern {
 // Handler implements
 func (df *downFile) Handler() func(ctx *context.Context) {
 	return func(ctx *context.Context) {
-		type req struct {
-			File string `binding:"name(file)" validate:"required(T) minlength(1) message(file is empty)"`
+		fileName := ctx.ParamWith("file", "")
+		if fileName == "" {
+			ctx.JSONText(`{"msg":"file is empty","code":1}`)
+			return
 		}
-		fs := req{}
-		ctx.BindAndValidate(&fs, func() {
-			root := df.root
-			dateDir := ""
-			if df.dateDir {
-				dateDir = time.Now().Format("20060102")
-			}
-			filePath := filepath.Join(root, dateDir, fs.File)
-			bytes, err := ioutil.ReadFile(filePath)
-			if err != nil {
-				df.logger.Println(err)
-				ctx.JSON(map[string]interface{}{"code": 1, "msg": "file is not exists"})
-				return
-			}
-			ctx.Render(context.RenderBuilder().Header(map[string][]string{
-				headers.ContentDisposition: {"attachment;filename=" + url.QueryEscape(fs.File)},
-			}).ContentType(mime.BINARY).Buffer(bytes).Build())
-		})
+		root := df.root
+		dateDir := ""
+		if df.dateDir {
+			dateDir = time.Now().Format("20060102")
+		}
+		filePath := filepath.Join(root, dateDir, fileName)
+		bytes, err := ioutil.ReadFile(filePath)
+		if err != nil {
+			df.logger.Println(err)
+			ctx.JSON(map[string]interface{}{"code": 1, "msg": "file is not exists"})
+			return
+		}
+		ctx.Render(context.RenderBuilder().Header(map[string][]string{
+			headers.ContentDisposition: {"attachment;filename=" + url.QueryEscape(fileName)},
+		}).ContentType(mime.BINARY).Buffer(bytes).Build())
 	}
 }
 
