@@ -9,25 +9,23 @@ import (
 )
 
 type defaultMWState struct {
-	header                  bool
-	methodNotAllowed        bool
-	methodNotAllowedHandler func(ctx *context.Context)
-	recovery                bool
-	recoveryHandler         func(ctx *context.Context)
-	recoveryCodeName        string
-	recoveryCodeVal         int
-	recoveryMsgName         string
-	notFound                bool
-	notFoundHandler         func(ctx *context.Context)
-	stdLogger               bool
-	session                 bool
-	provider                session.Provider
-	config                  *session.Config
-	listener                *session.Listener
-	static                  bool
-	staticHandler           func(ctx *context.Context)
-	staticCache             bool
-	staticRoot              string
+	header           bool
+	recovery         bool
+	recoveryHandler  func(ctx *context.Context)
+	recoveryCodeName string
+	recoveryCodeVal  int
+	recoveryMsgName  string
+	notFound         bool
+	notFoundHandler  func(ctx *context.Context)
+	stdLogger        bool
+	session          bool
+	provider         session.Provider
+	config           *session.Config
+	listener         *session.Listener
+	static           bool
+	staticHandler    func(ctx *context.Context)
+	staticCache      bool
+	staticRoot       string
 }
 
 // Use Middlewares
@@ -48,20 +46,6 @@ func (a *App) UseSession(provider session.Provider, config *session.Config, list
 // UseHeader Use Header Middleware
 func (a *App) UseHeader() *App {
 	a.defaultMWState.header = true
-	return a
-}
-
-// UseMethodNotAllowed Use Method Not Allowed Middleware
-func (a *App) UseMethodNotAllowed() *App {
-	a.defaultMWState.methodNotAllowed = true
-	return a
-}
-
-// MethodNotAllowedHandler Sets MethodNotAllowed handler
-func (a *App) MethodNotAllowedHandler(handlers ...func(ctx *context.Context)) *App {
-	if len(handlers) > 0 {
-		a.defaultMWState.methodNotAllowedHandler = handlers[0]
-	}
 	return a
 }
 
@@ -133,24 +117,20 @@ func (a *App) useDefaultMWs() *App {
 		a.middlewares[1] = middleware.Header()
 	}
 
-	if a.defaultMWState.methodNotAllowed {
-		a.middlewares[2] = middleware.MethodNotAllowed(a.defaultMWState.methodNotAllowedHandler)
-	}
-
 	if a.defaultMWState.stdLogger {
-		a.middlewares[3] = middleware.StdLogger()
+		a.middlewares[2] = middleware.StdLogger()
 	}
 
 	if a.defaultMWState.recovery {
 		if a.defaultMWState.recoveryMsgName != "" {
-			a.middlewares[4] = middleware.RecoveryWithConfig(a.defaultMWState.recoveryCodeName, a.defaultMWState.recoveryCodeVal, a.defaultMWState.recoveryMsgName, a.defaultMWState.recoveryHandler)
+			a.middlewares[3] = middleware.RecoveryWithConfig(a.defaultMWState.recoveryCodeName, a.defaultMWState.recoveryCodeVal, a.defaultMWState.recoveryMsgName, a.defaultMWState.recoveryHandler)
 		} else {
-			a.middlewares[4] = middleware.Recovery(a.defaultMWState.recoveryHandler)
+			a.middlewares[3] = middleware.Recovery(a.defaultMWState.recoveryHandler)
 		}
 	}
 
 	if a.defaultMWState.notFound {
-		a.middlewares[5] = middleware.NotFound(a.defaultMWState.notFoundHandler)
+		a.middlewares[4] = middleware.NotFound(a.defaultMWState.notFoundHandler)
 	}
 
 	if a.defaultMWState.static {
