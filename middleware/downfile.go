@@ -44,7 +44,7 @@ func (df *downFile) Method() Method {
 
 // Pattern implements
 func (df *downFile) Pattern() Pattern {
-	return "/download/downloadFile"
+	return "/download/file"
 }
 
 // Handler implements
