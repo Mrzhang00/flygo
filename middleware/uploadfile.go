@@ -54,7 +54,7 @@ func (uf *uploadFile) Method() Method {
 
 // Pattern implements
 func (uf *uploadFile) Pattern() Pattern {
-	return "/upload/uploadFile"
+	return "/upload/file"
 }
 
 // Handler implements
