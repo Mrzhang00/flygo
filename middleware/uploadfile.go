@@ -31,7 +31,7 @@ func UploadFile() *uploadFile {
 		size:       100 * 1024 * 1024,
 		mimes:      []string{"text/plain", "image/jpeg", "image/jpg", "image/png", "image/gif", "application/octet-stream"},
 		extensions: []string{".txt", ".jpg", ".png", ".gif", ".xlsx"},
-		domain:     "http://localhost/",
+		domain:     "http://localhost",
 		prefix:     "/download/file",
 		dateDir:    true,
 	}
