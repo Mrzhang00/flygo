@@ -21,6 +21,7 @@ type App struct {
 	routers        []*router.Router
 	parsedRouters  *router.ParsedRouter
 	middlewares    []middleware.Middleware
+	middlewareMap  map[string]middleware.Middleware
 	defaultMWState *defaultMWState
 }
 
@@ -44,7 +45,8 @@ func NewApp() *App {
 			Simples:  make(map[string]*router.Simple),
 			Dynamics: make(map[string]map[string]*router.Dynamic),
 		},
-		middlewares: make([]middleware.Middleware, 6),
+		middlewares:   make([]middleware.Middleware, 6),
+		middlewareMap: make(map[string]middleware.Middleware, 0),
 		defaultMWState: &defaultMWState{
 			header: true,
 		},

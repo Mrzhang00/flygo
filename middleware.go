@@ -30,6 +30,13 @@ type defaultMWState struct {
 
 // Use Middlewares
 func (a *App) Use(middlewares ...middleware.Middleware) *App {
+	for _, mw := range middlewares {
+		if _, have := a.middlewareMap[mw.Name()]; have {
+			a.Logger.Panicf("Middleware[%s] was registered\n", mw.Name())
+		} else {
+			a.middlewareMap[mw.Name()] = mw
+		}
+	}
 	a.middlewares = append(a.middlewares, middlewares...)
 	return a
 }
@@ -115,6 +122,7 @@ func (a *App) useDefaultMWs() *App {
 
 	if a.defaultMWState.header {
 		a.middlewares[1] = middleware.Header()
+		a.middlewareMap[a.middlewares[1].Name()] = a.middlewares[1]
 	}
 
 	if a.defaultMWState.stdLogger {
@@ -137,11 +145,13 @@ func (a *App) useDefaultMWs() *App {
 		a.middlewares = append(a.middlewares, middleware.Static(a.defaultMWState.staticCache, a.defaultMWState.staticRoot, a.defaultMWState.staticHandler))
 	}
 
+	a.setMiddlewareMap()
+
 	return a
 }
 
 // Middlewares Filter Middlewares
-func (a *App) Middlewares(ctx *context.Context, mtype *middleware.Type) []middleware.Middleware {
+func (a *App) Middlewares(ctx *context.Context, mwType *middleware.Type) []middleware.Middleware {
 	mws := make([]middleware.Middleware, 0)
 	if len(a.middlewares) > 0 {
 		for _, mw := range a.middlewares {
@@ -149,7 +159,7 @@ func (a *App) Middlewares(ctx *context.Context, mtype *middleware.Type) []middle
 				continue
 			}
 			matched := false
-			if mtype == mw.Type() {
+			if mwType == mw.Type() {
 				if mw.Method() == middleware.MethodAny || string(mw.Method()) == ctx.Request.Method {
 					if mw.Pattern() == middleware.PatternNoRoute {
 						matched = true
@@ -166,11 +176,24 @@ func (a *App) Middlewares(ctx *context.Context, mtype *middleware.Type) []middle
 			}
 			if matched {
 				mws = append(mws, mw)
-				if mtype == middleware.TypeHandler {
+				if mwType == middleware.TypeHandler {
 					break
 				}
 			}
 		}
 	}
+	a.setMiddlewareMap()
 	return mws
+}
+
+func (a *App) Middleware(name string) middleware.Middleware {
+	return a.middlewareMap[name]
+}
+
+func (a *App) setMiddlewareMap() {
+	for _, mw := range a.middlewares {
+		if mw != nil {
+			a.middlewareMap[mw.Name()] = mw
+		}
+	}
 }
