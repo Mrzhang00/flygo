@@ -41,7 +41,6 @@
         - [HTTP Server Idle Timeout Configuration](#http-server-idle-timeout-configuration)
     - [Application Configuration](#application-configuration)
         - [Application Config File Configuration](#application-config-file-configuration)
-        - [Application Dev Debug Enable Configuration](#application-dev-debug-enable-configuration)
         - [Application Serve Host Configuration](#application-serve-host-configuration)
         - [Application Serve Port Configuration](#application-serve-port-configuration)
         - [Application Serve TLS Enable Configuration](#application-serve-tls-enable-configuration)
@@ -684,16 +683,15 @@ func main() {
 ### Embedded implemented Middlewares
 
 * `not_found` Not Found resource handler
-* `Logger` Built in Logger implemention
+* `Logger` Built in Logger implementation
 * `recovery` Recover catch handler
-* `method_not_allowed` Method not allowed handler
 * `static` Static resource handler
 * `cors` Cors handler
-* `uploadfile` Upload files
-* `downfile` Download files
+* `uploadFile` Upload files
+* `downloadFile` Download files
 * `redisauth` Redis simple authentication
 * `redistoken` Redis simple authorization
-* `session` Session implemention(providers of memory or redis)
+* `session` Session implementation(providers: memory or redis)
 
 ### Extra implemented Middlewares
 
@@ -887,28 +885,6 @@ App.ConfigFile = "app.yml"
 
 ```
 FLYGO_CONFIG = "app.yml"
-```
-
-#### Application Dev Debug Enable Configuration
-
-* Code set
-
-```
-App.Config.Flygo.Dev.Debug = true
-```
-
-* YAML config
-
-```yaml
-flygo:
-  dev:
-    debug: T
-```
-
-* Environment variable
-
-```
-FLYGO_DEV_DEBUG = "T"
 ```
 
 #### Application Serve Host Configuration
@@ -1240,7 +1216,6 @@ flygo:
 |SERVER_WRITE_TIMEOUT|duration|e.g. "2m"|HTTP server write timeout|
 |SERVER_IDLE_TIMEOUT|duration|e.g. "1s"|HTTP server Idle timeout|
 |FLYGO_CONFIG|string|e.g. "app.yml"|Yaml config file|
-|FLYGO_DEV_DEBUG|bool|[1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False]|Debug mode enable|
 |FLYGO_SERVER_HOST|string|e.g. "127.0.0.1"|Serve host|
 |FLYGO_SERVER_PORT|int|e.g. "8080"|Serve port|
 |FLYGO_SERVER_TLS_ENABLE|bool|[1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False]|Serve TLS enable|
