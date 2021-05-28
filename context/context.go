@@ -2,14 +2,14 @@ package context
 
 import (
 	"github.com/billcoding/flygo/config"
-	"github.com/billcoding/flygo/log"
+	"github.com/sirupsen/logrus"
 	"html/template"
 	"net/http"
 )
 
 // Context struct
 type Context struct {
-	logger         log.Logger
+	Logger         *logrus.Logger
 	Request        *http.Request
 	render         *Render
 	pos            int
@@ -24,7 +24,7 @@ type Context struct {
 }
 
 // New context
-func New(r *http.Request, templateConfig *config.YmlConfigTemplate) *Context {
+func New(logger *logrus.Logger, r *http.Request, templateConfig *config.YmlConfigTemplate) *Context {
 	funcMap := make(map[string]interface{}, 0)
 	if templateConfig.FuncMap != nil {
 		for k, v := range templateConfig.FuncMap {
@@ -32,7 +32,7 @@ func New(r *http.Request, templateConfig *config.YmlConfigTemplate) *Context {
 		}
 	}
 	ctx := &Context{
-		logger:         log.New("[Context]"),
+		Logger:         logger,
 		Request:        r,
 		render:         RenderBuilder().DefaultBuild(),
 		pos:            -1,

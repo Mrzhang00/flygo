@@ -32,7 +32,7 @@ func (ctx *Context) AddFuncMap(funcMap template.FuncMap) *Context {
 // Template render template
 func (ctx *Context) Template(prefix string, data map[string]interface{}) {
 	if !ctx.templateConfig.Enable {
-		ctx.logger.Warn("[Template]disabled")
+		ctx.Logger.Warnf("[Template]disabled")
 	} else {
 		mutex.Lock()
 		defer mutex.Unlock()
@@ -42,7 +42,7 @@ func (ctx *Context) Template(prefix string, data map[string]interface{}) {
 		if !have {
 			bytes2, err := ioutil.ReadFile(realPath)
 			if err != nil {
-				ctx.logger.Error("[Template]%v", err)
+				ctx.Logger.Errorf("[Template]%v", err)
 			} else {
 				tpl = string(bytes2)
 				if ctx.templateConfig.Cache {
@@ -55,13 +55,13 @@ func (ctx *Context) Template(prefix string, data map[string]interface{}) {
 		}
 		t, err := template.New("HTML").Parse(tpl)
 		if err != nil {
-			ctx.logger.Error("[Template]%v", err)
+			ctx.Logger.Errorf("[Template]%v", err)
 		} else {
 			t.Funcs(ctx.funcMap)
 			var w bytes.Buffer
 			err := t.Execute(&w, ctx.dataMap)
 			if err != nil {
-				ctx.logger.Error("[Template]%v", err)
+				ctx.Logger.Errorf("[Template]%v", err)
 			} else {
 				ctx.HTML(w.String())
 			}

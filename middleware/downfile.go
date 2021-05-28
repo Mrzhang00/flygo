@@ -1,11 +1,11 @@
 package middleware
 
 import (
+	"fmt"
 	"github.com/billcoding/flygo/context"
 	"github.com/billcoding/flygo/headers"
 	"github.com/billcoding/flygo/mime"
 	"io/ioutil"
-	"log"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -13,7 +13,6 @@ import (
 )
 
 type downFile struct {
-	logger  *log.Logger
 	root    string
 	dateDir bool
 }
@@ -21,7 +20,6 @@ type downFile struct {
 // DownFile return new downFile
 func DownFile() *downFile {
 	return &downFile{
-		logger:  log.New(os.Stdout, "[downFile]", log.LstdFlags),
 		root:    os.TempDir(),
 		dateDir: true,
 	}
@@ -63,7 +61,7 @@ func (df *downFile) Handler() func(ctx *context.Context) {
 		filePath := filepath.Join(root, dateDir, fileName)
 		bytes, err := ioutil.ReadFile(filePath)
 		if err != nil {
-			df.logger.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 			ctx.JSON(map[string]interface{}{"code": 1, "msg": "file is not exists"})
 			return
 		}

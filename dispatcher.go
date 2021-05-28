@@ -9,16 +9,14 @@ import (
 )
 
 type dispatcher struct {
-	mu   *sync.Mutex
-	app  *App
-	done chan bool
+	mu  *sync.Mutex
+	app *App
 }
 
 func (a *App) newDispatcher() *dispatcher {
 	return &dispatcher{
-		app:  a,
-		mu:   &sync.Mutex{},
-		done: make(chan bool, 1),
+		app: a,
+		mu:  &sync.Mutex{},
 	}
 }
 
@@ -29,22 +27,17 @@ func (d *dispatcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (d *dispatcher) dispatch(r *http.Request, w http.ResponseWriter) {
-
-	ctx := context.New(r, d.app.Config.Flygo.Template)
-
+	ctx := context.New(d.app.Logger, r, d.app.Config.Flygo.Template)
 	d.addChains(ctx,
 		d.app.parsedRouters.Handler(ctx),
 		d.app.Middlewares(ctx, middleware.TypeBefore),
 		d.app.Middlewares(ctx, middleware.TypeHandler),
 		d.app.Middlewares(ctx, middleware.TypeAfter))
-
 	ctx.Chain()
-
 	d.writeDone(ctx.Rendered(), w)
 }
 
 func (d *dispatcher) addChains(ctx *context.Context, handler func(ctx *context.Context), beforeMWs, handlerMWs, afterMWs []middleware.Middleware) {
-
 	if handler != nil || len(handlerMWs) > 0 {
 		for _, bmw := range beforeMWs {
 			// Add all route before MW

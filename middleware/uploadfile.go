@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/billcoding/flygo/context"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -13,7 +12,6 @@ import (
 )
 
 type uploadFile struct {
-	logger     *log.Logger
 	root       string
 	size       int
 	mimes      []string
@@ -26,7 +24,6 @@ type uploadFile struct {
 // UploadFile return new uploadFile
 func UploadFile() *uploadFile {
 	return &uploadFile{
-		logger:     log.New(os.Stdout, "[uploadFile]", log.LstdFlags),
 		root:       os.TempDir(),
 		size:       100 * 1024 * 1024,
 		mimes:      []string{"text/plain", "image/jpeg", "image/jpg", "image/png", "image/gif", "application/octet-stream"},
@@ -86,7 +83,7 @@ func (uf *uploadFile) Handler() func(ctx *context.Context) {
 
 		err := ctx.ParseMultipart(int64(uf.size))
 		if err != nil {
-			uf.logger.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 			ctx.JSON(getJson("parse file error", 1))
 			return
 		}
@@ -95,7 +92,7 @@ func (uf *uploadFile) Handler() func(ctx *context.Context) {
 		for _, file := range files {
 			err := verifyFile(file, uf)
 			if err != nil {
-				uf.logger.Println(err)
+				fmt.Fprintln(os.Stderr, err)
 				ctx.JSON(getJson(err.Error(), 1))
 				return
 			}
@@ -111,7 +108,7 @@ func (uf *uploadFile) Handler() func(ctx *context.Context) {
 		if err != nil {
 			err := os.MkdirAll(parentPath, os.ModePerm)
 			if err != nil {
-				uf.logger.Println(err)
+				fmt.Fprintln(os.Stderr, err)
 				ctx.JSON(getJson(err.Error(), 1))
 				return
 			}
@@ -132,7 +129,7 @@ func (uf *uploadFile) Handler() func(ctx *context.Context) {
 
 			err := file.Copy(saveFilePath)
 			if err != nil {
-				uf.logger.Println(err)
+				fmt.Fprintln(os.Stderr, err)
 				_ = os.Chmod(saveFilePath, os.ModePerm)
 				removeSaveFiles(saveFiles)
 				ctx.JSON(getJson(err.Error(), 1))

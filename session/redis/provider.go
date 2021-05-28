@@ -3,12 +3,12 @@ package redis
 import (
 	"crypto/md5"
 	"fmt"
-	"github.com/billcoding/flygo/log"
 	se "github.com/billcoding/flygo/session"
 	"github.com/go-redis/redis"
 	"io"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -18,7 +18,6 @@ import (
 const defaultPrefixKey = "session:"
 
 type provider struct {
-	logger    log.Logger
 	keyPrefix string
 	options   *redis.Options
 	client    *redis.Client
@@ -35,14 +34,13 @@ func NewWithPrefixKey(options *redis.Options, prefixKey string) se.Provider {
 	client := redis.NewClient(options)
 	ping := client.Ping()
 	p := &provider{
-		logger:    log.New("[Provider]"),
 		keyPrefix: prefixKey,
 		options:   options,
 		client:    client,
 		sessions:  &sync.Map{},
 	}
 	if ping.Err() != nil {
-		p.logger.Warn("%v", ping.Err())
+		fmt.Fprintln(os.Stderr, ping.Err())
 	}
 	p.syncSession()
 	return p
@@ -85,7 +83,7 @@ func (p *provider) Get(id string) se.Session {
 func (p *provider) Del(id string) {
 	delCmd := p.client.Del(p.getRedisKey(id))
 	if delCmd.Err() != nil {
-		p.logger.Error("[Del]%s", delCmd.Err())
+		fmt.Fprintln(os.Stderr, delCmd.Err())
 	}
 }
 
@@ -93,7 +91,7 @@ func (p *provider) Del(id string) {
 func (p *provider) GetAll() map[string]se.Session {
 	keysCmd := p.client.Keys(p.keyPrefix)
 	if keysCmd.Err() != nil {
-		p.logger.Error("[GetAll]%s", keysCmd.Err())
+		fmt.Fprintln(os.Stderr, keysCmd.Err())
 		return nil
 	}
 	keys, _ := keysCmd.Result()
@@ -112,14 +110,14 @@ func (p *provider) GetAll() map[string]se.Session {
 func (p *provider) Clear() {
 	keysCmd := p.client.Keys(p.keyPrefix)
 	if keysCmd.Err() != nil {
-		p.logger.Error("[Clear]%s", keysCmd.Err())
+		fmt.Fprintln(os.Stderr, keysCmd.Err())
 		return
 	}
 	keys, _ := keysCmd.Result()
 	for _, key := range keys {
 		delCmd := p.client.Del(key)
 		if delCmd.Err() != nil {
-			p.logger.Error("[Clear]%s", delCmd.Err())
+			fmt.Fprintln(os.Stderr, delCmd.Err())
 		}
 	}
 }
@@ -143,12 +141,12 @@ func (p *provider) New(config *se.Config, _ *se.Listener) se.Session {
 	session := newSession(p.client, sessionId, p.getRedisKey(sessionId))
 	hashSetCmd := p.client.HSet(p.getRedisKey(sessionId), sessionIdName, sessionId)
 	if hashSetCmd.Err() != nil {
-		p.logger.Error("[New]%v", hashSetCmd.Err())
+		fmt.Fprintln(os.Stderr, hashSetCmd.Err())
 		return nil
 	}
 	expireCmd := p.client.Expire(p.getRedisKey(sessionId), se.GetTimeout(config.Timeout))
 	if expireCmd.Err() != nil {
-		p.logger.Error("[New]%v", expireCmd.Err())
+		fmt.Fprintln(os.Stderr, expireCmd.Err())
 		return nil
 	}
 	p.sessions.Store(sessionId, session)
@@ -159,7 +157,7 @@ func (p *provider) New(config *se.Config, _ *se.Listener) se.Session {
 func (p *provider) Refresh(session se.Session, config *se.Config, listener *se.Listener) {
 	expireCmd := p.client.Expire(p.getRedisKey(session.Id()), se.GetTimeout(config.Timeout))
 	if expireCmd.Err() != nil {
-		p.logger.Error("[Refresh]%v", expireCmd.Err())
+		fmt.Fprintln(os.Stderr, expireCmd.Err())
 	} else {
 		go func() {
 			if listener != nil && listener.Refreshed != nil {
@@ -179,7 +177,7 @@ func (p *provider) syncSession() {
 	go func() {
 		keysCmd := p.client.Keys(p.keyPrefix + "*")
 		if keysCmd.Err() != nil {
-			p.logger.Error("[syncSession]%v", keysCmd.Err())
+			fmt.Fprintln(os.Stderr, keysCmd.Err())
 			return
 		}
 		keys := keysCmd.Val()
@@ -187,11 +185,11 @@ func (p *provider) syncSession() {
 		for _, key := range keys {
 			hashGetAllCmd := p.client.HGetAll(key)
 			if hashGetAllCmd.Err() != nil {
-				p.logger.Error("[syncSession]%v", hashGetAllCmd.Err())
+				fmt.Fprintln(os.Stderr, hashGetAllCmd.Err())
 				continue
 			}
-			vals := hashGetAllCmd.Val()
-			sessionId := vals[sessionIdName]
+			values := hashGetAllCmd.Val()
+			sessionId := values[sessionIdName]
 			rs := newSession(p.client, sessionId, key)
 			sessionMap[sessionId] = rs
 			p.sessions.Store(sessionId, newSession(p.client, sessionId, key))
@@ -208,7 +206,7 @@ func (p *provider) cleanSession(listener *se.Listener) {
 			key := p.getRedisKey(sessionId)
 			existsCmd := p.client.Exists(key)
 			if existsCmd.Err() != nil {
-				p.logger.Error("[invalidatedSession]%v", existsCmd.Err())
+				fmt.Fprintln(os.Stderr, existsCmd.Err())
 			} else {
 				if existsCmd.Val() <= 0 {
 					sess.Invalidate()

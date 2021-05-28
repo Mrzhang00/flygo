@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"github.com/billcoding/flygo/context"
-	"github.com/billcoding/flygo/log"
 	"github.com/billcoding/flygo/mime"
 	"github.com/billcoding/flygo/util"
 	"io/ioutil"
@@ -16,7 +15,6 @@ type static struct {
 	caches  map[string][]byte
 	root    string
 	mimes   map[string]string
-	logger  log.Logger
 	handler func(ctx *context.Context)
 }
 
@@ -36,7 +34,6 @@ func Static(cache bool, root string, handlers ...func(ctx *context.Context)) *st
 		caches: make(map[string][]byte, 0),
 		root:   rot,
 		mimes:  defaultMimes(),
-		logger: log.New("[Static]"),
 	}
 	if len(handlers) > 0 && handlers[0] != nil {
 		st.handler = handlers[0]
@@ -126,7 +123,6 @@ func (s *static) Handler() func(ctx *context.Context) {
 		} else {
 			bytes, err := ioutil.ReadFile(realPath)
 			if err != nil {
-				s.logger.Warn("[Handler]%v", err)
 				ctx.Chain()
 			} else {
 				buffer = bytes

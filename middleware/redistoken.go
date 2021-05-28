@@ -3,15 +3,14 @@ package middleware
 import (
 	"fmt"
 	"github.com/billcoding/flygo/context"
-	"github.com/billcoding/flygo/log"
 	"github.com/go-redis/redis"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 )
 
 type redisToken struct {
-	logger  log.Logger
 	key     string
 	appKey  string
 	expires time.Duration
@@ -27,7 +26,6 @@ func RedisToken(options *redis.Options) *redisToken {
 	client := redis.NewClient(options)
 	ping := client.Ping()
 	rt := &redisToken{
-		logger:  log.New("[RedisToken]"),
 		key:     "auth:authorization",
 		appKey:  "auth:apps",
 		expires: 24 * time.Hour,
@@ -38,7 +36,7 @@ func RedisToken(options *redis.Options) *redisToken {
 		client:  client,
 	}
 	if ping.Err() != nil {
-		rt.logger.Warn("%v", ping.Err())
+		fmt.Fprintln(os.Stderr, ping.Err())
 	}
 	return rt
 }

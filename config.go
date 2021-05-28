@@ -11,43 +11,30 @@ func (a *App) parseYml() {
 	file := a.ConfigFile
 	if file != "" {
 		bytes, err := ioutil.ReadFile(file)
-
 		if err != nil {
-			a.DebugTrace(func() {
-				a.Logger.Warn("[parseYml]%v", err)
-			})
-		}
-
-		if err == nil {
+			a.Logger.Debugf("[parseYml]%v", err)
+		} else {
 			err = a.Config.Unmarshal(bytes)
 			if err != nil {
-
-				a.DebugTrace(func() {
-					if err != nil {
-						a.Logger.Warn("[parseYml]%v", err)
-					}
-				})
-
+				if err != nil {
+					a.Logger.Debugf("[parseYml]%v", err)
+				}
 			}
 		}
 	}
 }
 
 func (a *App) parseConfig() *App {
-	execdir, _ := os.Executable()
-	execroot := filepath.Dir(execdir)
+	rootDir, _ := os.Getwd()
 	rot := a.Config.Flygo.Template.Root
-
 	if strings.HasPrefix(rot, "/") {
-
 	} else {
 		switch rot {
 		case "", ".", "./":
-			rot = execroot
+			rot = rootDir
 		default:
-
 			rot = strings.TrimPrefix(rot, "./")
-			rot = filepath.Join(execroot, rot)
+			rot = filepath.Join(rootDir, rot)
 		}
 	}
 	a.Config.Flygo.Template.Root = rot

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/billcoding/flygo"
 	"github.com/billcoding/flygo/context"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -49,6 +50,9 @@ func testServeWithHost(t *testing.T, host string, port int, method, expected str
 		app := flygo.NewApp()
 		app.Config.Flygo.Server.Host = host
 		app.Config.Flygo.Server.Port = port
+		app.Logger.SetLevel(logrus.DebugLevel)
+		//app.Logger.AddHook(logrushook.New("", true, false))
+		app.UseStdLogger()
 		app.Route(strings.ToUpper(method), "/", func(ctx *context.Context) {
 			ctx.Text(expected)
 		}).Run()

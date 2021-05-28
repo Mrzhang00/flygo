@@ -9,7 +9,7 @@ import (
 func (ctx *Context) TextFSFile(fs embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {
-		ctx.logger.Error("[TextFile]%v", err)
+		ctx.Logger.Errorf("[TextFile]%v", err)
 		panic(err)
 	}
 	ctx.Render(RenderBuilder().Buffer(bytes).ContentType(mime.TEXT).Build())
@@ -19,7 +19,7 @@ func (ctx *Context) TextFSFile(fs embed.FS, name string) {
 func (ctx *Context) JSONFSFile(fs *embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {
-		ctx.logger.Error("[JSONFile]%v", err)
+		ctx.Logger.Errorf("[JSONFile]%v", err)
 		panic(err)
 	}
 	ctx.Render(RenderBuilder().Buffer(bytes).ContentType(mime.JSON).Build())
@@ -29,7 +29,7 @@ func (ctx *Context) JSONFSFile(fs *embed.FS, name string) {
 func (ctx *Context) XMLFSFile(fs *embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {
-		ctx.logger.Error("[XMLFile]%v", err)
+		ctx.Logger.Errorf("[XMLFile]%v", err)
 		panic(err)
 	}
 	ctx.Render(RenderBuilder().Buffer(bytes).ContentType(mime.XML).Build())
@@ -39,7 +39,7 @@ func (ctx *Context) XMLFSFile(fs *embed.FS, name string) {
 func (ctx *Context) ImageFSFile(fs *embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {
-		ctx.logger.Error("[ImageFile]%v", err)
+		ctx.Logger.Errorf("[ImageFile]%v", err)
 		panic(err)
 	}
 	ctx.Image(bytes)
@@ -49,7 +49,7 @@ func (ctx *Context) ImageFSFile(fs *embed.FS, name string) {
 func (ctx *Context) ICOFSFile(fs *embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {
-		ctx.logger.Error("[ICOFile]%v", err)
+		ctx.Logger.Errorf("[ICOFile]%v", err)
 		panic(err)
 	}
 	ctx.ICO(bytes)
@@ -59,7 +59,7 @@ func (ctx *Context) ICOFSFile(fs *embed.FS, name string) {
 func (ctx *Context) BMPFSFile(fs *embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {
-		ctx.logger.Error("[BMPFile]%v", err)
+		ctx.Logger.Errorf("[BMPFile]%v", err)
 		panic(err)
 	}
 	ctx.BMP(bytes)
@@ -69,7 +69,7 @@ func (ctx *Context) BMPFSFile(fs *embed.FS, name string) {
 func (ctx *Context) JPGFSFile(fs *embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {
-		ctx.logger.Error("[JPGFile]%v", err)
+		ctx.Logger.Errorf("[JPGFile]%v", err)
 		panic(err)
 	}
 	ctx.JPG(bytes)
@@ -84,7 +84,7 @@ func (ctx *Context) JPEGFSFile(fs *embed.FS, name string) {
 func (ctx *Context) PNGJSFile(fs *embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {
-		ctx.logger.Error("[PNGFile]%v", err)
+		ctx.Logger.Errorf("[PNGFile]%v", err)
 		panic(err)
 	}
 	ctx.PNG(bytes)
@@ -94,7 +94,7 @@ func (ctx *Context) PNGJSFile(fs *embed.FS, name string) {
 func (ctx *Context) GIFFSFile(fs *embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {
-		ctx.logger.Error("[GIFFile]%v", err)
+		ctx.Logger.Errorf("[GIFFile]%v", err)
 		panic(err)
 	}
 	ctx.GIF(bytes)
@@ -104,7 +104,7 @@ func (ctx *Context) GIFFSFile(fs *embed.FS, name string) {
 func (ctx *Context) HTMLFSFile(fs *embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {
-		ctx.logger.Error("[HTMLFile]%v", err)
+		ctx.Logger.Errorf("[HTMLFile]%v", err)
 		panic(err)
 	}
 	ctx.Render(RenderBuilder().Buffer(bytes).ContentType(mime.HTML).Build())
@@ -114,7 +114,7 @@ func (ctx *Context) HTMLFSFile(fs *embed.FS, name string) {
 func (ctx *Context) CSSFSFile(fs *embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {
-		ctx.logger.Error("[CSSFile]%v", err)
+		ctx.Logger.Errorf("[CSSFile]%v", err)
 		panic(err)
 	}
 	ctx.Render(RenderBuilder().Buffer(bytes).ContentType(mime.CSS).Build())
@@ -124,7 +124,7 @@ func (ctx *Context) CSSFSFile(fs *embed.FS, name string) {
 func (ctx *Context) JSFSFile(fs *embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {
-		ctx.logger.Error("[JSFile]%v", err)
+		ctx.Logger.Errorf("[JSFile]%v", err)
 		panic(err)
 	}
 	ctx.Render(RenderBuilder().Buffer(bytes).ContentType(mime.JS).Build())
@@ -134,7 +134,7 @@ func (ctx *Context) JSFSFile(fs *embed.FS, name string) {
 func (ctx *Context) FileFS(fs *embed.FS, name string) {
 	bytes, err := fs.ReadFile(name)
 	if err != nil {
-		ctx.logger.Error("[File]%v", err)
+		ctx.Logger.Errorf("[File]%v", err)
 		panic(err)
 	}
 	ctx.Binary(bytes)

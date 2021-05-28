@@ -1,8 +1,8 @@
 package context
 
 import (
+	"fmt"
 	"github.com/billcoding/flygo/headers"
-	"github.com/billcoding/flygo/log"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -11,8 +11,6 @@ import (
 
 // MultipartFile struct
 type MultipartFile struct {
-	// Logger MultipartFile logger
-	Logger log.Logger
 	// Filename file name
 	Filename string
 	// ContentType Content type
@@ -32,19 +30,19 @@ func (file *MultipartFile) Copy(distName string) error {
 	var err error
 	f, err = file.FileHeader.Open()
 	if err != nil {
-		file.Logger.Error("%v", err)
+		fmt.Fprintln(os.Stderr, err)
 		return err
 	}
 
 	dist, err = os.Create(distName)
 	if err != nil {
-		file.Logger.Error("%v", err)
+		fmt.Fprintln(os.Stderr, err)
 		return err
 	}
 
 	_, err = io.Copy(dist, f)
 	if err != nil {
-		file.Logger.Error("%v", err)
+		fmt.Fprintln(os.Stderr, err)
 		return err
 	}
 	_ = f.Close()
@@ -57,7 +55,7 @@ func (ctx *Context) ParseMultipart(maxMemory int64) error {
 	var err error
 	err = ctx.Request.ParseMultipartForm(maxMemory)
 	if err != nil {
-		ctx.logger.Error("[ParseMultipart]%v", err)
+		fmt.Fprintln(os.Stderr, err)
 		return err
 	}
 	paramMap := make(map[string][]string, 0)
@@ -69,7 +67,6 @@ func (ctx *Context) ParseMultipart(maxMemory int64) error {
 		mfs := make([]*MultipartFile, 0)
 		for _, fileHeader := range header {
 			mf := &MultipartFile{
-				Logger:      log.New("[MultipartFile]"),
 				Filename:    fileHeader.Filename,
 				ContentType: fileHeader.Header.Get(headers.MIME),
 				Size:        fileHeader.Size,

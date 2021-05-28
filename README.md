@@ -684,7 +684,7 @@ func main() {
 ### Embedded implemented Middlewares
 
 * `not_found` Not Found resource handler
-* `logger` Built in logger implemention
+* `Logger` Built in Logger implemention
 * `recovery` Recover catch handler
 * `method_not_allowed` Method not allowed handler
 * `static` Static resource handler

@@ -1,14 +1,14 @@
 package redis
 
 import (
-	"github.com/billcoding/flygo/log"
+	"fmt"
 	se "github.com/billcoding/flygo/session"
 	"github.com/go-redis/redis"
+	"os"
 	"time"
 )
 
 type session struct {
-	logger      log.Logger
 	id          string
 	key         string
 	invalidated bool
@@ -17,7 +17,6 @@ type session struct {
 
 func newSession(client *redis.Client, id, key string) se.Session {
 	return &session{
-		logger:      log.New("[Session]"),
 		id:          id,
 		key:         key,
 		invalidated: false,
@@ -53,7 +52,7 @@ func (s *session) Get(name string) interface{} {
 	val := ""
 	err := getCmd.Scan(&val)
 	if err != nil {
-		s.logger.Error("[Get]%v", err)
+		fmt.Fprintln(os.Stderr, err)
 	}
 	return val
 }
@@ -61,12 +60,12 @@ func (s *session) Get(name string) interface{} {
 // GetAll session's values
 func (s *session) GetAll() map[string]interface{} {
 	getAllCmd := s.client.HGetAll(s.key)
-	vals := getAllCmd.Val()
-	nvals := make(map[string]interface{}, 0)
-	for k, v := range vals {
-		nvals[k] = v
+	values := getAllCmd.Val()
+	newValues := make(map[string]interface{}, 0)
+	for k, v := range values {
+		newValues[k] = v
 	}
-	return nvals
+	return newValues
 }
 
 // Set named val into session

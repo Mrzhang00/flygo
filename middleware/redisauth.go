@@ -1,13 +1,13 @@
 package middleware
 
 import (
+	"fmt"
 	"github.com/billcoding/flygo/context"
-	"github.com/billcoding/flygo/log"
 	"github.com/go-redis/redis"
+	"os"
 )
 
 type redisAuth struct {
-	logger  log.Logger
 	key     string
 	msg     string
 	code    int
@@ -20,7 +20,7 @@ func RedisAuth(options *redis.Options) *redisAuth {
 	client := redis.NewClient(options)
 	ping := client.Ping()
 	r := &redisAuth{
-		logger:  log.New("[RedisAuth]"),
+
 		key:     "auth:authorization:",
 		msg:     "Unauthorized",
 		code:    777,
@@ -28,7 +28,7 @@ func RedisAuth(options *redis.Options) *redisAuth {
 		client:  client,
 	}
 	if ping.Err() != nil {
-		r.logger.Warn("%v", ping.Err())
+		fmt.Fprintln(os.Stderr, ping.Err())
 	}
 	return r
 }

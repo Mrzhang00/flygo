@@ -2,11 +2,10 @@ package flygo
 
 import (
 	"github.com/billcoding/flygo/config"
-	"github.com/billcoding/flygo/log"
 	"github.com/billcoding/flygo/middleware"
 	"github.com/billcoding/flygo/rest"
 	"github.com/billcoding/flygo/router"
-	syslog "log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"strconv"
@@ -16,7 +15,7 @@ import (
 type App struct {
 	ConfigFile     string
 	Config         *config.Config
-	Logger         log.Logger
+	Logger         *logrus.Logger
 	controllers    []rest.Controller
 	groups         []*router.Group
 	routers        []*router.Router
@@ -37,7 +36,7 @@ func NewApp() *App {
 	return &App{
 		ConfigFile:  "flygo.yml",
 		Config:      config.Default(),
-		Logger:      log.New("[FLYGO]"),
+		Logger:      logrus.StandardLogger(),
 		controllers: make([]rest.Controller, 0),
 		groups:      make([]*router.Group, 0),
 		routers:     []*router.Router{router.NewRouter()},
@@ -70,7 +69,7 @@ func (a *App) parseAddr() {
 	minPort := 0
 	maxPort := 65536
 	if port < minPort || port > maxPort {
-		a.Logger.Error("[parseAddr]The port `%v` is invalid.[valid : %v - %v]", port, minPort, maxPort)
+		a.Logger.Errorf("[parseAddr]The port `%v` is invalid.[valid : %v - %v]", port, minPort, maxPort)
 		os.Exit(0)
 	}
 }
@@ -80,8 +79,8 @@ func (a *App) serve() {
 	port := a.Config.Flygo.Server.Port
 	tlsEnable := a.Config.Flygo.Server.TLS.Enable
 	addr := host + ":" + strconv.Itoa(port)
-	a.Logger.Info("[Serve]Bind on %s", addr)
-	a.Logger.Info("[Serve]Server started")
+	a.Logger.Infof("[Serve]Bind on %s", addr)
+	a.Logger.Infof("[Serve]Server started")
 	var err error
 	server := &http.Server{
 		Addr:              addr,
@@ -91,7 +90,6 @@ func (a *App) serve() {
 		ReadHeaderTimeout: a.Config.Server.Timeout.ReadHeader,
 		WriteTimeout:      a.Config.Server.Timeout.Write,
 		IdleTimeout:       a.Config.Server.Timeout.Idle,
-		ErrorLog:          syslog.New(os.Stderr, "[http]", syslog.LstdFlags),
 	}
 	if tlsEnable {
 		certFile := a.Config.Flygo.Server.TLS.CertFile
@@ -101,6 +99,6 @@ func (a *App) serve() {
 		err = server.ListenAndServe()
 	}
 	if err != nil {
-		a.Logger.Error("[Serve]%v", err.Error())
+		a.Logger.Errorf("[Serve]%v", err.Error())
 	}
 }

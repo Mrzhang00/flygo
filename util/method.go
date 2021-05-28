@@ -41,12 +41,6 @@ func RouteSupport(method string) bool {
 	return have
 }
 
-// RequestSupport supports
-func RequestSupport(method string) bool {
-	_, have := requestMethods[method]
-	return have
-}
-
 // AllMethods methods
 func AllMethods() []string {
 	return allMethods

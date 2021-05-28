@@ -34,15 +34,9 @@ type YmlServerConfigTimeout struct {
 
 // YmlConfig struct
 type YmlConfig struct {
-	Dev      *YmlConfigDev      `yaml:"dev"`
 	Banner   *YmlConfigBanner   `yaml:"banner"`
 	Server   *YmlConfigServer   `yaml:"server"`
 	Template *YmlConfigTemplate `yaml:"template"`
-}
-
-// YmlConfigDev struct
-type YmlConfigDev struct {
-	Debug bool `yaml:"debug"`
 }
 
 // YmlConfigBanner struct
@@ -89,9 +83,7 @@ func Default() *Config {
 			},
 		},
 		Flygo: &YmlConfig{
-			Dev: &YmlConfigDev{
-				Debug: false,
-			}, Banner: &YmlConfigBanner{
+			Banner: &YmlConfigBanner{
 				Enable: true,
 				Type:   "default",
 				File:   "banner.txt",

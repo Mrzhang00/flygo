@@ -31,7 +31,7 @@ func (a *App) printBanner() {
 	case "file":
 		bytes, err := ioutil.ReadFile(a.Config.Flygo.Banner.File)
 		if err != nil {
-			a.Logger.Error("[printBanner]%v", err)
+			a.Logger.Errorf("[printBanner]%v", err)
 			return
 		}
 		fmt.Printf("%v\n", string(bytes))

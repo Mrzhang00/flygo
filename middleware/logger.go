@@ -2,12 +2,11 @@ package middleware
 
 import (
 	"github.com/billcoding/flygo/context"
-	"github.com/billcoding/flygo/log"
-	"github.com/billcoding/flygo/util"
+	"github.com/sirupsen/logrus"
 )
 
 type logger struct {
-	logger  log.Logger
+	logger  *logrus.Logger
 	handler func(ctx *context.Context)
 }
 
@@ -34,14 +33,24 @@ func (l *logger) Pattern() Pattern {
 // Handler implements
 func (l *logger) Handler() func(ctx *context.Context) {
 	return func(ctx *context.Context) {
+		l.logger.WithFields(map[string]interface{}{
+			"Host":       ctx.Request.Host,
+			"Proto":      ctx.Request.Proto,
+			"Method":     ctx.Request.Method,
+			"URL":        ctx.Request.URL,
+			"RequestURI": ctx.Request.RequestURI,
+			"RemoteAddr": ctx.Request.RemoteAddr,
+			"Header":     ctx.Request.Header,
+			"Form":       ctx.Request.Form,
+			"PostForm":   ctx.Request.PostForm,
+		}).Infof("Requested %s", ctx.Request.RequestURI)
 		ctx.Chain()
-		l.logger.Info("[%s]%s => %d", ctx.Request.Method, util.TrimLeftAndRight(ctx.Request.URL.Path), ctx.Rendered().Code)
 	}
 }
 
 // StdLogger return logger
 func StdLogger() Middleware {
 	return &logger{
-		logger: log.New("[StdLogger]"),
+		logger: logrus.StandardLogger(),
 	}
 }
