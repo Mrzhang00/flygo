@@ -118,6 +118,7 @@ func (uf *uploadFile) Handler() func(ctx *context.Context) {
 			extIndex := strings.LastIndexByte(file.Filename, '.')
 			ext := file.Filename[extIndex+1:]
 
+			rand.Seed(time.Now().UnixNano())
 			saveFile := fmt.Sprintf("%x.%s", rand.Int63(), ext)
 			saveFilePath := filepath.Join(parentPath, saveFile)
 
@@ -199,6 +200,15 @@ func (uf *uploadFile) Prefix(prefix string) *uploadFile {
 func (uf *uploadFile) DateDir(dateDir bool) *uploadFile {
 	uf.dateDir = dateDir
 	return uf
+}
+
+// Create create dist file
+func (uf *uploadFile) Create(file string, buf []byte) error {
+	dateDir := ""
+	if uf.dateDir {
+		dateDir = time.Now().Format("20060102")
+	}
+	return os.WriteFile(filepath.Join(uf.root, dateDir, file), buf, 0766)
 }
 
 // UFile struct

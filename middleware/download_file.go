@@ -12,41 +12,41 @@ import (
 	"time"
 )
 
-type downFile struct {
+type downloadFile struct {
 	root    string
 	dateDir bool
 }
 
-// DownFile return new downFile
-func DownFile() *downFile {
-	return &downFile{
+// DownloadFile return new downloadFile
+func DownloadFile() *downloadFile {
+	return &downloadFile{
 		root:    os.TempDir(),
 		dateDir: true,
 	}
 }
 
 // Name implements
-func (df *downFile) Name() string {
-	return "DownFile"
+func (df *downloadFile) Name() string {
+	return "DownloadFile"
 }
 
 // Type implements
-func (df *downFile) Type() *Type {
+func (df *downloadFile) Type() *Type {
 	return TypeHandler
 }
 
 // Method implements
-func (df *downFile) Method() Method {
+func (df *downloadFile) Method() Method {
 	return MethodGet
 }
 
 // Pattern implements
-func (df *downFile) Pattern() Pattern {
+func (df *downloadFile) Pattern() Pattern {
 	return "/download/file"
 }
 
 // Handler implements
-func (df *downFile) Handler() func(ctx *context.Context) {
+func (df *downloadFile) Handler() func(ctx *context.Context) {
 	return func(ctx *context.Context) {
 		fileName := ctx.ParamWith("file", "")
 		if fileName == "" {
@@ -72,13 +72,13 @@ func (df *downFile) Handler() func(ctx *context.Context) {
 }
 
 // Root path
-func (df *downFile) Root(root string) *downFile {
+func (df *downloadFile) Root(root string) *downloadFile {
 	df.root = root
 	return df
 }
 
 // DateDir enable
-func (df *downFile) DateDir(dateDir bool) *downFile {
+func (df *downloadFile) DateDir(dateDir bool) *downloadFile {
 	df.dateDir = dateDir
 	return df
 }
