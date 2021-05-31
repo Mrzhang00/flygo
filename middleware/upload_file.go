@@ -208,7 +208,10 @@ func (uf *uploadFile) Create(file string, buf []byte) error {
 	if uf.dateDir {
 		dateDir = time.Now().Format("20060102")
 	}
-	return os.WriteFile(filepath.Join(uf.root, dateDir, file), buf, 0766)
+	// FIX when date dir was not created
+	fileName := filepath.Join(uf.root, dateDir, file)
+	_ = os.MkdirAll(filepath.Dir(fileName), 0766)
+	return os.WriteFile(fileName, buf, 0766)
 }
 
 // UFile struct
