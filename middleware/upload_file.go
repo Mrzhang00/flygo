@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type uploadFile struct {
+type UploadFile struct {
 	root       string
 	size       int
 	mimes      []string
@@ -21,9 +21,9 @@ type uploadFile struct {
 	dateDir    bool
 }
 
-// UploadFile return new uploadFile
-func UploadFile() *uploadFile {
-	return &uploadFile{
+// NewUploadFile return new UploadFile
+func NewUploadFile() *UploadFile {
+	return &UploadFile{
 		root:       os.TempDir(),
 		size:       100 * 1024 * 1024,
 		mimes:      []string{"text/plain", "image/jpeg", "image/jpg", "image/png", "image/gif", "application/octet-stream"},
@@ -35,27 +35,27 @@ func UploadFile() *uploadFile {
 }
 
 // Type implements
-func (uf *uploadFile) Type() *Type {
+func (uf *UploadFile) Type() *Type {
 	return TypeHandler
 }
 
 // Name implements
-func (*uploadFile) Name() string {
+func (*UploadFile) Name() string {
 	return "UploadFile"
 }
 
 // Method implements
-func (uf *uploadFile) Method() Method {
+func (uf *UploadFile) Method() Method {
 	return MethodPost
 }
 
 // Pattern implements
-func (uf *uploadFile) Pattern() Pattern {
+func (uf *UploadFile) Pattern() Pattern {
 	return "/upload/file"
 }
 
 // Handler implements
-func (uf *uploadFile) Handler() func(ctx *context.Context) {
+func (uf *UploadFile) Handler() func(ctx *context.Context) {
 	return func(ctx *context.Context) {
 		defer removeTmpFiles(ctx)
 		type jd struct {
@@ -149,61 +149,61 @@ func (uf *uploadFile) Handler() func(ctx *context.Context) {
 }
 
 // Root set
-func (uf *uploadFile) Root(root string) *uploadFile {
+func (uf *UploadFile) Root(root string) *UploadFile {
 	uf.root = root
 	return uf
 }
 
 // Size set
-func (uf *uploadFile) Size(size int) *uploadFile {
+func (uf *UploadFile) Size(size int) *UploadFile {
 	uf.size = size
 	return uf
 }
 
 // Extensions set
-func (uf *uploadFile) Extensions(extensions []string) *uploadFile {
+func (uf *UploadFile) Extensions(extensions []string) *UploadFile {
 	uf.extensions = extensions
 	return uf
 }
 
 // AddExtension add extensions
-func (uf *uploadFile) AddExtension(extensions ...string) *uploadFile {
+func (uf *UploadFile) AddExtension(extensions ...string) *UploadFile {
 	uf.extensions = append(uf.extensions, extensions...)
 	return uf
 }
 
 // Mimes set
-func (uf *uploadFile) Mimes(mimes []string) *uploadFile {
+func (uf *UploadFile) Mimes(mimes []string) *UploadFile {
 	uf.mimes = mimes
 	return uf
 }
 
 // AddMime add mimes
-func (uf *uploadFile) AddMime(mimes ...string) *uploadFile {
+func (uf *UploadFile) AddMime(mimes ...string) *UploadFile {
 	uf.mimes = append(uf.mimes, mimes...)
 	return uf
 }
 
 // Domain set
-func (uf *uploadFile) Domain(domain string) *uploadFile {
+func (uf *UploadFile) Domain(domain string) *UploadFile {
 	uf.domain = domain
 	return uf
 }
 
 // Prefix set
-func (uf *uploadFile) Prefix(prefix string) *uploadFile {
+func (uf *UploadFile) Prefix(prefix string) *UploadFile {
 	uf.prefix = prefix
 	return uf
 }
 
 // DateDir set
-func (uf *uploadFile) DateDir(dateDir bool) *uploadFile {
+func (uf *UploadFile) DateDir(dateDir bool) *UploadFile {
 	uf.dateDir = dateDir
 	return uf
 }
 
 // Create create dist file
-func (uf *uploadFile) Create(file string, buf []byte) error {
+func (uf *UploadFile) Create(file string, buf []byte) error {
 	dateDir := ""
 	if uf.dateDir {
 		dateDir = time.Now().Format("20060102")
@@ -220,7 +220,7 @@ type UFile struct {
 	Url  string `json:"url"`
 }
 
-func verifyFile(file *context.MultipartFile, uf *uploadFile) error {
+func verifyFile(file *context.MultipartFile, uf *UploadFile) error {
 
 	err := verifySize(file, uf)
 	if err != nil {
@@ -240,14 +240,14 @@ func verifyFile(file *context.MultipartFile, uf *uploadFile) error {
 	return nil
 }
 
-func verifySize(file *context.MultipartFile, uf *uploadFile) error {
+func verifySize(file *context.MultipartFile, uf *UploadFile) error {
 	if file.Size > int64(uf.size) {
 		return fmt.Errorf("the file size exceed limit[max:%d, current:%d]", uf.size, file.Size)
 	}
 	return nil
 }
 
-func verifyMime(file *context.MultipartFile, uf *uploadFile) error {
+func verifyMime(file *context.MultipartFile, uf *UploadFile) error {
 	ms := strings.Join(uf.mimes, "|")
 	mimeAll := fmt.Sprintf("|%s|", ms)
 	if !strings.Contains(mimeAll, fmt.Sprintf("|%s|", file.ContentType)) {
@@ -256,7 +256,7 @@ func verifyMime(file *context.MultipartFile, uf *uploadFile) error {
 	return nil
 }
 
-func verifyExt(file *context.MultipartFile, uf *uploadFile) error {
+func verifyExt(file *context.MultipartFile, uf *UploadFile) error {
 	es := strings.Join(uf.extensions, "|")
 	extAll := fmt.Sprintf("|%s|", es)
 	extIndex := strings.LastIndexByte(file.Filename, '.')
@@ -271,10 +271,6 @@ func verifyExt(file *context.MultipartFile, uf *uploadFile) error {
 }
 
 func removeTmpFiles(ctx *context.Context) {
-	defer func() {
-		if re := recover(); re != nil {
-		}
-	}()
 	form := ctx.Request.MultipartForm
 	if form != nil {
 		_ = form.RemoveAll()
