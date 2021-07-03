@@ -19,12 +19,12 @@ type Context struct {
 	MultipartMap   map[string][]*MultipartFile
 	dataMap        map[string]interface{}
 	funcMap        template.FuncMap
-	templateConfig *config.YmlConfigTemplate
+	templateConfig *config.Template
 	handlerRouted  bool
 }
 
 // New context
-func New(logger *logrus.Logger, r *http.Request, templateConfig *config.YmlConfigTemplate) *Context {
+func New(logger *logrus.Logger, r *http.Request, templateConfig *config.Template) *Context {
 	funcMap := make(map[string]interface{}, 0)
 	if templateConfig.FuncMap != nil {
 		for k, v := range templateConfig.FuncMap {

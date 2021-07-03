@@ -17,12 +17,12 @@ func (r *Builder) Build() *Render {
 
 // RenderBuilder render
 func RenderBuilder() *Builder {
-	return &Builder{r: &Render{Code: 200, ContentType: mime.TEXT}}
+	return &Builder{r: &Render{Code: http.StatusOK, ContentType: mime.TEXT}}
 }
 
 // DefaultBuild render
 func (r *Builder) DefaultBuild() *Render {
-	return r.Header(http.Header{}).Cookies(make([]*http.Cookie, 0)).Code(200).ContentType(mime.TEXT).Build()
+	return r.Header(http.Header{}).Cookies(make([]*http.Cookie, 0)).Code(http.StatusOK).ContentType(mime.TEXT).Build()
 }
 
 // Buffer render

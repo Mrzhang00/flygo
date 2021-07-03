@@ -18,20 +18,21 @@ func init() {
 }
 
 func (a *App) printBanner() {
-	if !a.Config.Flygo.Banner.Enable {
+	if !a.Config.Banner.Enable {
 		return
 	}
-	switch a.Config.Flygo.Banner.Type {
+	switch a.Config.Banner.Type {
 	case "default":
 		fmt.Println(strings.Join(banners, "\n"))
 		break
 	case "text":
-		fmt.Println(a.Config.Flygo.Banner.Text)
+		fmt.Println(a.Config.Banner.Text)
 		break
 	case "file":
-		bytes, err := ioutil.ReadFile(a.Config.Flygo.Banner.File)
+		bytes, err := ioutil.ReadFile(a.Config.Banner.File)
 		if err != nil {
-			a.Logger.Errorf("[printBanner]%v", err)
+			panic(err)
+			a.Logger.Errorf("printBanner: %v", err)
 			return
 		}
 		fmt.Printf("%v\n", string(bytes))

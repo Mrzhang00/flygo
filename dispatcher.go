@@ -27,7 +27,7 @@ func (d *dispatcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (d *dispatcher) dispatch(r *http.Request, w http.ResponseWriter) {
-	ctx := context.New(d.app.Logger, r, d.app.Config.Flygo.Template)
+	ctx := context.New(d.app.Logger, r, d.app.Config.Template)
 	d.addChains(ctx,
 		d.app.parsedRouters.Handler(ctx),
 		d.app.Middlewares(ctx, middleware.TypeBefore),

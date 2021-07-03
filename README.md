@@ -11,7 +11,7 @@
     - [Install by Go PATH](#install-by-go-path)
     - [Install by Go Module](#install-by-go-module)
 - [Quickstart](#Quickstart)
-    - [Build helloworld App](#build-helloworld-app)
+    - [Build hello world App](#build-hello-world-app)
     - [Build simple route App](#build-simple-route-app)
     - [Build dynamic route App](#build-dynamic-route-app)
     - [Build Router App](#build-router-app)
@@ -33,27 +33,6 @@
     - [How to register Session Listener](#how-to-register-session-listener)
 - [Binding and Validator](#binding-and-validator)
 - [Configuration](#Configuration)
-    - [HTTP Server Configuration](#http-server-configuration)
-        - [HTTP Server Max Header Size Configuration](#http-server-max-header-size-configuration)
-        - [HTTP Server Read Timeout Configuration](#http-server-read-timeout-configuration)
-        - [HTTP Server Read Header Timeout Configuration](#http-server-read-header-timeout-configuration)
-        - [HTTP Server Write Timeout Configuration](#http-server-write-timeout-configuration)
-        - [HTTP Server Idle Timeout Configuration](#http-server-idle-timeout-configuration)
-    - [Application Configuration](#application-configuration)
-        - [Application Config File Configuration](#application-config-file-configuration)
-        - [Application Serve Host Configuration](#application-serve-host-configuration)
-        - [Application Serve Port Configuration](#application-serve-port-configuration)
-        - [Application Serve TLS Enable Configuration](#application-serve-tls-enable-configuration)
-        - [Application Serve TLS Cert File Configuration](#application-serve-tls-cert-file-configuration)
-        - [Application Serve TLS Key File Configuration](#application-serve-tls-key-file-configuration)
-        - [Application Banner Enable Configuration](#application-banner-enable-configuration)
-        - [Application Banner Type Configuration](#application-banner-type-configuration)
-        - [Application Banner Text Configuration](#application-banner-text-configuration)
-        - [Application Banner File Configuration](#application-banner-file-configuration)
-        - [Application Template Enable Configuration](#application-template-enable-configuration)
-        - [Application Template Cache Enable Configuration](#application-template-cache-enable-configuration)
-        - [Application Template Root Path Configuration](#application-template-root-configuration)
-        - [Application Template Suffix Configuration](#application-template-suffix-configuration)
     - [Default YAML Configuration File](#default-yaml-configuration-file)
     - [All Environment Variables Table](#all-environment-variables-table)
 - [go-web-framework-benchmark](https://github.com/smallnest/go-web-framework-benchmark#flygo)
@@ -65,10 +44,6 @@
 A simple and lightweight web framework, pure native and no third dependencies.
 
 It can help you to build good web apps.
-
-**That's freedom.**
-
-**We are flying in Go.**
 
 ## Features
 
@@ -103,7 +78,7 @@ require github.com/billcoding/flygo latest
 
 ## Quickstart
 
-### Build helloworld App
+### Build hello world App
 
 ```go
 package main
@@ -200,7 +175,7 @@ func main() {
 	}()
 
 	flygo.GetApp().GET("/{message}", func(c *Context) {
-		c.Text(c.Param("message"))
+		c.Text(c.Get("message"))
 	}).Run()
 }
 ```
@@ -406,13 +381,13 @@ func main() {
 	}()
 
 	flygo.GetApp().GET("/{message}", func(c *Context) {
-		c.Text(c.Param("message"))
+		c.Text(c.Get("message"))
 	}).GET("/user/{id}", func(c *Context) {
-		c.Text(c.Param("id"))
+		c.Text(c.Get("id"))
 	}).GET("/user/{id}/detail", func(c *Context) {
-		c.Text(c.Param("id"))
+		c.Text(c.Get("id"))
 	}).GET("/user/{id}/{name}", func(c *Context) {
-		c.Text(c.Param("id") + "-" + c.Param("name"))
+		c.Text(c.Get("id") + "-" + c.Get("name"))
 	}).Run()
 }
 ```
@@ -666,7 +641,7 @@ func (t *TestMiddleware) Method() mw.Method {
 }
 
 func (t *TestMiddleware) Pattern() mw.Pattern {
-	return "/test"
+	return "/testing"
 }
 
 func (t *TestMiddleware) Handler() func(c *Context) {
@@ -752,429 +727,13 @@ type InnerModel struct {
 
 func handler(c *Context) {
 	m := model{}
-	c.BindWithParamsAndValidate(&m, bind.Param, func() {
+	c.BindWithParamsAndValidate(&m, bind.Get, func() {
 		c.JSON(&m)
 	})
 }
 ```
 
 ## Configuration
-
-### HTTP Server Configuration
-
-#### HTTP Server Max Header Size Configuration
-
-* Code set
-
-```
-App.Config.Server.MaxHeaderSize = 1 << 9
-```
-
-* YAML config
-
-```yaml
-server:
-  maxHeaderSize: 10000
-```
-
-* Environment variable
-
-```
-SERVER_MAX_HEADER_SIZE = 10000
-```
-
-#### HTTP Server Read Timeout Configuration
-
-* Code set
-
-```
-App.Config.Server.Timeout.Read = time.Minute
-```
-
-* YAML config
-
-```yaml
-server:
-  timeout:
-    read: 1m
-```
-
-* Environment variable
-
-```
-SERVER_READ_TIMEOUT = "1m"
-```
-
-#### HTTP Server Read Header Timeout Configuration
-
-* Code set
-
-```
-App.Config.Server.Timeout.ReadHeader = time.Minute
-```
-
-* YAML config
-
-```yaml
-server:
-  timeout:
-    readHeader: 1m1s
-```
-
-* Environment variable
-
-```
-SERVER_READ_HEADER_TIMEOUT = "1m1s"
-```
-
-#### HTTP Server Write Timeout Configuration
-
-* Code set
-
-```
-App.Config.Server.Timeout.Write = time.Minute * 2
-```
-
-* YAML config
-
-```yaml
-server:
-  timeout:
-    write: 2m
-```
-
-* Environment variable
-
-```
-SERVER_WRITE_TIMEOUT = "2m"
-```
-
-#### HTTP Server Idle Timeout Configuration
-
-* Code set
-
-```
-App.Config.Server.Timeout.Idle = time.Second
-```
-
-* YAML config
-
-```yaml
-server:
-  timeout:
-    idle: 1s
-```
-
-* Environment variable
-
-```
-SERVER_IDLE_TIMEOUT = "1s"
-```
-
-### Application Configuration
-
-#### Application Config File Configuration
-
-* Code set
-
-```
-App.ConfigFile = "app.yml"
-```
-
-* Environment variable
-
-```
-FLYGO_CONFIG = "app.yml"
-```
-
-#### Application Serve Host Configuration
-
-* Code set
-
-```
-App.Config.Flygo.Server.Host = "127.0.0.1"
-```
-
-* YAML config
-
-```yaml
-flygo:
-  server:
-    host: 127.0.0.1
-```
-
-* Environment variable
-
-```
-FLYGO_SERVER_HOST = "127.0.0.1"
-```
-
-#### Application Serve Port Configuration
-
-* Code set
-
-```
-App.Config.Flygo.Server.Port = 8080
-```
-
-* YAML config
-
-```yaml
-flygo:
-  server:
-    port: 8080
-```
-
-* Environment variable
-
-```
-FLYGO_SERVER_PORT = 8080
-```
-
-#### Application Serve TLS Enable Configuration
-
-* Code set
-
-```
-App.Config.Flygo.Server.TLS.Enable = true
-```
-
-* YAML config
-
-```yaml
-flygo:
-  server:
-    tls:
-      enable: T
-```
-
-* Environment variable
-
-```
-FLYGO_SERVER_TLS_ENABLE = "T"
-```
-
-#### Application Serve TLS Cert File Configuration
-
-* Code set
-
-```
-App.Config.Flygo.Server.TLS.CertFile = "cert.pem"
-```
-
-* YAML config
-
-```yaml
-flygo:
-  server:
-    tls:
-      certFile: cert.pem
-```
-
-* Environment variable
-
-```
-FLYGO_SERVER_TLS_CERT_FILE = "cert.pem"
-```
-
-#### Application Serve TLS Key File Configuration
-
-* Code set
-
-```
-App.Config.Flygo.Server.TLS.KeyFile = "cert.key"
-```
-
-* YAML config
-
-```yaml
-flygo:
-  server:
-    tls:
-      keyFile: cert.key
-```
-
-* Environment variable
-
-```
-FLYGO_SERVER_TLS_KEY_FILE = "cert.key"
-```
-
-#### Application Banner Enable Configuration
-
-* Code set
-
-```
-App.Config.Flygo.Banner.Enable = true
-```
-
-* YAML config
-
-```yaml
-flygo:
-  banner:
-    enable: T
-```
-
-* Environment variable
-
-```
-FLYGO_BANNER_ENABLE = "T"
-```
-
-#### Application Banner Type Configuration
-
-* Code set
-
-```
-App.Config.Flygo.Banner.Type = "text"
-```
-
-* YAML config
-
-```yaml
-flygo:
-  banner:
-    type: text
-```
-
-* Environment variable
-
-```
-FLYGO_BANNER_TYPE = "text"
-```
-
-#### Application Banner Text Configuration
-
-* Code set
-
-```
-App.Config.Flygo.Banner.Text = "This is Banner Title"
-```
-
-* YAML config
-
-```yaml
-flygo:
-  banner:
-    text: 'This is Banner Title'
-```
-
-* Environment variable
-
-```
-FLYGO_BANNER_TEXT = "This is Banner Title"
-```
-
-#### Application Banner File Configuration
-
-* Code set
-
-```
-App.Config.Flygo.Banner.File = "banner.txt"
-```
-
-* YAML config
-
-```yaml
-flygo:
-  banner:
-    file: banner.txt
-```
-
-* Environment variable
-
-```
-FLYGO_BANNER_FILE = "banner.txt"
-```
-
-#### Application Template Enable Configuration
-
-* Code set
-
-```
-App.Config.Flygo.Template.Enable = true
-```
-
-* YAML config
-
-```yaml
-flygo:
-  template:
-    enable: T
-```
-
-* Environment variable
-
-```
-FLYGO_TEMPLATE_ENABLE = "T"
-```
-
-#### Application Template Cache Enable Configuration
-
-* Code set
-
-```
-App.Config.Flygo.Template.Cache = true
-```
-
-* YAML config
-
-```yaml
-flygo:
-  template:
-    cache: T
-```
-
-* Environment variable
-
-```
-FLYGO_TEMPLATE_CACHE = "T"
-```
-
-#### Application Template Root Configuration
-
-* Code set
-
-```
-App.Config.Flygo.Template.Root = "/to/path/templates"
-```
-
-* YAML config
-
-```yaml
-flygo:
-  template:
-    root: /to/path/templates
-```
-
-* Environment variable
-
-```
-FLYGO_TEMPLATE_ROOT = "/to/path/templates"
-```
-
-#### Application Template Suffix Configuration
-
-* Code set
-
-```
-App.Config.Flygo.Template.Suffix = ".tpl"
-```
-
-* YAML config
-
-```yaml
-flygo:
-  template:
-    suffix: .tpl
-```
-
-* Environment variable
-
-```
-FLYGO_TEMPLATE_SUFFIX = ".tpl"
-```
 
 ### Default YAML Configuration File
 
@@ -1199,7 +758,7 @@ flygo:
     type: default
     text: ''
     file: ''
-  template:
+  Template:
     enable: false
     cache: true
     root: ./templates

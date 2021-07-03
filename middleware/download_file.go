@@ -44,7 +44,7 @@ func (df *DownloadFile) Pattern() Pattern {
 // Handler implements
 func (df *DownloadFile) Handler() func(ctx *context.Context) {
 	return func(ctx *context.Context) {
-		fileName := ctx.ParamWith("file", "")
+		fileName := ctx.Get("file")
 		if fileName == "" {
 			ctx.JSONText(`{"msg":"file is empty","code":1}`)
 			return

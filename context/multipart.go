@@ -1,7 +1,6 @@
 package context
 
 import (
-	"fmt"
 	"github.com/billcoding/flygo/headers"
 	"io"
 	"mime/multipart"
@@ -30,19 +29,16 @@ func (file *MultipartFile) Copy(distName string) error {
 	var err error
 	f, err = file.FileHeader.Open()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
 		return err
 	}
 
 	dist, err = os.Create(distName)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
 		return err
 	}
 
 	_, err = io.Copy(dist, f)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
 		return err
 	}
 	_ = f.Close()
@@ -55,7 +51,6 @@ func (ctx *Context) ParseMultipart(maxMemory int64) error {
 	var err error
 	err = ctx.Request.ParseMultipartForm(maxMemory)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
 		return err
 	}
 	paramMap := make(map[string][]string, 0)

@@ -51,7 +51,7 @@ func RecoveryWithConfig(codeName string, codeVal int, msgName string, handlers .
 		handler = func(ctx *context.Context) {
 			defer func() {
 				if re := recover(); re != nil {
-					fmt.Println(fmt.Sprintf("[Recovered]%v", re))
+					fmt.Println(fmt.Sprintf("Recovered: %v", re))
 					var buf [4096]byte
 					n := runtime.Stack(buf[:], false)
 					fmt.Printf("%s\n", string(buf[:n]))

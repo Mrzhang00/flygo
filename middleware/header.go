@@ -44,7 +44,7 @@ func (h *header) Handler() func(ctx *context.Context) {
 // Header return header
 func Header() Middleware {
 	return &header{map[string]string{
-		headers.Server:  fmt.Sprintf("golang/flygo (%s)", runtime.Version()),
-		headers.XServer: fmt.Sprintf("golang/flygo (%s)", runtime.Version()),
+		headers.Server:        fmt.Sprintf("flygo/%s", runtime.Version()),
+		headers.BackendServer: fmt.Sprintf("flygo/%s", runtime.Version()),
 	}}
 }

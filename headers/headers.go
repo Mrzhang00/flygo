@@ -5,8 +5,8 @@ const (
 	MIME = "Content-Type"
 	// Server header
 	Server = "Server"
-	// XServer header
-	XServer = "X-Server"
+	// BackendServer header
+	BackendServer = "Backend-Server"
 	// SetCookie header
 	SetCookie = "Set-Cookie"
 	// ContentDisposition header
