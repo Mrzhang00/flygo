@@ -43,8 +43,7 @@ func NotFound(handlers ...func(ctx *context.Context)) Middleware {
 }
 
 var notFoundHandler = func(ctx *context.Context) {
-	handleRouted, have := ctx.MWData["HANDLER_ROUTED"]
-	if have && handleRouted.(bool) {
+	if ctx.Routed() {
 		ctx.Chain()
 		return
 	}
