@@ -23,7 +23,6 @@ type defaultMWState struct {
 	config           *session.Config
 	listener         *session.Listener
 	static           bool
-	staticHandler    func(ctx *context.Context)
 	staticCache      bool
 	staticRoot       string
 }
@@ -106,14 +105,6 @@ func (a *App) UseStatic(cache bool, root string) *App {
 	return a
 }
 
-// StaticHandler Sets Static Resources handler
-func (a *App) StaticHandler(handlers ...func(ctx *context.Context)) *App {
-	if len(handlers) > 0 {
-		a.defaultMWState.staticHandler = handlers[0]
-	}
-	return a
-}
-
 func (a *App) useDefaultMWs() *App {
 
 	if a.defaultMWState.session {
@@ -142,7 +133,7 @@ func (a *App) useDefaultMWs() *App {
 	}
 
 	if a.defaultMWState.static {
-		a.middlewares = append(a.middlewares, middleware.Static(a.defaultMWState.staticCache, a.defaultMWState.staticRoot, a.defaultMWState.staticHandler))
+		a.middlewares = append(a.middlewares, middleware.Static(a.defaultMWState.staticCache, a.defaultMWState.staticRoot))
 	}
 
 	a.setMiddlewareMap()
