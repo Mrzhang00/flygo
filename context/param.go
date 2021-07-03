@@ -11,24 +11,25 @@ func (ctx *Context) ParamMap() map[string][]string {
 	return ctx.paramMap
 }
 
-// Param return named param
-func (ctx *Context) Param(name string) string {
-	return ctx.ParamWith(name, "")
+// Get return named param
+func (ctx *Context) Get(name string) string {
+	return ctx.ParamDefault(name, "")
 }
 
-// ParamInt return named param of int
-func (ctx *Context) ParamInt(name string) int64 {
-	val := ctx.Param(name)
-	iv, err := strconv.ParseInt(val, 10, 64)
-	if err != nil {
-		panic(err)
-	}
-	return iv
+// HasParam return true if named param in param map
+func (ctx *Context) HasParam(name string) bool {
+	return ctx.ParamMap()[name] != nil
 }
 
-// ParamIntWith return named param of int
-func (ctx *Context) ParamIntWith(name string, defaultVal int) int {
-	val := ctx.ParamWith(name, fmt.Sprintf("%d", defaultVal))
+// Int return named param of int
+func (ctx *Context) Int(name string) (int64, error) {
+	val := ctx.Get(name)
+	return strconv.ParseInt(val, 10, 64)
+}
+
+// IntDefault return named param of int with default `defaultVal`
+func (ctx *Context) IntDefault(name string, defaultVal int) int {
+	val := ctx.ParamDefault(name, fmt.Sprintf("%d", defaultVal))
 	iv, err := strconv.Atoi(val)
 	if err != nil {
 		panic(err)
@@ -36,9 +37,9 @@ func (ctx *Context) ParamIntWith(name string, defaultVal int) int {
 	return iv
 }
 
-// ParamFloat return named param of float
-func (ctx *Context) ParamFloat(name string) float64 {
-	val := ctx.Param(name)
+// Float return named param of float
+func (ctx *Context) Float(name string) float64 {
+	val := ctx.Get(name)
 	iv, err := strconv.ParseFloat(val, 64)
 	if err != nil {
 		panic(err)
@@ -46,10 +47,10 @@ func (ctx *Context) ParamFloat(name string) float64 {
 	return iv
 }
 
-// ParamFloatWith return named param of float
-func (ctx *Context) ParamFloatWith(name string, defaultVal float64) float64 {
-	fval := ctx.ParamWith(name, fmt.Sprintf("%f", defaultVal))
-	fv, err := strconv.ParseFloat(fval, 64)
+// FloatDefault return named param of float
+func (ctx *Context) FloatDefault(name string, defaultVal float64) float64 {
+	val := ctx.ParamDefault(name, fmt.Sprintf("%f", defaultVal))
+	fv, err := strconv.ParseFloat(val, 64)
 	if err != nil {
 		panic(err)
 	}
@@ -58,40 +59,40 @@ func (ctx *Context) ParamFloatWith(name string, defaultVal float64) float64 {
 
 // Params return named param values
 func (ctx *Context) Params(name string) []string {
-	return ctx.ParamsWith(name, nil)
+	return ctx.ParamsDefault(name, nil)
 }
 
-// ParamWith return named param with default value
-func (ctx *Context) ParamWith(name, defaultValue string) string {
-	vals := ctx.paramMap[name]
-	if vals != nil && len(vals) > 0 && strings.TrimSpace(vals[0]) != "" {
-		return strings.TrimSpace(vals[0])
+// ParamDefault return named param with default value
+func (ctx *Context) ParamDefault(name, defaultVal string) string {
+	params := ctx.paramMap[name]
+	if params == nil || len(params) <= 0 {
+		return defaultVal
 	}
-	return defaultValue
+	return params[0]
 }
 
-// ParamsWith return named param with default value
-func (ctx *Context) ParamsWith(name string, defaultValue []string) []string {
-	vals := ctx.paramMap[name]
-	if vals != nil {
-		return vals
+// ParamsDefault return named param with default value
+func (ctx *Context) ParamsDefault(name string, defaultVal []string) []string {
+	params := ctx.paramMap[name]
+	if params != nil {
+		return params
 	}
-	return defaultValue
+	return defaultVal
 }
 
-func (ctx *Context) transformParamMap(multiFunc func(vals []string) string) map[string]string {
+func (ctx *Context) transformParamMap(multiFunc func(name string, params []string) string) map[string]string {
 	sm := make(map[string]string, 0)
 	for k, v := range ctx.paramMap {
-		sm[k] = multiFunc(v)
+		sm[k] = multiFunc(k, v)
 	}
 	return sm
 }
 
 // SingleParamMap return single value param map
 func (ctx *Context) SingleParamMap() map[string]string {
-	return ctx.transformParamMap(func(vals []string) string {
-		if vals != nil && len(vals) > 0 {
-			return vals[0]
+	return ctx.transformParamMap(func(name string, params []string) string {
+		if params != nil && len(params) > 0 {
+			return params[0]
 		}
 		return ""
 	})
@@ -99,9 +100,9 @@ func (ctx *Context) SingleParamMap() map[string]string {
 
 // JoinedParamMap return joined single value param map
 func (ctx *Context) JoinedParamMap(separator string) map[string]string {
-	return ctx.transformParamMap(func(vals []string) string {
-		if vals != nil && len(vals) > 0 {
-			return strings.Join(vals, separator)
+	return ctx.transformParamMap(func(name string, params []string) string {
+		if params != nil && len(params) > 0 {
+			return strings.Join(params, separator)
 		}
 		return ""
 	})
@@ -117,21 +118,16 @@ func (ctx *Context) SetParamMap(paramMap map[string][]string) *Context {
 	return ctx
 }
 
-// RESTID return RESTful ID
-func (ctx *Context) RESTID() string {
-	return ctx.Param("RESTFUL_ID")
+// Key return REST-ful key
+func (ctx *Context) Key() string {
+	return ctx.Get("RESTFUL_KEY")
 }
 
-// RESTIntID return int RESTful ID
-func (ctx *Context) RESTIntID() int64 {
-	intID, err := strconv.ParseInt(ctx.RESTID(), 10, 64)
+// IntKey return int REST-ful key
+func (ctx *Context) IntKey() int64 {
+	intID, err := strconv.ParseInt(ctx.Key(), 10, 64)
 	if err != nil {
 		panic(err)
 	}
 	return intID
-}
-
-// RESTStringID return RESTful ID
-func (ctx *Context) RESTStringID() string {
-	return ctx.Param("RESTFUL_ID")
 }
