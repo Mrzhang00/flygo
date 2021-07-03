@@ -5,38 +5,30 @@ import (
 	"github.com/billcoding/flygo/mime"
 	"github.com/billcoding/flygo/util"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 )
 
 type static struct {
-	cache   bool
-	caches  map[string][]byte
-	root    string
-	mimes   map[string]string
-	handler func(ctx *context.Context)
+	cache      bool
+	caches     map[string][]byte
+	mimeCaches map[string]string
+	root       string
+	mimes      map[string]string
 }
 
 // Static new static
-func Static(cache bool, root string, handlers ...func(ctx *context.Context)) *static {
-	rot := root
-	if rot == "" || rot == "." || rot == "./" {
-		executeDir, _ := os.Executable()
-		rot = filepath.Dir(executeDir)
-	}
-	if strings.TrimPrefix(rot, "./") != "" {
-		executeDir, _ := os.Executable()
-		rot = filepath.Join(filepath.Dir(executeDir), strings.TrimPrefix(rot, "./"))
+func Static(cache bool, root string) *static {
+	root, err := filepath.Abs(root)
+	if err != nil {
+		panic(err)
 	}
 	st := &static{
-		cache:  cache,
-		caches: make(map[string][]byte, 0),
-		root:   rot,
-		mimes:  defaultMimes(),
-	}
-	if len(handlers) > 0 && handlers[0] != nil {
-		st.handler = handlers[0]
+		cache:      cache,
+		caches:     make(map[string][]byte, 0),
+		mimeCaches: make(map[string]string, 0),
+		root:       root,
+		mimes:      defaultMimes(),
 	}
 	return st
 }
@@ -78,7 +70,7 @@ func defaultMimes() map[string]string {
 
 // Type implements
 func (s *static) Type() *Type {
-	return TypeBefore
+	return TypeHandler
 }
 
 // Name implements
@@ -98,9 +90,6 @@ func (s *static) Pattern() Pattern {
 
 // Handler implements
 func (s *static) Handler() func(ctx *context.Context) {
-	if s.handler != nil {
-		return s.handler
-	}
 	return func(ctx *context.Context) {
 		if strings.HasSuffix(util.TrimLeftAndRight(ctx.Request.URL.Path), "/") {
 			ctx.Chain()
@@ -113,29 +102,32 @@ func (s *static) Handler() func(ctx *context.Context) {
 		if extPos != -1 {
 			ext = urlPath[extPos+1:]
 		}
-		buffer, have := s.caches[urlPath]
-		if !have {
-			mm, extHave := s.mimes[ext]
-			if !extHave {
-				mm = mime.BINARY
-			}
-			ctx.Render(context.RenderBuilder().Buffer(buffer).ContentType(mm).Build())
-		} else {
+		var (
+			buffer   []byte
+			have     bool
+			mimeType string
+		)
+		if buffer, have = s.caches[urlPath]; !have {
 			bytes, err := ioutil.ReadFile(realPath)
 			if err != nil {
 				ctx.Chain()
+				return
 			} else {
 				buffer = bytes
+				if mm, extHave := s.mimes[ext]; !extHave {
+					mimeType = mime.BINARY
+				} else {
+					mimeType = mm
+				}
 				if s.cache {
 					s.caches[urlPath] = buffer
+					s.mimeCaches[urlPath] = mimeType
 				}
-				mm, extHave := s.mimes[ext]
-				if !extHave {
-					mm = mime.BINARY
-				}
-				ctx.Render(context.RenderBuilder().Buffer(buffer).ContentType(mm).Build())
 			}
+		} else {
+			mimeType = s.mimeCaches[urlPath]
 		}
+		ctx.Render(context.RenderBuilder().Buffer(buffer).ContentType(mimeType).Build())
 	}
 }
 
