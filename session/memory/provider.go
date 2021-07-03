@@ -70,9 +70,9 @@ func (p *provider) GetAll() map[string]se.Session {
 	return m
 }
 
-// Clear session's vals
+// Clear session's values
 func (p *provider) Clear() {
-	copyx := p.sessions
+	sessionCopy := p.sessions
 	p.sessions = &sync.Map{}
 	go func(copy *sync.Map) {
 		keys := make([]string, 0)
@@ -84,7 +84,7 @@ func (p *provider) Clear() {
 			copy.Delete(key)
 		}
 		runtime.GC()
-	}(copyx)
+	}(sessionCopy)
 }
 
 func tmd5(text string) string {
