@@ -7,7 +7,6 @@ import (
 	"github.com/billcoding/flygo/router"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"os"
 	"strconv"
 )
 
@@ -35,7 +34,7 @@ func GetApp() *App {
 // NewApp return new App
 func NewApp() *App {
 	return &App{
-		ConfigFile:  "flygo.yml",
+		ConfigFile:  "app.yml",
 		Config:      config.Default(),
 		Logger:      logrus.StandardLogger(),
 		controllers: make([]rest.Controller, 0),
@@ -61,46 +60,35 @@ func (a *App) Run() {
 	a.routeRestControllers()
 	a.parseRouters()
 	a.useDefaultMWs()
-	a.parseConfig()
 	a.debugTrace()
 	a.serve()
 }
 
-func (a *App) parseAddr() {
-	port := a.Config.Flygo.Server.Port
-	minPort := 0
-	maxPort := 65536
-	if port < minPort || port > maxPort {
-		a.Logger.Errorf("[parseAddr]The port `%v` is invalid.[valid : %v - %v]", port, minPort, maxPort)
-		os.Exit(0)
-	}
-}
-
 func (a *App) serve() {
-	host := a.Config.Flygo.Server.Host
-	port := a.Config.Flygo.Server.Port
-	tlsEnable := a.Config.Flygo.Server.TLS.Enable
+	host := a.Config.Server.Host
+	port := a.Config.Server.Port
+	tlsEnable := a.Config.Server.TLS.Enable
 	addr := host + ":" + strconv.Itoa(port)
-	a.Logger.Infof("[Serve]Bind on %s", addr)
-	a.Logger.Infof("[Serve]Server started")
+	a.Logger.Infof("serve: Bind on %s", addr)
+	a.Logger.Infof("serve: Server started")
 	var err error
 	server := &http.Server{
 		Addr:              addr,
 		Handler:           a.newDispatcher(),
 		MaxHeaderBytes:    a.Config.Server.MaxHeaderSize,
-		ReadTimeout:       a.Config.Server.Timeout.Read,
-		ReadHeaderTimeout: a.Config.Server.Timeout.ReadHeader,
-		WriteTimeout:      a.Config.Server.Timeout.Write,
-		IdleTimeout:       a.Config.Server.Timeout.Idle,
+		ReadTimeout:       a.Config.Server.ReadTimeout,
+		ReadHeaderTimeout: a.Config.Server.ReadHeaderTimeout,
+		WriteTimeout:      a.Config.Server.WriteTimeout,
+		IdleTimeout:       a.Config.Server.IdleTimeout,
 	}
 	if tlsEnable {
-		certFile := a.Config.Flygo.Server.TLS.CertFile
-		keyFile := a.Config.Flygo.Server.TLS.KeyFile
+		certFile := a.Config.Server.TLS.CertFile
+		keyFile := a.Config.Server.TLS.KeyFile
 		err = server.ListenAndServeTLS(certFile, keyFile)
 	} else {
 		err = server.ListenAndServe()
 	}
 	if err != nil {
-		a.Logger.Errorf("[Serve]%v", err.Error())
+		a.Logger.Errorf("serve: %v", err.Error())
 	}
 }
