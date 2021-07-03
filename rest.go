@@ -18,7 +18,7 @@ func (a *App) routeRestControllers() *App {
 		prefix := util.TrimSpecialChars(c.Prefix())
 
 		if c.GET() != nil {
-			getPattern := fmt.Sprintf("%s/{RESTFUL_ID}", prefix)
+			getPattern := fmt.Sprintf("%s/{RESTFUL_KEY}", prefix)
 			a.Route(http.MethodGet, getPattern, c.GET())
 		}
 
@@ -31,12 +31,12 @@ func (a *App) routeRestControllers() *App {
 		}
 
 		if c.PUT() != nil {
-			putPattern := fmt.Sprintf("%s/{RESTFUL_ID}", prefix)
+			putPattern := fmt.Sprintf("%s/{RESTFUL_KEY}", prefix)
 			a.Route(http.MethodPut, putPattern, c.PUT())
 		}
 
 		if c.DELETE() != nil {
-			deletePattern := fmt.Sprintf("%s/{RESTFUL_ID}", prefix)
+			deletePattern := fmt.Sprintf("%s/{RESTFUL_KEY}", prefix)
 			a.Route(http.MethodDelete, deletePattern, c.DELETE())
 		}
 
