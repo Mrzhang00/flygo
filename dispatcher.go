@@ -54,11 +54,11 @@ func (d *dispatcher) addChains(ctx *context.Context, handler func(ctx *context.C
 
 	if handler != nil {
 		ctx.Add(handler)
-		ctx.MWData["HANDLER_ROUTED"] = true
+		ctx.Route()
 	} else {
 		for _, hmw := range handlerMWs {
 			ctx.Add(hmw.Handler())
-			ctx.MWData["HANDLER_ROUTED"] = true
+			ctx.Route()
 			break
 		}
 	}
