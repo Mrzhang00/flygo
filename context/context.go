@@ -104,3 +104,13 @@ func (ctx *Context) AddCookie(cookies ...*http.Cookie) *Context {
 	ctx.render.Cookies = append(ctx.render.Cookies, cookies...)
 	return ctx
 }
+
+// Routed return handler routed
+func (ctx *Context) Routed() bool {
+	return ctx.handlerRouted
+}
+
+// Route once
+func (ctx *Context) Route() {
+	ctx.handlerRouted = true
+}
