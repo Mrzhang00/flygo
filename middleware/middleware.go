@@ -51,13 +51,13 @@ const (
 	MethodPatch = Method(http.MethodPatch)
 )
 
-// SetMWData set middleware data
-func SetMWData(ctx *context.Context, name string, mwData map[string]interface{}) {
+// Set set middleware data
+func Set(ctx *context.Context, name string, mwData map[string]interface{}) {
 	ctx.MWData[name] = mwData
 }
 
-// GetMWData get middleware data
-func GetMWData(ctx *context.Context, name string) map[string]interface{} {
+// Get get middleware data
+func Get(ctx *context.Context, name string) map[string]interface{} {
 	val, have := ctx.MWData[name]
 	if have {
 		return val.(map[string]interface{})
