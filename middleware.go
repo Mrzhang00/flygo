@@ -32,7 +32,7 @@ type defaultMWState struct {
 func (a *App) Use(middlewares ...middleware.Middleware) *App {
 	for _, mw := range middlewares {
 		if _, have := a.middlewareMap[mw.Name()]; have {
-			a.Logger.Panicf("Middleware[%s] was registered\n", mw.Name())
+			a.Logger.Panicf("middleware: %s was registered", mw.Name())
 		} else {
 			a.middlewareMap[mw.Name()] = mw
 		}
