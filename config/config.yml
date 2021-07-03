@@ -1,25 +1,22 @@
 server:
-  maxHeaderSize: 102400
-  timeout:
-    read: 1m
-    readHeader: 1m1s
-    write: 2m
-    idle: 1s
-flygo:
-  server:
-    host: localhost
-    port: 80
-    tls:
-      enable: false
-      certFile: ''
-      keyFile: ''
-  banner:
-    enable: true
-    type: default
-    text: ''
-    file: ''
-  template:
+  host: localhost
+  port: 80
+  tls:
     enable: false
-    cache: true
-    root: ./templates
-    suffix: .html
+    cert_file: ''
+    key_file: ''
+  max_header_size: 102400
+  read_timeout: 1m
+  read_header_timeout: 1m1s
+  write_timeout: 2m
+  idle_timeout: 1s
+banner:
+  enable: true
+  type: default
+  text: ''
+  file: ''
+template:
+  enable: true
+  cache: true
+  root: templates
+  suffix: .html
