@@ -11,8 +11,8 @@ func (ctx *Context) ParamMap() map[string][]string {
 	return ctx.paramMap
 }
 
-// Get return named param
-func (ctx *Context) Get(name string) string {
+// Param return named param
+func (ctx *Context) Param(name string) string {
 	return ctx.ParamDefault(name, "")
 }
 
@@ -23,7 +23,7 @@ func (ctx *Context) HasParam(name string) bool {
 
 // Int return named param of int
 func (ctx *Context) Int(name string) (int64, error) {
-	val := ctx.Get(name)
+	val := ctx.Param(name)
 	return strconv.ParseInt(val, 10, 64)
 }
 
@@ -39,7 +39,7 @@ func (ctx *Context) IntDefault(name string, defaultVal int) int {
 
 // Float return named param of float
 func (ctx *Context) Float(name string) float64 {
-	val := ctx.Get(name)
+	val := ctx.Param(name)
 	iv, err := strconv.ParseFloat(val, 64)
 	if err != nil {
 		panic(err)
@@ -120,7 +120,7 @@ func (ctx *Context) SetParamMap(paramMap map[string][]string) *Context {
 
 // Key return REST-ful key
 func (ctx *Context) Key() string {
-	return ctx.Get("RESTFUL_KEY")
+	return ctx.Param("RESTFUL_KEY")
 }
 
 // IntKey return int REST-ful key
