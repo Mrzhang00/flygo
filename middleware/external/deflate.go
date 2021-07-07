@@ -33,7 +33,6 @@ func NewDeflate() *deflate {
 	}
 }
 
-//Type
 func (d *deflate) Type() *middleware.Type {
 	return middleware.TypeAfter
 }
