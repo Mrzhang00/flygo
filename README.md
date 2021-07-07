@@ -483,7 +483,7 @@ func (t *TestRestController) Prefix() string {
 
 func (t *TestRestController) GET() func(c *Context) {
 	return func(c *Context) {
-		c.Text(fmt.Sprintf("GET one : %v", c.RestId()))
+		c.Text(fmt.Sprintf("GET one : %v", c.Key()))
 	}
 }
 
@@ -559,7 +559,7 @@ func (t *TestRestController) Prefix() string {
 
 func (t *TestRestController) GET() func(c *Context) {
 	return func(c *Context) {
-		c.Text(fmt.Sprintf("GET one : %v", c.RestId()))
+		c.Text(fmt.Sprintf("GET one : %v", c.Key()))
 	}
 }
 
@@ -583,7 +583,7 @@ func (t *TestRestController) PUT() func(c *Context) {
 
 func (t *TestRestController) DELETE() func(c *Context) {
 	return func(c *Context) {
-		c.Text(fmt.Sprintf("DELETE one : %v", c.RestId()))
+		c.Text(fmt.Sprintf("DELETE one : %v", c.Key()))
 	}
 }
 
@@ -667,12 +667,12 @@ func main() {
 * `redisauth` Redis simple authentication
 * `redistoken` Redis simple authorization
 * `session` Session implementation(providers: memory or redis)
+* `gzip` gzip compression
+* `deflate` deflate compression
 
 ### Extra implemented Middlewares
 
 * [Captcha middleware](https://github.com/flygotm/captcha)
-* [GZIP compression](https://github.com/flygotm/gzip)
-* [Deflate compression](https://github.com/flygotm/deflate)
 * [Brotli compression](https://github.com/flygotm/brotli)
 
 ## Session Support
