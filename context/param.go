@@ -65,7 +65,8 @@ func (ctx *Context) Params(name string) []string {
 // ParamDefault return named param with default value
 func (ctx *Context) ParamDefault(name, defaultVal string) string {
 	params := ctx.paramMap[name]
-	if params == nil || len(params) <= 0 {
+	//FIX: when param is empty
+	if params == nil || len(params) <= 0 || params[0] == "" {
 		return defaultVal
 	}
 	return params[0]
