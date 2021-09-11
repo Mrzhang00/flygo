@@ -36,7 +36,7 @@ func NewApp() *App {
 	return &App{
 		ConfigFile:  "app.yml",
 		Config:      config.Default(),
-		Logger:      logrus.StandardLogger(),
+		Logger:      logrus.New(),
 		controllers: make([]rest.Controller, 0),
 		groups:      make([]*router.Group, 0),
 		routers:     []*router.Router{router.NewRouter()},
