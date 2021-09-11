@@ -1,7 +1,7 @@
-github.com/billcoding/reflectx v0.0.0-20210519101234-62160fbc5dd0 h1:rZDrqc9UfnrDRVmoOD0PtxFgVOIhyRRMImVAm3tMNjQ=
-github.com/billcoding/reflectx v0.0.0-20210519101234-62160fbc5dd0/go.mod h1:kTtIvoOdnWlbfaOhBfsSukGBKVjrbCZdMl09YzT8gS4=
-github.com/billcoding/validator v0.0.0-20210519101723-a2df82154aeb h1:At1KQ+8WljecwGOP2Y8CHgtUiItevB9NJg5gL4Bkvws=
-github.com/billcoding/validator v0.0.0-20210519101723-a2df82154aeb/go.mod h1:RDsW5HqleiVTe5Uu1oHoNqLX9d70KAjzC9iaL00+xYg=
+github.com/billcoding/reflectx v0.0.0-20210906101940-7b9449e05229 h1:uUyBjjFn8YCAQEY7bak5Jdes2B5d8ze1XYH5esPbtFM=
+github.com/billcoding/reflectx v0.0.0-20210906101940-7b9449e05229/go.mod h1:kTtIvoOdnWlbfaOhBfsSukGBKVjrbCZdMl09YzT8gS4=
+github.com/billcoding/validator v0.0.0-20210911061705-345626717249 h1:Y+czKWHDviWuCHHwKK3UDVU9mV1iFakWaRyE2akiBS4=
+github.com/billcoding/validator v0.0.0-20210911061705-345626717249/go.mod h1:E3ber5huznayHx0dsHh8Jbzh2U3mowT9feoIlFKwvh4=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
